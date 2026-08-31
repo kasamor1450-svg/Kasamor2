@@ -1,0 +1,1737 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مشروع أبناء مصطفى حسن الزراعي | النظام المالي والتشغيلي المتكامل</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js CDN for Interactive Visuals -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Modern CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+  <!-- حاوية إشعارات الحفظ والتعديل الفوري في قاعدة البيانات (Toast Container) -->
+  <div id="toast-container" class="no-print fixed top-4 left-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- Header للطباعة فقط -->
+  <div class="hidden print-header p-4 text-center">
+    <div class="border-b-2 border-slate-900 pb-3 mb-4">
+      <h1 class="text-2xl font-black">مشروع أبناء مصطفى حسن الزراعي</h1>
+      <p class="text-sm font-bold text-slate-700">القضارف - كسمور الشرقي | المساحة الإجمالية: 1,450 فدان | الموسم الزراعي 2026</p>
+      <p class="text-xs text-slate-500 mt-0.5">كشف الموقف المالي والتشغيلي ومسير التكاليف حتى تاريخ: <span id="print-date"></span></p>
+    </div>
+  </div>
+
+  <!-- الهيدر والشريط العلوي الرئيسي -->
+  <header class="no-print sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors shadow-sm">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-13 sm:h-14">
+        
+        <!-- شعار واسم المزرعة مع زر التعديل المباشر -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-700 to-emerald-500 flex items-center justify-center text-white shadow-sm shadow-emerald-500/20 font-black text-base">
+            🌱
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 id="header-farm-name" class="text-sm sm:text-base font-black text-slate-900 dark:text-white tracking-tight">
+                مشروع أبناء مصطفى حسن الزراعي
+              </h1>
+              <span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border border-emerald-300 hidden sm:inline-block">
+                موسم 2026
+              </span>
+              <button onclick="openEditFarmInfoModal()" class="p-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900 rounded text-slate-500 hover:text-emerald-700 transition" title="تعديل بيانات المشروع">
+                <i data-lucide="edit-3" class="w-3 h-3"></i>
+              </button>
+            </div>
+            <p id="header-farm-details" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+              📍 كسمور الشرقي • المساحة: <strong class="text-slate-700 dark:text-slate-300 font-bold">1,450 فدان</strong>
+            </p>
+          </div>
+        </div>
+
+        <!-- أزرار الإجراءات السريعة والتحكم والمستخدم النشط -->
+        <div class="flex items-center gap-1.5">
+          
+          <!-- زر إدارة قاعدة البيانات والنسخ الاحتياطي البارز والدائم -->
+          <button onclick="openDatabaseManagerModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-sm" title="إدارة قاعدة البيانات والنسخ الاحتياطي">
+            <i data-lucide="database" class="w-3.5 h-3.5"></i>
+            <span>قاعدة البيانات</span>
+          </button>
+
+          <!-- بطاقة المستخدم الحالي (الإدارة) -->
+          <div onclick="openLoginModal()" class="cursor-pointer flex items-center gap-1.5 p-1 pr-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition border border-slate-200 dark:border-slate-700 text-xs" title="تبديل المستخدم">
+            <div id="current-user-avatar" class="w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-[10px] flex items-center justify-center shadow-sm">
+              م
+            </div>
+            <div class="hidden sm:block text-right">
+              <p id="current-user-display" class="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-none">محمد مصطفى</p>
+              <span id="current-user-role" class="text-[8px] font-bold px-1 rounded role-admin inline-block">المدير العام</span>
+            </div>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+          </div>
+
+          <!-- زر معرض صور مشاهد القضارف -->
+          <button onclick="openGedarefGalleryModal()" class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 rounded-lg text-[11px] font-bold transition shadow-sm hover:bg-emerald-100" title="ألبوم صور القضارف">
+            <span>📸 صور القضارف</span>
+          </button>
+
+          <!-- زر التقرير التنفيذي الشامل للموسم -->
+          <button onclick="openExecutiveSeasonReportModal()" class="hidden md:inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-emerald-800 to-teal-800 hover:from-emerald-900 hover:to-teal-900 text-white rounded-lg text-[11px] font-bold transition shadow-sm" title="التقرير التنفيذي الشامل">
+            <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>التقرير التنفيذي</span>
+          </button>
+
+          <!-- زر طباعة التقرير الشهري -->
+          <button onclick="printMonthlyReport()" class="hidden sm:inline-flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-bold transition shadow-sm">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>طباعة</span>
+          </button>
+
+          <!-- زر تصدير إكسيل -->
+          <button onclick="exportToCSV()" class="hidden sm:inline-flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-bold transition shadow-sm">
+            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Excel</span>
+          </button>
+
+          <!-- زر الوضع الليلي -->
+          <button id="theme-toggle" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 transition" title="تبديل الوضع">
+            <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+          </button>
+
+          <!-- زر القائمة الكاملة للهواتف -->
+          <button onclick="toggleMobileMenuDrawer()" class="md:hidden p-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 rounded-lg border border-emerald-300 transition flex items-center justify-center" title="فتح القائمة الكاملة">
+            <i data-lucide="menu" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- شريط التبويبات والتنقل الرئيسي المدمج والأنيق -->
+      <nav class="flex items-center gap-1 overflow-x-auto py-1.5 border-t border-slate-100 dark:border-slate-800/80 no-scrollbar text-[11px] font-bold">
+        <button data-target="section-dashboard" class="nav-tab-btn px-2.5 py-1 rounded-lg bg-emerald-700 text-white shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+          <span>لوحة القيادة</span>
+        </button>
+
+        <button data-target="section-expenses" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+          <span>المصروفات</span>
+        </button>
+
+        <button data-target="section-fuel" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="fuel" class="w-3.5 h-3.5"></i>
+          <span>الوقود</span>
+        </button>
+
+        <button data-target="section-machinery" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="wrench" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span>الآليات والأسطول</span>
+        </button>
+
+        <button data-target="section-labor" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          <span>مسير العمالة</span>
+        </button>
+
+        <button data-target="section-grocery" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="shopping-cart" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>بقالة المشروع</span>
+        </button>
+
+        <button data-target="section-inventory" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="boxes" class="w-3.5 h-3.5"></i>
+          <span>المخزون الزراعي</span>
+        </button>
+
+        <button data-target="section-harvest" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="wheat" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>الحصاد والمبيعات</span>
+        </button>
+
+        <button data-target="section-partners" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-emerald-500"></i>
+          <span>هيكل الشركاء</span>
+        </button>
+
+        <button data-target="section-forecasts" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+          <span>حاسبة الأرباح</span>
+        </button>
+
+        <button data-target="section-audit-logs" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="history" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>سجل التعديلات</span>
+        </button>
+
+        <button data-target="section-users" class="nav-tab-btn px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span>فريق الإدارة</span>
+        </button>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- شريط المؤشرات الحية السريعة (KPI Ribbon) -->
+  <section class="no-print bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 text-white py-2 shadow-inner">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center">
+        
+        <div class="p-1.5 sm:p-2 bg-white/5 backdrop-blur-sm rounded-xl border border-emerald-700/40">
+          <p class="text-[9px] text-emerald-300 font-bold">المساحة الإجمالية</p>
+          <p id="kpi-total-area" class="text-xs sm:text-sm font-black">1,450 فدان</p>
+        </div>
+
+        <div class="p-1.5 sm:p-2 bg-white/5 backdrop-blur-sm rounded-xl border border-emerald-700/40">
+          <p class="text-[9px] text-emerald-300 font-bold">إجمالي المنصرفات</p>
+          <p id="kpi-total-spent" class="text-xs sm:text-sm font-black text-amber-300">0 جنيه</p>
+        </div>
+
+        <div class="p-1.5 sm:p-2 bg-white/5 backdrop-blur-sm rounded-xl border border-emerald-700/40">
+          <p class="text-[9px] text-emerald-300 font-bold">تكلفة فدان الذرة (959)</p>
+          <p id="kpi-sorghum-cost" class="text-xs sm:text-sm font-black text-emerald-200">0 ج/فدان</p>
+        </div>
+
+        <div class="p-1.5 sm:p-2 bg-white/5 backdrop-blur-sm rounded-xl border border-emerald-700/40">
+          <p class="text-[9px] text-emerald-300 font-bold">تكلفة فدان التسالي (490)</p>
+          <p id="kpi-tasali-cost" class="text-xs sm:text-sm font-black text-emerald-200">0 ج/فدان</p>
+        </div>
+
+        <div class="p-1.5 sm:p-2 bg-white/5 backdrop-blur-sm rounded-xl border border-emerald-700/40">
+          <p class="text-[9px] text-emerald-300 font-bold">مخزون الجازولين</p>
+          <p id="kpi-fuel-stock" class="text-xs sm:text-sm font-black text-emerald-300">6 براميل</p>
+        </div>
+
+        <div class="p-1.5 sm:p-2 bg-white/5 backdrop-blur-sm rounded-xl border border-emerald-700/40 flex flex-col justify-center">
+          <div id="kpi-overall-progress"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- محتوى الأقسام والشاشات -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
+
+    <div id="budget-alerts-container" class="space-y-2"></div>
+
+    <!-- ======================================================== -->
+    <!-- القسم 1: لوحة القيادة والمخطط (Dashboard & Map) -->
+    <!-- ======================================================== -->
+    <section id="section-dashboard" class="app-section space-y-5">
+      
+      <!-- بانر المشهد البصري لمشاريع القضارف الزراعية (Gedaref Agriculture Hero Showcase) -->
+      <div class="relative overflow-hidden rounded-2xl border border-emerald-600/40 shadow-xl bg-slate-950 text-white min-h-[170px] sm:min-h-[200px] flex flex-col justify-between p-4 sm:p-6">
+        <img id="dashboard-hero-img" src="assets/images/gedaref_hero.jpg" alt="مشاريع القضارف الزراعية" class="absolute inset-0 w-full h-full object-cover opacity-65 transition-all duration-700 hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent"></div>
+        
+        <!-- الأزرار العلوية للبانر -->
+        <div class="relative z-10 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="px-2.5 py-0.5 bg-emerald-600/90 backdrop-blur-md text-white text-[10px] font-black rounded-full border border-emerald-400/40 shadow-sm flex items-center gap-1">
+              <span>🌾</span>
+              <span>الزراعة المطرية الآلية • سهول القضارف</span>
+            </span>
+            <span class="px-2.5 py-0.5 bg-amber-500/85 backdrop-blur-md text-white text-[10px] font-black rounded-full border border-amber-300/40 shadow-sm">
+              📍 كسمور الشرقي • 1,450 فدان
+            </span>
+          </div>
+
+          <button onclick="openGedarefGalleryModal()" class="px-2.5 py-1 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 rounded-lg text-[11px] font-black transition flex items-center gap-1 shadow-sm">
+            <span>📸 ألبوم صور القضارف (7 مشاهد)</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+        <!-- النصوص والمحولات التفاعلية السريعة -->
+        <div class="relative z-10 space-y-2 max-w-4xl pt-2">
+          <div>
+            <h2 class="text-lg sm:text-2xl font-black text-white tracking-tight drop-shadow-md">
+              مشروع أبناء مصطفى حسن الزراعي
+            </h2>
+            <p class="text-xs text-slate-200 leading-relaxed drop-shadow mt-0.5">
+              منظومة رقمية متكاملة لإدارة التكاليف التشغيلية، ومتابعة العمليات الزراعية، ومسير الأجور، والمخزون، وخطة رأس المال لموسم 2026.
+            </p>
+          </div>
+
+          <!-- شريط التبديل السريع لخلفية البانر -->
+          <div class="flex flex-wrap items-center gap-1 pt-0.5">
+            <span class="text-[10px] text-slate-300 font-bold ml-1">تبديل المشهد:</span>
+            <button onclick="switchDashboardHeroImage('hero')" class="px-2 py-0.5 bg-black/40 hover:bg-emerald-700/80 backdrop-blur-sm rounded text-[10px] font-bold border border-white/20 transition">
+              🌾 مزارع كسمور
+            </button>
+            <button onclick="switchDashboardHeroImage('silo')" class="px-2 py-0.5 bg-black/40 hover:bg-emerald-700/80 backdrop-blur-sm rounded text-[10px] font-bold border border-white/20 transition">
+              🏢 صوامع القضارف
+            </button>
+            <button onclick="switchDashboardHeroImage('tractors')" class="px-2 py-0.5 bg-black/40 hover:bg-emerald-700/80 backdrop-blur-sm rounded text-[10px] font-bold border border-white/20 transition">
+              🚜 الحراثات والكسرة
+            </button>
+            <button onclick="switchDashboardHeroImage('sorghumHarvest')" class="px-2 py-0.5 bg-black/40 hover:bg-emerald-700/80 backdrop-blur-sm rounded text-[10px] font-bold border border-white/20 transition">
+              🌽 حصاد الذرة
+            </button>
+            <button onclick="switchDashboardHeroImage('sesame')" class="px-2 py-0.5 bg-black/40 hover:bg-emerald-700/80 backdrop-blur-sm rounded text-[10px] font-bold border border-white/20 transition">
+              🌱 حقول السمسم
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🌾 لوحة القيادة ومخطط المقطوعيات</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            متابعة حالة تجهيز الأرض، والكسرات، والزراعة الفعلية لمقطوعيات المشروع الـ 5.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openAddPlotModal()" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>إضافة مقطوعية جديدة</span>
+          </button>
+
+          <button onclick="openEditExpenseModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>إضافة مصروف</span>
+          </button>
+
+          <button onclick="openAddOperationModal()" class="px-3.5 py-2 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="tractor" class="w-4 h-4"></i>
+            <span>تسجيل عملية زراعية</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- المخطط البصري للمزرعة -->
+      <div class="glass-card rounded-2xl p-5 border border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="map" class="w-5 h-5 text-emerald-600"></i>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">المخطط التوزيعي الجغرافي للمقطوعيات (1,450 فدان)</h3>
+          </div>
+          <div class="flex items-center gap-3 text-[11px]">
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> تم الحراثة والزراعة</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> تجهيز / كسرة أولى</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span> مخطط زراعة لاحقاً</span>
+          </div>
+        </div>
+
+        <div id="farm-visual-map" class="grid grid-cols-1 md:grid-cols-5 gap-3 pt-2"></div>
+      </div>
+
+      <!-- الرسوم البيانية التحليلية -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        
+        <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-600"></i>
+              <span>توزيع المصروفات حسب البنود (الوقود، البذور، العمالة...)</span>
+            </h4>
+          </div>
+          <div class="h-64 relative flex items-center justify-center">
+            <canvas id="expensesCategoryChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="bar-chart-3" class="w-4 h-4 text-emerald-600"></i>
+              <span>مقارنة تكلفة ومساحة المحاصيل (الذرة vs التسالي)</span>
+            </h4>
+          </div>
+          <div class="h-64 relative flex items-center justify-center">
+            <canvas id="cropsComparisonChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- بطاقات متابعة خطة رأس المال والميزانية التقديرية (إجمالي 300,000,000 ج.س) -->
+      <div class="glass-card rounded-2xl p-5 border border-slate-200 dark:border-slate-800">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="target" class="w-5 h-5 text-emerald-600"></i>
+            <div>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">🎯 خطة رأس المال وسقوف الميزانية التقديرية (إجمالي 300,000,000 ج.س)</h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">200,000,000 ج.س لمرحلة الزراعة والتشغيل الميداني • 100,000,000 ج.س لمرحلة الحصاد والتسويق</p>
+            </div>
+          </div>
+          <button onclick="openEditBudgetCapsModal()" class="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 rounded-xl text-xs font-bold hover:bg-emerald-100 transition self-start sm:self-auto">
+            ⚙️ تعديل الميزانية ورأس المال
+          </button>
+        </div>
+        <div id="budget-caps-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- شبكة بطاقات المقطوعيات الخمس -->
+      <div>
+        <h3 class="text-sm font-black text-slate-900 dark:text-white mb-3">تفاصيل المقطوعيات والعمليات الميدانية:</h3>
+        <div id="plots-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم 2: المصروفات وتدقيق التكاليف (Expenses & Review) -->
+    <!-- ======================================================== -->
+    <section id="section-expenses" class="app-section hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>💳 سجل المصروفات وتدقيق التكاليف</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            إشراف الإدارة المالية (مصطفى الجعلي) والإدارة العامة على المصروفات ومراجعتها.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openEditBudgetCapsModal()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm" title="تعديل السقوف والميزانية">
+            <i data-lucide="sliders" class="w-4 h-4 text-emerald-600"></i>
+            <span>تعديل الميزانية والسقوف</span>
+          </button>
+
+          <button onclick="openEditExpenseModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>تسجيل مصروف جديد</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="review-alert-banner" class="hidden"></div>
+
+      <!-- أدوات الفلترة والبحث السريع -->
+      <div class="glass-card p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-3 text-xs">
+        <div class="flex-1 min-w-[200px]">
+          <input type="text" id="expense-search-input" onkeyup="filterExpenses()" placeholder="🔍 بحث في البيان، الملاحظات، أو المورد..." class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white">
+        </div>
+        <div>
+          <select id="expense-filter-category" onchange="filterExpenses()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+            <option value="all">جميع البنود</option>
+            <option value="وقود">وقود</option>
+            <option value="بذور">بذور</option>
+            <option value="مبيدات">مبيدات</option>
+            <option value="أسمدة">أسمدة</option>
+            <option value="عمالة">عمالة</option>
+            <option value="إيجار آليات وصيانة">إيجار آليات وصيانة</option>
+            <option value="نقل">نقل</option>
+            <option value="البيت">البيت</option>
+            <option value="مصاريف إدارية">مصاريف إدارية</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+        <div>
+          <select id="expense-filter-crop" onchange="filterExpenses()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+            <option value="all">جميع المحاصيل والتصنيفات</option>
+            <option value="ذرة">🌽 ذرة ارفع قدمك</option>
+            <option value="تسالي">🌱 تسالي</option>
+            <option value="مشترك">🌾 مشترك (المزرعة)</option>
+            <option value="البيت">🏠 البيت (مصاريف خاصة)</option>
+          </select>
+        </div>
+        <div>
+          <select id="expense-filter-status" onchange="filterExpenses()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+            <option value="all">كل حالات التدقيق</option>
+            <option value="review">⚠️ للمراجعة فقط</option>
+            <option value="approved">✓ معتمد فقط</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">قائمة القيود والمصروفات المسجلة</h3>
+          <span class="text-xs text-slate-500">انقر على أيقونة القلم 📝 لتعديل أي مبلغ أو تصحيحه فوراً</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التاريخ</th>
+                <th class="py-3 px-4">البند والتصنيف</th>
+                <th class="py-3 px-4">المبلغ</th>
+                <th class="py-3 px-4">المقطوعية</th>
+                <th class="py-3 px-4">المحصول</th>
+                <th class="py-3 px-4">البيان ومدخل القيد</th>
+                <th class="py-3 px-4">حالة التدقيق</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-black text-slate-900 dark:text-white mb-3">حدود الميزانية التقديرية ومؤشرات الاستهلاك:</h3>
+        <div id="budget-caps-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم: الآليات والصيانة وكفاءة الوقود (Machinery & Maintenance) -->
+    <!-- ======================================================== -->
+    <section id="section-machinery" class="app-section hidden space-y-6">
+      
+      <!-- بانر صيانة الجرارات والآليات -->
+      <div class="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md bg-slate-900 text-white min-h-[140px] flex items-center p-5">
+        <img src="assets/images/gedaref_tractors.jpg" alt="صيانة الآليات والجرارات" class="absolute inset-0 w-full h-full object-cover opacity-40">
+        <div class="absolute inset-0 bg-gradient-to-l from-slate-950 via-slate-900/80 to-transparent"></div>
+        <div class="relative z-10 space-y-1 max-w-2xl">
+          <span class="px-2.5 py-0.5 bg-blue-600/90 text-white text-[10px] font-black rounded-full inline-block">🚜 أسطول الجرارات والآليات الميدانية</span>
+          <h3 class="text-base font-black text-white">الصيانة الدورية، قطع الغيار، ومؤشر كفاءة الوقود لكل فدان</h3>
+          <p class="text-xs text-slate-300">متابعة ساعات تشغيل المحركات، مواعيد تغيير الزيوت والفلاتر، وتتبع كفاءة السائقين في استهلاك الوقود.</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🚜 إدارة أسطول الآليات والصيانة وكفاءة الوقود</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            سجل الصيانة وتغيير الزيوت وقطع الغيار، ومعدلات استهلاك الجازولين لكل فدان ومقارنة أداء السائقين.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openAddMachineryMaintenanceModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>➕ تسجيل عملية صيانة</span>
+          </button>
+          <button onclick="openAddMachineModal()" class="px-3.5 py-2 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="tractor" class="w-4 h-4"></i>
+            <span>➕ إضافة آلية/جرار</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- مؤشرات أسطول الآليات والصيانة -->
+      <div id="machinery-kpi-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <!-- بطاقات أسطول الجرارات والآليات -->
+      <div>
+        <h3 class="text-sm font-black text-slate-900 dark:text-white mb-3">أسطول الجرارات والمعدات الزراعية العاملة بالمشروع:</h3>
+        <div id="machinery-fleet-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+      </div>
+
+      <!-- جدول سجل الصيانة وتغيير الزيوت -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/40">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل الصيانة الدورية وتغيير الزيوت وقطع الغيار</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">توثيق شامل لتكاليف الصيانة، الفنيين، والقطع المستبدلة</p>
+          </div>
+          <button onclick="openAddMachineryMaintenanceModal()" class="px-3 py-1 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-300 rounded-lg text-xs font-bold">
+            + صيانة جديدة
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التاريخ</th>
+                <th class="py-3 px-4">الآلية / الجرار</th>
+                <th class="py-3 px-4">نوع الصيانة</th>
+                <th class="py-3 px-4 font-black text-slate-900 dark:text-white">التكلفة (ج.س)</th>
+                <th class="py-3 px-4">قطع الغيار والزيوت المستخدمة</th>
+                <th class="py-3 px-4">الفني / الورشة</th>
+                <th class="py-3 px-4">قراءة العداد</th>
+                <th class="py-3 px-4">ملاحظات</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="machinery-maintenance-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- حاسبة ساعات العمل الميدانية والمعيار الفلاحي (5 فدان في الساعة) -->
+      <div class="glass-card rounded-2xl border border-emerald-300 dark:border-emerald-800/80 p-5 space-y-4 bg-gradient-to-br from-white via-emerald-50/20 to-white dark:from-slate-900 dark:via-emerald-950/20 dark:to-slate-900 shadow-md">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-700 to-emerald-500 text-white flex items-center justify-center font-black text-base shadow-sm">⏱️</span>
+            <div>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">حاسبة ساعات العمل الميدانية والمعيار الفلاحي المعتمد</h3>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">معيار العمليات الفلاحية (حرث، زراعة، كديب ونظافة، سرولة): <strong class="text-emerald-700 dark:text-emerald-400 font-black">5 فدان في الساعة</strong> (0.20 ساعة/فدان)</p>
+            </div>
+          </div>
+          <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 rounded-full text-xs font-bold self-start sm:self-auto">
+            المعيار: 5 فدان/ساعة
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">اختر المقطوعية أو أدخل المساحة:</label>
+            <select id="calc-plot-select" onchange="applyPlotToFieldHoursCalc()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="custom">مساحة مخصصة...</option>
+              <option value="1450">المشروع كاملاً (1,450 فدان)</option>
+              <option value="429">نمرة الـ 500 (429 فدان - ذرة)</option>
+              <option value="380">نمرة النوبة (380 فدان - ذرة)</option>
+              <option value="320">نمرة الويكة (320 فدان - تسالي)</option>
+              <option value="170">نمرة عباس (170 فدان - تسالي)</option>
+              <option value="150">نمرة الرقيقة (150 فدان - ذرة)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">المساحة المستهدفة (فدان):</label>
+            <input type="number" id="calc-feddan-input" value="100" min="1" oninput="recalcFieldHoursWidget()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">نوع العملية الفلاحية:</label>
+            <select id="calc-op-type" onchange="recalcFieldHoursWidget()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="plowing">حراثة وتقليب (كسرة أولى/ثانية)</option>
+              <option value="planting">زراعة وبذر (دسك زراعة)</option>
+              <option value="weeding">كديب ونظافة حشائش</option>
+              <option value="sarwala">سرولة وتسوية</option>
+              <option value="spraying">رش مبيد حشائش/آفات</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">عدد الجرارات ووردية اليوم:</label>
+            <div class="grid grid-cols-2 gap-1.5">
+              <select id="calc-tractors-count" onchange="recalcFieldHoursWidget()" class="p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-[11px]">
+                <option value="1">1 جرار</option>
+                <option value="2" selected>2 جرار (ابستة + الجعيلي)</option>
+                <option value="3">3 جرارات</option>
+              </select>
+              <select id="calc-shift-hours" onchange="recalcFieldHoursWidget()" class="p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-[11px]">
+                <option value="8">وردية 8 س</option>
+                <option value="10" selected>وردية 10 س</option>
+                <option value="12">وردية 12 س</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- بطاقات نتائج الحساب الفوري لساعات العمل والوقود -->
+        <div id="calc-results-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2"></div>
+      </div>
+
+      <!-- جدول مؤشر كفاءة استهلاك الوقود ومقارنة السائقين وساعات العمل -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">مؤشر كفاءة استهلاك الوقود وساعات العمل الميداني للسائقين</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">تحليل ساعات العمل الميدانية الفعلية (5 فدان/ساعة) ومعدل اللترات لكل فدان وكل ساعة تشغيل</p>
+          </div>
+          <span class="px-2.5 py-1 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-bold self-start">
+            معدل الأداء: 5 فدان / ساعة
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">السائق المسؤول</th>
+                <th class="py-3 px-4">الجرار / الآلية</th>
+                <th class="py-3 px-4">المساحة المنجزة (فدان)</th>
+                <th class="py-3 px-4 font-black text-blue-700 dark:text-blue-400">ساعات العمل الميدانية (5 فدان/س)</th>
+                <th class="py-3 px-4">الوقود المستهلك</th>
+                <th class="py-3 px-4 font-black text-slate-900 dark:text-white">معدل الاستهلاك للفدان (لتر/فدان)</th>
+                <th class="py-3 px-4 font-black text-emerald-600">معدل الاستهلاك بالساعة (لتر/ساعة)</th>
+                <th class="py-3 px-4">مستوى الكفاءة</th>
+                <th class="py-3 px-4">التقييم الفني</th>
+              </tr>
+            </thead>
+            <tbody id="drivers-efficiency-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم 3: الوقود والآليات (Fuel & Machinery) -->
+    <!-- ======================================================== -->
+    <section id="section-fuel" class="app-section hidden space-y-6">
+      
+      <!-- بانر الآليات والجرارات في طين القضارف -->
+      <div class="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md bg-slate-900 text-white min-h-[140px] flex items-center p-5">
+        <img src="assets/images/gedaref_tractors.jpg" alt="الحراثات والجرارات الزراعية" class="absolute inset-0 w-full h-full object-cover opacity-40">
+        <div class="absolute inset-0 bg-gradient-to-l from-slate-950 via-slate-900/80 to-transparent"></div>
+        <div class="relative z-10 space-y-1 max-w-2xl">
+          <span class="px-2.5 py-0.5 bg-emerald-600/90 text-white text-[10px] font-black rounded-full inline-block">🚜 أسطول الحراثات والجرارات الميدانية</span>
+          <h3 class="text-base font-black text-white">تشغيل الآليات الثقيلة وحراثة أراضي المشروع (1,450 فدان)</h3>
+          <p class="text-xs text-slate-300">متابعة دقيقة لاستهلاك الجازولين (200 لتر/برميل) لكل عملية حرث وكسرة تحت إشراف الوكيل عبدالقادر والسائقين (ابستة ومحمد الجعيلي).</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>⛽ إدارة مخزون الوقود (الجازولين) والآليات</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            إضافة وتوريد براميل الجازولين للمخزن، وصرفها للسائقين والتركتورات مع تتبع الرصيد المتبقي لحظياً.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- زر توريد وإضافة مخزون -->
+          <button onclick="openAddFuelStockModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>📥 توريد / إضافة وقود للمخزن</span>
+          </button>
+
+          <!-- زر صرف من المخزن -->
+          <button onclick="openIssueFuelModal()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            <span>📤 صرف وقود للتشغيل</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="fuel-status-cards" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+      <!-- فلاتر سجل الوقود -->
+      <div class="glass-card p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-slate-700 dark:text-slate-300">تصفية الحركات:</span>
+          <select id="fuel-filter-type" onchange="renderFuelSection()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+            <option value="all">جميع حركات الوقود</option>
+            <option value="purchase">📥 التوريد والشراء فقط</option>
+            <option value="issue">📤 المنصرف للتشغيل فقط</option>
+          </select>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          الوكيل ومسؤول الوقود والعمليات: <strong class="text-emerald-700 dark:text-emerald-400 font-bold">عبدالقادر (المشرف العام)</strong>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">سجل توريد وصرف الجازولين التفصيلي</h3>
+          <span class="text-xs text-slate-400">تحديث فوري لأرصدة المخزن</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التاريخ</th>
+                <th class="py-3 px-4">نوع الحركة</th>
+                <th class="py-3 px-4">الكمية</th>
+                <th class="py-3 px-4">السائق / المستلم</th>
+                <th class="py-3 px-4">المقطوعية المستفيدة</th>
+                <th class="py-3 px-4">البيان والمسؤول</th>
+                <th class="py-3 px-4 text-left">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="fuel-transactions-table" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم 4: مسير رواتب العمالة والمشرفين (Monthly Labor Wages) -->
+    <!-- ======================================================== -->
+    <section id="section-labor" class="app-section hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>👥 مسير رواتب العمالة والمشرفين (رواتب شهرية مع الاحتساب التلقائي)</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            متابعة الرواتب الشهرية للوكيل عبدالقادر، السائقين (ابستة، محمد الجعيلي)، والعمالة، مع احتساب مدة العمل والمستحقات والمسدد والمتبقي تلقائياً.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openHarvestContractCalculatorModal()" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="calculator" class="w-4 h-4"></i>
+            <span>➕ حاسبة مقاولات الحصاد (الصرامة والدراس)</span>
+          </button>
+          <button onclick="openEditLaborModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>إضافة عامل / موظف جديد</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3.5 px-4">اسم العامل / المشرف</th>
+                <th class="py-3.5 px-4">الوظيفة والمهام</th>
+                <th class="py-3.5 px-4">نوع العامل</th>
+                <th class="py-3.5 px-4">تاريخ المباشرة</th>
+                <th class="py-3.5 px-4">تاريخ الانتهاء</th>
+                <th class="py-3.5 px-4">الراتب الشهري</th>
+                <th class="py-3.5 px-4">مدة العمل</th>
+                <th class="py-3.5 px-4 text-amber-700 dark:text-amber-400">مسحوبات البقالة</th>
+                <th class="py-3.5 px-4">صافي المستحق</th>
+                <th class="py-3.5 px-4">المبلغ المدفوع</th>
+                <th class="py-3.5 px-4">حالة السداد والمتبقي</th>
+                <th class="py-3.5 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="labor-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم: بقالة المشروع وحسابات الإعاشة والمسحوبات الآجلة -->
+    <!-- ======================================================== -->
+    <section id="section-grocery" class="app-section hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 flex items-center justify-center font-bold text-base">🛒</span>
+            <h2 class="text-lg font-black text-slate-900 dark:text-white">بقالة الكمبو والمسحوبات الآجلة للعمالة</h2>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">إدارة مبيعات ومسحوبات مواد الإعاشة والسلع الغذائية بالآجل وخصمها تلقائياً من مستحقات نهاية الموسم</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openAddGroceryTxModal()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-600/20 transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>تسجيل سحب بقالة جديد</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- بطاقات المؤشرات السريعة للبقالة -->
+      <div id="grocery-status-cards" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+
+      <!-- فلتر وبحث المسحوبات -->
+      <div class="glass-card p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="relative flex-1 md:w-64">
+            <i data-lucide="search" class="w-4 h-4 absolute right-3 top-3 text-slate-400"></i>
+            <input type="text" id="grocery-search-input" oninput="renderGrocerySection()" placeholder="بحث باسم العامل أو الصنف..." class="w-full pr-9 pl-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-amber-500">
+          </div>
+          
+          <select id="grocery-filter-worker" onchange="renderGrocerySection()" class="py-2 px-3 rounded-xl text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-bold focus:outline-none focus:border-amber-500">
+            <option value="all">جميع العمال والمشرفين</option>
+          </select>
+        </div>
+
+        <div class="text-xs text-slate-500 font-medium">
+          💡 <span class="font-bold text-amber-700 dark:text-amber-400">ملاحظة محاسبية:</span> مسحوبات البقالة تخصم مباشرة وتلقائياً من صافي الراتب المستحق في مسير الأجور.
+        </div>
+      </div>
+
+      <!-- جدول قيود ومسحوبات البقالة -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3.5 px-4">التاريخ</th>
+                <th class="py-3.5 px-4">اسم العامل / الموظف</th>
+                <th class="py-3.5 px-4">الأصناف والسلع المسحوبة</th>
+                <th class="py-3.5 px-4">المبلغ المسحوب</th>
+                <th class="py-3.5 px-4">المسؤول / المشرف</th>
+                <th class="py-3.5 px-4">حالة الخصم</th>
+                <th class="py-3.5 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="grocery-transactions-table" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم 5: المخزون الزراعي (Inventory Management) -->
+    <!-- ======================================================== -->
+    <section id="section-inventory" class="app-section hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>📦 مستودع المخزون الزراعي (تقاوي، أسمدة، مبيدات، مدخلات)</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            إدارة حركة التوريد والشراء وصرف المدخلات الزراعية لمقطوعيات وحقول المشروع مع تتبع الأرصدة لحظياً.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- زر توريد وإضافة كمية للمخزن -->
+          <button onclick="openAddInventoryStockModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>📥 توريد / إضافة للمخزون</span>
+          </button>
+
+          <!-- زر صرف مواد من المخزن -->
+          <button onclick="openIssueInventoryModal()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            <span>📤 صرف مواد للحقول</span>
+          </button>
+
+          <!-- زر تعريف صنف جديد -->
+          <button onclick="openAddNewInventoryItemModal()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="package-plus" class="w-4 h-4 text-emerald-600"></i>
+            <span>تعريف صنف جديد</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- شبكة بطاقات الأصناف المخزنية -->
+      <div id="inventory-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <!-- سجل حركات المخزون الزراعي (توريد وصرف) -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">سجل حركات المخزون الزراعي التفصيلي (توريد وصرف)</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">توثيق شامل لكافة البذور والمبيدات والأسمدة المصروفة للحقول</p>
+          </div>
+          
+          <div class="flex items-center gap-2 text-xs">
+            <span class="font-bold text-slate-700 dark:text-slate-300">تصفية:</span>
+            <select id="inv-filter-type" onchange="renderInventorySection()" class="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs">
+              <option value="all">جميع الحركات</option>
+              <option value="purchase">📥 التوريد والشراء فقط</option>
+              <option value="issue">📤 الصرف للحقول فقط</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التاريخ</th>
+                <th class="py-3 px-4">الصنف والتصنيف</th>
+                <th class="py-3 px-4">نوع الحركة</th>
+                <th class="py-3 px-4">الكمية والوحدة</th>
+                <th class="py-3 px-4">المقطوعية / المحصول</th>
+                <th class="py-3 px-4">المستلم / المشرف</th>
+                <th class="py-3 px-4">البيان والتفاصيل</th>
+                <th class="py-3 px-4 text-left">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-transactions-table" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم: منظومة الحصاد ومبيعات المحاصيل والزكاة (Harvest & Marketing) -->
+    <!-- ======================================================== -->
+    <section id="section-harvest" class="app-section hidden space-y-6">
+      
+      <!-- بانر حصاد الذرة وتسويق الغلال -->
+      <div class="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md bg-slate-900 text-white min-h-[140px] flex items-center p-5">
+        <img src="assets/images/gedaref_sorghum_harvest.jpg" alt="حصاد الذرة الرفيعة" class="absolute inset-0 w-full h-full object-cover opacity-40">
+        <div class="absolute inset-0 bg-gradient-to-l from-slate-950 via-slate-900/80 to-transparent"></div>
+        <div class="relative z-10 space-y-1 max-w-2xl">
+          <span class="px-2.5 py-0.5 bg-amber-500/90 text-white text-[10px] font-black rounded-full inline-block">🌾 موسم حصاد وتسويق غلال القضارف 2026</span>
+          <h3 class="text-base font-black text-white">إدارة الحصاد اليومي، عقود البيع، وتوريد زكاة الزروع (10%)</h3>
+          <p class="text-xs text-slate-300">متابعة دخوليات الجوالات من نمر المشروع (1,450 فدان)، عقود التوريد للشركات والتجار، وتوثيق تسليم الزكاة لديوان الزكاة.</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🌾 منظومة الحصاد والتسويق وتوريد الزكاة</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            توثيق دخوليات الشونة والصوامع، تتبع صفقات البيع والنقدية المحصلة، وإيصالات الزكاة الشرعية.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openAddHarvestIntakeModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>➕ تسجيل دخولية حصاد</span>
+          </button>
+
+          <button onclick="openAddCropSaleModal()" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            <span>➕ تسجيل صفقة بيع</span>
+          </button>
+
+          <button onclick="openAddZakatDeliveryModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="file-check" class="w-4 h-4"></i>
+            <span>➕ توريد زكاة (10%)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- مؤشرات الحصاد والمبيعات والزكاة -->
+      <div id="harvest-kpi-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <!-- أزرار التبديل بين جداول الحصاد والمبيعات والزكاة -->
+      <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs font-bold">
+        <button id="tab-btn-harvest-intakes" onclick="switchHarvestSubTab('intakes')" class="px-4 py-2 rounded-xl bg-emerald-700 text-white shadow-sm transition flex items-center gap-1.5">
+          <i data-lucide="wheat" class="w-4 h-4"></i>
+          <span>دخوليات الحصاد اليومية</span>
+        </button>
+        <button id="tab-btn-harvest-sales" onclick="switchHarvestSubTab('sales')" class="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          <span>عقود ومبيعات المحاصيل</span>
+        </button>
+        <button id="tab-btn-harvest-zakat" onclick="switchHarvestSubTab('zakat')" class="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="file-check" class="w-4 h-4"></i>
+          <span>توريد زكاة الزروع (10%)</span>
+        </button>
+      </div>
+
+      <!-- جدول 1: دخوليات الحصاد اليومية -->
+      <div id="harvest-intakes-view" class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/40">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل دخوليات وتشوين المحصول اليومي من النمر</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">توثيق الكميات الواردة من كل نمرة ومواقع التخزين والرتبة</p>
+          </div>
+          <button onclick="openAddHarvestIntakeModal()" class="px-3 py-1 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 rounded-lg text-xs font-bold">
+            + دخولية جديدة
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التاريخ</th>
+                <th class="py-3 px-4">المقطوعية / النمرة</th>
+                <th class="py-3 px-4">المحصول والصنف</th>
+                <th class="py-3 px-4 font-black text-slate-900 dark:text-white">الكمية (جوال)</th>
+                <th class="py-3 px-4">الوزن التقديري</th>
+                <th class="py-3 px-4">موقع التخزين</th>
+                <th class="py-3 px-4">المشرف الميداني</th>
+                <th class="py-3 px-4">الرتبة والجودة</th>
+                <th class="py-3 px-4">ملاحظات</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="harvest-intakes-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- جدول 2: عقود ومبيعات المحاصيل -->
+      <div id="harvest-sales-view" class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/40">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل عقود وتوريد مبيعات المحاصيل للتجار</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">متابعة الفواتير وأسعار البيع والنقدية المحصلة والمتبقيات</p>
+          </div>
+          <button onclick="openAddCropSaleModal()" class="px-3 py-1 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 rounded-lg text-xs font-bold">
+            + صفقة بيع جديدة
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التاريخ</th>
+                <th class="py-3 px-4">المشتري / التاجر</th>
+                <th class="py-3 px-4">المحصول</th>
+                <th class="py-3 px-4">الكمية المباعة</th>
+                <th class="py-3 px-4">سعر الجوال</th>
+                <th class="py-3 px-4 font-black text-slate-900 dark:text-white">إجمالي القيمة</th>
+                <th class="py-3 px-4 text-emerald-600">المحصل الفعلي</th>
+                <th class="py-3 px-4 text-amber-600">المتبقي</th>
+                <th class="py-3 px-4">طريقة الدفع</th>
+                <th class="py-3 px-4">حالة السداد</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="harvest-sales-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- جدول 3: توريد زكاة الزروع -->
+      <div id="harvest-zakat-view" class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/40">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل تسليم وتوريد زكاة الزروع والثمار (10% - العُشر الشرعي)</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">توثيق رسمي للجوالات المسلمة لديوان الزكاة بالقضارف وإبراء الذمة</p>
+          </div>
+          <button onclick="openAddZakatDeliveryModal()" class="px-3 py-1 bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-300 rounded-lg text-xs font-bold">
+            + إيصال تسليم زكاة
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التاريخ</th>
+                <th class="py-3 px-4">نوع المحصول</th>
+                <th class="py-3 px-4 font-black text-slate-900 dark:text-white">الجوالات المسلمة (العُشر 10%)</th>
+                <th class="py-3 px-4">رقم إيصال الاستلام</th>
+                <th class="py-3 px-4">الجهة المستلمة</th>
+                <th class="py-3 px-4">المفتش / المسؤول</th>
+                <th class="py-3 px-4">ملاحظات وبيان</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="harvest-zakat-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم: هيكل الشركاء والأنصبة وتوزيع رأس المال والأرباح (13 سهم) -->
+    <!-- ======================================================== -->
+    <section id="section-partners" class="app-section hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold text-base">👥</span>
+            <h2 class="text-lg font-black text-slate-900 dark:text-white">هيكل الشركاء وتوزيع الأنصبة وضخ رأس المال</h2>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">توزيع رأس المال ومتابعة ضخ وتوريد المبالغ من الشركاء ونظام الـ 13 سهماً المعتمد لتوزيع الأرباح</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openAddCapitalInjectionModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>تسجيل ضخ رأس مال جديد</span>
+          </button>
+          <div class="px-3.5 py-2 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 rounded-xl text-xs font-black text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+            <span>إجمالي الأسهم: 13 سهم (100%)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- بطاقات مؤشرات الشركاء ورأس المال -->
+      <div id="partners-kpi-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <!-- جدول تفصيل أنصبة الشركاء والمصروفات والأرباح -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
+          <div>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">جدول توزيع الحصص ورأس المال المدفوع للشركاء (13 سهم)</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">استرداد 100% لرأس المال المدفوع والمضخوخ وتوزيع الأرباح الصافية بنظام الـ 13 سهماً</p>
+          </div>
+          <div class="text-xs font-bold text-slate-500">
+            📊 رأس المال المستهدف: 300 مليون ج.س (200م زراعة + 100م حصاد)
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3.5 px-4">اسم الشريك</th>
+                <th class="py-3.5 px-4">الأنصبة الثابتة للأرباح</th>
+                <th class="py-3.5 px-4">نسبة توزيع الأرباح</th>
+                <th class="py-3.5 px-4 text-slate-900 dark:text-white">إجمالي رأس المال المدفوع (مسترد 100%)</th>
+                <th class="py-3.5 px-4">حالة الاسترداد</th>
+                <th class="py-3.5 px-4">الملاحظات</th>
+                <th class="py-3.5 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="partners-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- سجل حركات ضخ وتوريد رأس المال للمشروع -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs">💵</span>
+            <div>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل حركات وتوريدات ضخ رأس المال للمشروع</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">توثيق كامل لكافة المبالغ المضخوخة والمدفوعة من الشركاء مع التواريخ وطريقة التوريد</p>
+            </div>
+          </div>
+          <button onclick="openAddCapitalInjectionModal()" class="px-3 py-1.5 bg-purple-50 dark:bg-purple-950 hover:bg-purple-100 border border-purple-300 dark:border-purple-800 text-purple-800 dark:text-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>إضافة توريد رأس مال</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التاريخ</th>
+                <th class="py-3 px-4">الشريك المورّد</th>
+                <th class="py-3 px-4 font-black text-slate-900 dark:text-white">المبلغ المضخوخ (ج.س)</th>
+                <th class="py-3 px-4">طريقة التوريد</th>
+                <th class="py-3 px-4">الغرض والبيان</th>
+                <th class="py-3 px-4">المستلم / القائم بالتقييد</th>
+                <th class="py-3 px-4">ملاحظات</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="capital-injections-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم 6: توقعات الأرباح ومحاكي الأسعار (Forecasts & Simulator) -->
+    <!-- ======================================================== -->
+    <section id="section-forecasts" class="app-section hidden space-y-6">
+      
+      <!-- بانر صوامع غلال القضارف وتسويق المحاصيل -->
+      <div class="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md bg-slate-900 text-white min-h-[140px] flex items-center p-5">
+        <img src="assets/images/gedaref_silo.jpg" alt="صوامع غلال القضارف" class="absolute inset-0 w-full h-full object-cover opacity-40">
+        <div class="absolute inset-0 bg-gradient-to-l from-slate-950 via-slate-900/80 to-transparent"></div>
+        <div class="relative z-10 space-y-1 max-w-2xl">
+          <span class="px-2.5 py-0.5 bg-amber-500/90 text-white text-[10px] font-black rounded-full inline-block">🏢 صوامع غلال القضارف وبورصة المحاصيل</span>
+          <h3 class="text-base font-black text-white">تسويق وتخزين محصول الذرة والتسالي لموسم 2026</h3>
+          <p class="text-xs text-slate-300">محاكاة حية لعوائد الإنتاج وأسعار البيع المتوقعة بالسوق (ذرة 3.5 جوال/فدان بسعر 300,000 ج.س • تسالي 1.5 جوال/فدان بسعر 600,000 ج.س).</p>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <span>📈 حاسبة الإيرادات ومحاكي أسعار المحاصيل التفاعلي</span>
+        </h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          حرك أشرطة التمرير أدناه لاختبار سيناريوهات الإنتاجية وأسعار السوق مع <strong class="text-emerald-700 dark:text-emerald-400">خصم زكاة الزروع 10% (العُشر) تلقائياً</strong> واحتساب صافي أرباح المشروع وتوزيعها على الشركاء التسعة.
+        </p>
+      </div>
+
+      <div class="glass-card p-6 rounded-2xl border border-emerald-300 dark:border-emerald-800/60 space-y-6">
+        <h3 class="text-sm font-black text-emerald-800 dark:text-emerald-400 flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4"></i>
+          <span>محاكي السيناريوهات الحية (Live Price & Yield Simulator):</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-4 bg-amber-50/60 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-900/40 space-y-4">
+            <div class="flex items-center gap-3">
+              <img src="assets/images/gedaref_sorghum.jpg" alt="ذرة القضارف" class="w-12 h-12 rounded-xl object-cover border border-amber-300 shadow-sm">
+              <div>
+                <h4 class="font-black text-xs text-amber-900 dark:text-amber-200">🌽 محصول الذرة (ارفع قدمك محسن)</h4>
+                <p class="text-[10px] text-amber-700 dark:text-amber-300 font-bold">المساحة المزروعة: 959 فدان • كسمور الشرقي</p>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span>إنتاجية الفدان المتوقعة:</span>
+                <strong id="sim-sorghum-yield-val" class="text-amber-700 dark:text-amber-300 font-bold">3.5 جوال/فدان</strong>
+              </div>
+              <input type="range" id="sim-sorghum-yield" min="1" max="10" step="0.5" value="3.5" oninput="updateSimulation()" class="w-full accent-amber-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span>سعر بيع الجوال المتوقع:</span>
+                <strong id="sim-sorghum-price-val" class="text-amber-700 dark:text-amber-300 font-bold">300,000 جنيه</strong>
+              </div>
+              <input type="range" id="sim-sorghum-price" min="100000" max="600000" step="10000" value="300000" oninput="updateSimulation()" class="w-full accent-amber-600">
+            </div>
+          </div>
+
+          <div class="p-4 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 space-y-4">
+            <div class="flex items-center gap-3">
+              <img src="assets/images/gedaref_tasali.jpg" alt="تسالي القضارف" class="w-12 h-12 rounded-xl object-cover border border-emerald-300 shadow-sm">
+              <div>
+                <h4 class="font-black text-xs text-emerald-900 dark:text-emerald-200">🌱 محصول التسالي (نقاوة أولى)</h4>
+                <p class="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold">المساحة المزروعة: 490 فدان • كسمور الشرقي</p>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span>إنتاجية الفدان المتوقعة:</span>
+                <strong id="sim-tasali-yield-val" class="text-emerald-700 dark:text-emerald-300 font-bold">1.5 جوال/فدان</strong>
+              </div>
+              <input type="range" id="sim-tasali-yield" min="0.5" max="6" step="0.1" value="1.5" oninput="updateSimulation()" class="w-full accent-emerald-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span>سعر بيع الجوال المتوقع:</span>
+                <strong id="sim-tasali-price-val" class="text-emerald-700 dark:text-emerald-300 font-bold">600,000 جنيه</strong>
+              </div>
+              <input type="range" id="sim-tasali-price" min="200000" max="1200000" step="25000" value="600000" oninput="updateSimulation()" class="w-full accent-emerald-600">
+            </div>
+          </div>
+        </div>
+
+        <!-- شريط تخصيص رأس مال الموسم القادم 500 مليون جنيه قبل توزيع الأرباح -->
+        <div class="p-4 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 dark:from-purple-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 rounded-2xl border border-purple-200 dark:border-purple-800/60 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-purple-600/20">🏦</span>
+            <div>
+              <h4 class="font-black text-xs text-purple-950 dark:text-purple-200">🌱 تخصيص واحتياطي رأس مال الموسم القادم (2027) قبل توزيع الأرباح:</h4>
+              <p class="text-[10px] text-purple-700 dark:text-purple-300">يُحجز من أرباح الموسم الحالي كتمويل ذاتي للمشروع حتى لا يُطلب من الشركاء دفع مبالغ جديدة للموسم القادم.</p>
+            </div>
+          </div>
+          <div class="w-full sm:w-72 space-y-1">
+            <div class="flex justify-between text-xs font-bold text-purple-900 dark:text-purple-200">
+              <span>المبلغ المخصص:</span>
+              <strong id="sim-next-season-val" class="font-mono text-purple-700 dark:text-purple-300">500,000,000 ج.س</strong>
+            </div>
+            <input type="range" id="sim-next-season" min="0" max="1000000000" step="25000000" value="500000000" oninput="updateSimulation()" class="w-full accent-purple-600">
+          </div>
+        </div>
+      </div>
+
+      <div id="forecast-results-container"></div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم 7: سجل تدقيق وتتبع التعديلات (Audit Log Section) -->
+    <!-- ======================================================== -->
+    <section id="section-audit-logs" class="app-section hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>📜 سجل تدقيق وتتبع العمليات والتعديلات (Audit Log)</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            سجل تاريخي يوثق بالتوقيت الدقيق اسم المسؤول الذي قام بإضافة أو تعديل أي قيد مالي أو تشغيلي.
+          </p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">سجل الأنشطة والحركات الزمنية</h3>
+          <span class="text-xs text-slate-500">حفظ تلقائي لكافة الإجراءات</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">التوقيت والتاريخ</th>
+                <th class="py-3 px-4">المستخدم والدور</th>
+                <th class="py-3 px-4">نوع العملية</th>
+                <th class="py-3 px-4">تفاصيل التعديل / الإجراء</th>
+                <th class="py-3 px-4">الموقع / الحقل</th>
+              </tr>
+            </thead>
+            <tbody id="audit-logs-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- القسم 8: إدارة المستخدمين والصلاحيات (Users & Roles) -->
+    <!-- ======================================================== -->
+    <section id="section-users" class="app-section hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>👥 حسابات المستخدمين المعتمدة وصلاحيات الدخول (5 مستخدمين)</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            الحسابات المصرحة لاستخدام وإدارة النظام: المدير العام (محمد مصطفى)، المدير الإداري (حسن مصطفى)، المدير المالي (مصطفى الجعلي)، الشريك (أبوبكر مصطفى)، والوكيل والمشرف الميداني العام (عبدالقادر).
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-emerald-300 dark:border-emerald-800">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>حسابات مؤمنة ومصرحة (5 مستخدمين)</span>
+          </span>
+        </div>
+      </div>
+
+      <div id="users-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+    </section>
+
+  </main>
+
+  <!-- خانة التوقيعات الرسمية للتقرير المطبوع بأسماء أعضاء الإدارة والشركاء والوكيل المعتمدين -->
+  <div class="hidden print-only max-w-7xl mx-auto px-4 mt-8 pt-6 border-t-2 border-slate-900 grid grid-cols-5 gap-3 text-center">
+    <div>
+      <p class="font-bold text-xs">إعداد المدير المالي</p>
+      <p class="text-xs font-bold mt-1 text-slate-800">مصطفى الجعلي</p>
+      <p class="text-[11px] text-slate-400 mt-4">التوقيع: ............................</p>
+    </div>
+    <div>
+      <p class="font-bold text-xs">إشراف الوكيل العام</p>
+      <p class="text-xs font-bold mt-1 text-slate-800">عبدالقادر</p>
+      <p class="text-[11px] text-slate-400 mt-4">التوقيع: ............................</p>
+    </div>
+    <div>
+      <p class="font-bold text-xs">الشريك في المشروع</p>
+      <p class="text-xs font-bold mt-1 text-slate-800">أبوبكر مصطفى</p>
+      <p class="text-[11px] text-slate-400 mt-4">التوقيع: ............................</p>
+    </div>
+    <div>
+      <p class="font-bold text-xs">اعتماد المدير الإداري</p>
+      <p class="text-xs font-bold mt-1 text-slate-800">حسن مصطفى</p>
+      <p class="text-[11px] text-slate-400 mt-4">التوقيع: ............................</p>
+    </div>
+    <div>
+      <p class="font-bold text-xs">اعتماد المدير العام</p>
+      <p class="text-xs font-bold mt-1 text-slate-800">محمد مصطفى</p>
+      <p class="text-[11px] text-slate-400 mt-4">التوقيع: ............................</p>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- المساعد الذكي العائم للمزرعة (AI Agro-Assistant) -->
+  <!-- ======================================================== -->
+  <div class="no-print fixed bottom-6 left-6 z-50 mobile-fab-offset">
+    
+    <button onclick="document.getElementById('ai-chat-drawer').classList.toggle('hidden')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white p-3.5 rounded-full shadow-2xl flex items-center gap-2 font-bold text-xs transition transform hover:scale-105 active:scale-95" title="المستشار المالي والزراعي الذكي">
+      <i data-lucide="bot" class="w-5 h-5"></i>
+      <span class="hidden sm:inline">المستشار الذكي (AI)</span>
+    </button>
+
+    <div id="ai-chat-drawer" class="hidden absolute bottom-16 left-0 w-80 sm:w-96 glass-card rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col h-[480px]">
+      
+      <div class="p-3.5 bg-gradient-to-r from-emerald-800 to-emerald-700 text-white flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🤖</span>
+          <div>
+            <h4 class="font-bold text-xs">المساعد المالي والزراعي الذكي</h4>
+            <p class="text-[10px] text-emerald-200">مشروع أبناء مصطفى حسن (1,450 فدان)</p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('ai-chat-drawer').classList.add('hidden')" class="text-white/80 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div id="ai-chat-messages" class="flex-1 p-3.5 overflow-y-auto space-y-2 bg-slate-50 dark:bg-slate-900/60">
+        <div class="flex justify-start mb-2">
+          <div class="max-w-[90%] p-3 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-2xl rounded-bl-none border border-slate-200 dark:border-slate-700 text-xs leading-relaxed">
+            <p class="font-bold text-emerald-600 dark:text-emerald-400 text-[11px] mb-1">مرحباً بك!</p>
+            أنا جاهز للإجابة على جميع استفساراتك حول أرقام ومصروفات المزرعة، تكلفة الفدان، حركة الوقود، أنصبة الشركاء، أو مسحوبات البقالة.
+          </div>
+        </div>
+      </div>
+
+      <div class="p-2 bg-white dark:bg-slate-800/90 border-t border-slate-100 dark:border-slate-700/60 flex gap-1.5 overflow-x-auto no-scrollbar text-[10px]">
+        <button onclick="askAIQuestion('من هم أعضاء الإدارة؟')" class="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg whitespace-nowrap hover:bg-emerald-50 text-slate-700 dark:text-slate-300">
+          👔 أعضاء الإدارة
+        </button>
+        <button onclick="askAIQuestion('كم صرفنا على الذرة حتى الآن؟')" class="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg whitespace-nowrap hover:bg-emerald-50 text-slate-700 dark:text-slate-300">
+          🌾 تكلفة الذرة
+        </button>
+        <button onclick="askAIQuestion('كم برميل جاز متبقي بالمخزن؟')" class="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg whitespace-nowrap hover:bg-emerald-50 text-slate-700 dark:text-slate-300">
+          ⛽ رصيد الوقود
+        </button>
+      </div>
+
+      <div class="p-2.5 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 flex items-center gap-2">
+        <input type="text" id="ai-user-input" placeholder="اكتب سؤالك هنا..." class="flex-1 p-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
+        <button id="ai-send-btn" class="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- شريط التنقل السفلي للهواتف الذكية (Mobile Bottom Navigation) -->
+  <!-- ======================================================== -->
+  <nav id="mobile-bottom-nav" class="no-print md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/90 dark:border-slate-800/90 px-3 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.08)] safe-area-bottom">
+    
+    <!-- زر الرئيسية -->
+    <button onclick="switchSection('section-dashboard')" data-mobile-target="section-dashboard" class="mobile-nav-btn active flex flex-col items-center justify-center p-1 rounded-2xl transition">
+      <div class="w-8 h-8 flex items-center justify-center">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      </div>
+      <span class="text-[10px] font-black mt-0.5">الرئيسية</span>
+    </button>
+
+    <!-- زر المصروفات -->
+    <button onclick="switchSection('section-expenses')" data-mobile-target="section-expenses" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
+      <div class="w-8 h-8 flex items-center justify-center">
+        <i data-lucide="receipt" class="w-5 h-5"></i>
+      </div>
+      <span class="text-[10px] font-bold mt-0.5">المصروفات</span>
+    </button>
+
+    <!-- الزر المركزي البارز للإجراء السريع على الجوال (FAB) -->
+    <button onclick="toggleMobileQuickActions()" class="flex flex-col items-center justify-center -mt-6 bg-gradient-to-tr from-emerald-700 to-emerald-500 text-white w-13 h-13 p-3 rounded-full shadow-lg shadow-emerald-600/40 border-4 border-white dark:border-slate-900 transform active:scale-90 transition">
+      <i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i>
+    </button>
+
+    <!-- زر الحصاد -->
+    <button onclick="switchSection('section-harvest')" data-mobile-target="section-harvest" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
+      <div class="w-8 h-8 flex items-center justify-center">
+        <i data-lucide="wheat" class="w-5 h-5 text-amber-500"></i>
+      </div>
+      <span class="text-[10px] font-bold mt-0.5">الحصاد</span>
+    </button>
+
+    <!-- زر بقالة المشروع -->
+    <button onclick="switchSection('section-grocery')" data-mobile-target="section-grocery" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
+      <div class="w-8 h-8 flex items-center justify-center">
+        <i data-lucide="shopping-cart" class="w-5 h-5 text-amber-600"></i>
+      </div>
+      <span class="text-[10px] font-bold mt-0.5">البقالة</span>
+    </button>
+
+    <!-- زر القائمة الكاملة -->
+    <button onclick="toggleMobileMenuDrawer()" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
+      <div class="w-8 h-8 flex items-center justify-center">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </div>
+      <span class="text-[10px] font-bold mt-0.5">الأقسام</span>
+    </button>
+  </nav>
+
+  <!-- ======================================================== -->
+  <!-- ورقة الإجراءات السريعة للموبايل (Mobile Quick Actions Sheet) -->
+  <!-- ======================================================== -->
+  <div id="mobile-quick-actions-sheet" class="no-print hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col justify-end p-0">
+    <div class="bg-white dark:bg-slate-900 rounded-t-3xl p-5 border-t border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 animate-drawer-slide">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-sm font-bold">⚡</span>
+          <h3 class="text-sm font-black text-slate-900 dark:text-white">إجراءات المزرعة السريعة</h3>
+        </div>
+        <button onclick="toggleMobileQuickActions()" class="p-1 rounded-full text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 text-xs">
+        <button onclick="toggleMobileQuickActions(); openEditExpenseModal()" class="p-3.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-base">💳</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">إضافة مصروف</p>
+            <span class="text-[10px] text-slate-500">وقود، خيش، إعاشة، مبيد</span>
+          </div>
+        </button>
+
+        <button onclick="toggleMobileQuickActions(); openAddHarvestIntakeModal()" class="p-3.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 rounded-2xl border border-amber-200 dark:border-amber-800 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center text-base">🌾</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">دخولية حصاد</p>
+            <span class="text-[10px] text-slate-500">توثيق جوالات النمر</span>
+          </div>
+        </button>
+
+        <button onclick="toggleMobileQuickActions(); openAddGroceryTxModal()" class="p-3.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 rounded-2xl border border-amber-200 dark:border-amber-800 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-base">🛒</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">سحب بقالة</p>
+            <span class="text-[10px] text-slate-500">تسجيل آجل لعامل</span>
+          </div>
+        </button>
+
+        <button onclick="toggleMobileQuickActions(); openIssueFuelModal()" class="p-3.5 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 rounded-2xl border border-blue-200 dark:border-blue-800 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-base">⛽</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">صرف وقود</p>
+            <span class="text-[10px] text-slate-500">صرف جاز للسائقين</span>
+          </div>
+        </button>
+
+        <button onclick="toggleMobileQuickActions(); openAddCropSaleModal()" class="p-3.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 rounded-2xl border border-purple-200 dark:border-purple-800 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center text-base">💰</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">بيع محاصيل</p>
+            <span class="text-[10px] text-slate-500">عقد بيع ذرة أو تسالي</span>
+          </div>
+        </button>
+
+        <button onclick="toggleMobileQuickActions(); openAddMachineryMaintenanceModal()" class="p-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-2xl border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-slate-700 text-white flex items-center justify-center text-base">🚜</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">صيانة آلية</p>
+            <span class="text-[10px] text-slate-500">تغيير زيت وعمرة</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="pt-2">
+        <button onclick="toggleMobileQuickActions()" class="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-2xl font-bold text-xs text-slate-600 dark:text-slate-300">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- القائمة الجانبية الكاملة للموبايل (Mobile Full Menu Drawer) -->
+  <!-- ======================================================== -->
+  <div id="mobile-menu-drawer" class="no-print hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+    <div class="bg-white dark:bg-slate-900 w-80 max-w-[85vw] h-full shadow-2xl flex flex-col p-4 overflow-y-auto animate-drawer-slide border-l border-slate-200 dark:border-slate-800">
+      
+      <!-- رأس القائمة ومعلومات المزرعة -->
+      <div class="flex justify-between items-start pb-4 border-b border-slate-200 dark:border-slate-800 mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-700 to-emerald-500 flex items-center justify-center text-white font-black text-lg">🌱</div>
+          <div>
+            <h4 class="font-black text-xs text-slate-900 dark:text-white">مشروع أبناء مصطفى حسن</h4>
+            <p class="text-[10px] text-slate-400">القضارف - كسمور (1,450 فدان)</p>
+          </div>
+        </div>
+        <button onclick="toggleMobileMenuDrawer()" class="p-1 rounded-lg text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- بطاقة المستخدم الحالية -->
+      <div onclick="toggleMobileMenuDrawer(); openLoginModal()" class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between mb-4 cursor-pointer">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center">م</div>
+          <div>
+            <p class="text-xs font-bold text-slate-900 dark:text-white">محمد مصطفى (المدير العام)</p>
+            <span class="text-[10px] text-emerald-600 font-medium">تبديل المستخدم أو تسجيل الخروج</span>
+          </div>
+        </div>
+        <i data-lucide="chevron-left" class="w-4 h-4 text-slate-400"></i>
+      </div>
+
+      <!-- قائمة الأقسام الـ 12 الكاملة -->
+      <div class="space-y-1.5 flex-1 text-xs">
+        <p class="text-[10px] font-bold text-slate-400 px-2 uppercase tracking-wider mb-1">أقسام المنظومة:</p>
+        
+        <button onclick="switchSection('section-dashboard')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></span>
+          <span>لوحة القيادة والمخطط</span>
+        </button>
+
+        <button onclick="switchSection('section-expenses')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 flex items-center justify-center"><i data-lucide="receipt" class="w-4 h-4"></i></span>
+          <span>المصروفات وتدقيق التكاليف</span>
+        </button>
+
+        <button onclick="switchSection('section-fuel')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 flex items-center justify-center"><i data-lucide="fuel" class="w-4 h-4"></i></span>
+          <span>حركات الوقود والمخزن</span>
+        </button>
+
+        <button onclick="switchSection('section-machinery')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 flex items-center justify-center"><i data-lucide="wrench" class="w-4 h-4"></i></span>
+          <span>الآليات والصيانة وكفاءة الوقود</span>
+        </button>
+
+        <button onclick="switchSection('section-labor')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-700 flex items-center justify-center"><i data-lucide="users" class="w-4 h-4"></i></span>
+          <span>مسير العمالة وسندات المخالصة</span>
+        </button>
+
+        <button onclick="switchSection('section-grocery')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 flex items-center justify-center"><i data-lucide="shopping-cart" class="w-4 h-4"></i></span>
+          <span>بقالة المشروع والمسحوبات</span>
+        </button>
+
+        <button onclick="switchSection('section-inventory')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 flex items-center justify-center"><i data-lucide="boxes" class="w-4 h-4"></i></span>
+          <span>المخزون الزراعي (التقاوي والخيش)</span>
+        </button>
+
+        <button onclick="switchSection('section-harvest')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 flex items-center justify-center"><i data-lucide="wheat" class="w-4 h-4"></i></span>
+          <span>الحصاد والمبيعات والزكاة</span>
+        </button>
+
+        <button onclick="switchSection('section-partners')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 flex items-center justify-center"><i data-lucide="pie-chart" class="w-4 h-4"></i></span>
+          <span>الشركاء والأنصبة وضخ رأس المال</span>
+        </button>
+
+        <button onclick="switchSection('section-forecasts')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-teal-100 dark:bg-teal-950 text-teal-700 flex items-center justify-center"><i data-lucide="trending-up" class="w-4 h-4"></i></span>
+          <span>محاكي الأرباح واحتياطي 2027 (500M)</span>
+        </button>
+
+        <button onclick="switchSection('section-audit-logs')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 flex items-center justify-center"><i data-lucide="history" class="w-4 h-4"></i></span>
+          <span>سجل التعديلات (Audit Log)</span>
+        </button>
+
+        <button onclick="switchSection('section-users')" class="w-full p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-right flex items-center gap-2.5 font-bold text-slate-700 dark:text-slate-200 transition">
+          <span class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 flex items-center justify-center"><i data-lucide="shield-check" class="w-4 h-4"></i></span>
+          <span>فريق الإدارة والصلاحيات</span>
+        </button>
+      </div>
+
+      <!-- أزرار أدوات إضافية -->
+      <div class="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+        <button onclick="toggleMobileMenuDrawer(); openExecutiveSeasonReportModal()" class="w-full py-2.5 bg-gradient-to-r from-emerald-800 to-teal-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm">
+          <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+          <span>التقرير التنفيذي الشامل للموسم</span>
+        </button>
+
+        <button onclick="toggleMobileMenuDrawer(); openGedarefGalleryModal()" class="w-full py-2 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2">
+          <span>📸 ألبوم صور القضارف (7 مشاهد)</span>
+        </button>
+
+        <button onclick="toggleMobileMenuDrawer(); openDatabaseManagerModal()" class="w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          <span>إدارة قاعدة البيانات والنسخ</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- النافذة المنبثقة العامة (Modal Overlay) -->
+  <div id="modal-overlay" class="no-print hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="modal-content-container" class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transform transition-all"></div>
+  </div>
+
+  <footer class="no-print border-t border-slate-200 dark:border-slate-800 py-4 text-center text-xs text-slate-400 bg-white/50 dark:bg-slate-900/50">
+    <p>مشروع أبناء مصطفى حسن الزراعي (القضارف - كسمور الشرقي) • نظام الإدارة المالية والتشغيلية 2026</p>
+  </footer>
+
+  <script src="../database/database.js"></script>`r`n  <script src="../database/api.js"></script>`r`n  <script src="js/images_data.js"></script>`r`n  <script src="js/app.js"></script>
+</body>
+</html>
