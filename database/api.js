@@ -250,11 +250,21 @@
           roleTitle: u.role_title || u.roleTitle || 'عضو في الإدارة',
           phone: u.phone
         })),
-          partners: (partnersRes.data || []).map(p => ({
-            id: p.id, name: p.name, fullName: p.full_name,
-            shares: p.shares, totalShares: p.total_shares,
-            paidCapital: Number(p.paid_capital || 0), role: p.role, notes: p.notes
-          })),
+          partners: (partnersRes.data || []).map(p => {
+            const nonRefMatch = (p.notes || '').match(/\[غير مسترد:\s*([\d\.]+)\]/);
+            const refMatch = (p.notes || '').match(/\[مسترد:\s*([\d\.]+)\]/);
+            const paid = Number(p.paid_capital || 0);
+            const nonRef = nonRefMatch ? parseFloat(nonRefMatch[1]) : 0;
+            const ref = refMatch ? parseFloat(refMatch[1]) : (paid > 0 ? paid - nonRef : (p.shares === 2 ? 46153846.15 : 23076923.08));
+            return {
+              id: p.id, name: p.name, fullName: p.full_name,
+              shares: p.shares, totalShares: p.total_shares,
+              paidCapital: nonRef + ref,
+              nonRefundableCapital: nonRef,
+              refundableCapital: ref,
+              role: p.role, notes: p.notes
+            };
+          }),
           capitalInjections: (capitalInjRes.data || []).map(ci => ({
             id: ci.id, partnerId: ci.partner_id, partnerName: ci.partner_name,
             date: ci.date, amount: Number(ci.amount || 0), paymentMethod: ci.payment_method,
@@ -428,6 +438,70 @@
       return await this.client.from('crop_sales').upsert(row);
     }
 
+    
+    async upsertCapitalInjection(inj) {
+      if (!this.client) return null;
+      try {
+        const typeTag = inj.capitalType === 'non_refundable' ? '[نوع: غير مسترد]' : '[نوع: مسترد]';
+        let notes = (inj.notes || '').replace(/\[نوع:\s*(غير مسترد|مسترد)\]/g, '').trim();
+        notes = notes ? `${notes} ${typeTag}` : typeTag;
+
+        const row = {
+          id: inj.id,
+          partner_id: inj.partnerId,
+          partner_name: inj.partnerName,
+          date: inj.date,
+          amount: parseFloat(inj.amount) || 0,
+          payment_method: inj.method || inj.paymentMethod || 'تحويل بنكك',
+          purpose: inj.purpose || 'ضخ رأس مال للمشروع',
+          logged_by: inj.loggedBy || 'المدير المالي',
+          notes: notes
+        };
+        const { data, error } = await this.client.from('capital_injections').upsert(row);
+        if (error) console.warn('Supabase upsert capital injection warning:', error);
+        return data;
+      } catch(err) {
+        console.warn('upsertCapitalInjection error:', err);
+        return null;
+      }
+    },
+
+    async deleteCapitalInjection(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('capital_injections').delete().eq('id', id);
+        if (error) console.warn('Supabase delete capital injection warning:', error);
+        return !error;
+      } catch(err) {
+        console.warn('deleteCapitalInjection error:', err);
+        return false;
+      }
+    },
+
+    async updatePartner(p) {
+      if (!this.client) return null;
+      try {
+        const typeTag = `[غير مسترد: ${p.nonRefundableCapital || 0}] [مسترد: ${p.refundableCapital || 0}]`;
+        let notes = (p.notes || '').replace(/\[غير مسترد:.*?\]/g, '').replace(/\[مسترد:.*?\]/g, '').trim();
+        notes = notes ? `${notes} ${typeTag}` : typeTag;
+
+        const row = {
+          name: p.name,
+          full_name: p.fullName || p.name,
+          shares: parseFloat(p.shares) || 1,
+          paid_capital: parseFloat(p.paidCapital) || 0,
+          role: p.role,
+          notes: notes
+        };
+        const { data, error } = await this.client.from('partners').update(row).eq('id', p.id);
+        if (error) console.warn('Supabase update partner warning:', error);
+        return data;
+      } catch(err) {
+        console.warn('updatePartner error:', err);
+        return null;
+      }
+    },
+  
     async insertFuelTx(f) {
       if (!this.client) return null;
       const row = {
