@@ -15180,17 +15180,16 @@ function updateCloudStatusIndicator(isConnected, message) {
     btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm';
   }
 }
-}
 
 function openSupabaseCloudModal() {
   const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
-  let currentUrl = '';
-  let currentKey = '';
+  let currentUrl = 'https://iuavmonqyvokldpvdqtm.supabase.co';
+  let currentKey = 'sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l';
   if (rawCfg) {
     try {
       const parsed = JSON.parse(rawCfg);
-      currentUrl = parsed.url || '';
-      currentKey = parsed.anonKey || '';
+      if (parsed.url) currentUrl = parsed.url;
+      if (parsed.anonKey) currentKey = parsed.anonKey;
     } catch (e) {}
   }
 
@@ -15228,12 +15227,12 @@ function openSupabaseCloudModal() {
       <div class="space-y-4 text-xs">
         <div>
           <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">رابط مشروع Supabase (Project URL):</label>
-          <input type="text" id="supabase-url-input" value="${currentUrl}" value="https://iuavmonqyvokldpvdqtm.supabase.co" placeholder="https://iuavmonqyvokldpvdqtm.supabase.co" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
+          <input type="text" id="supabase-url-input" value="${currentUrl}" placeholder="${currentUrl}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
         </div>
 
         <div>
           <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">المفتاح العام (Supabase Anon Key):</label>
-          <input type="password" id="supabase-key-input" value="${currentKey}" value="sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l" placeholder="sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
+          <input type="text" id="supabase-key-input" value="${currentKey}" placeholder="${currentKey}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
         </div>
 
         <div class="flex gap-2 pt-2">
