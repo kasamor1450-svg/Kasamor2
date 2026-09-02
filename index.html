@@ -721,8 +721,14 @@ table tbody tr:hover {
             <span>قاعدة البيانات</span>
           </button>
 
+          
+          <!-- زر تغيير اسم المستخدم وكلمة المرور البارز في الشريط العلوي -->
+          <button onclick="openChangePasswordModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-xl text-xs font-black transition shadow-sm active:scale-95 flex-shrink-0" title="تغيير اسم المستخدم وكلمة المرور الخاصة بك">
+            <span>🔐 تغيير كلمة المرور</span>
+          </button>
+  
           <!-- بطاقة المستخدم الحالي (الإدارة) -->
-          <div onclick="openLoginModal()" class="cursor-pointer flex items-center gap-1.5 p-1 pr-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition border border-slate-200 dark:border-slate-700 text-xs" title="تبديل المستخدم">
+          <div onclick="openUserProfileMenuModal()" class="cursor-pointer flex items-center gap-1.5 p-1 pr-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition border border-slate-200 dark:border-slate-700 text-xs" title="تبديل المستخدم">
             <div id="current-user-avatar" class="w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-[10px] flex items-center justify-center shadow-sm">
               م
             </div>
@@ -9628,7 +9634,12 @@ function openAddInventoryStockModal(preselectedId = null) {
           <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">إلغاء</button>
           <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold">تأكيد التوريد وإضافة للمخزن</button>
         </div>
-      </form>
+        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+            <button type="button" onclick="closeModal(); openChangePasswordModal();" class="text-amber-700 dark:text-amber-400 font-bold hover:underline text-xs flex items-center justify-center gap-1.5 mx-auto">
+              <span>🔐 هل تريد تعديل اسم المستخدم أو كلمة المرور؟ اضغط هنا</span>
+            </button>
+          </div>
+        </form>
     </div>
   `;
   openModal(html);
@@ -12205,6 +12216,83 @@ function generateSmartAnswer(q) {
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(checkAuthenticationState, 100);
     });
+  }
+  
+  
+  // =========================================================================
+  // نافذة الملف الشخصي للمستخدم وخيارات الحساب
+  // =========================================================================
+
+  function openUserProfileMenuModal() {
+    const user = currentUser || (state.users ? state.users[0] : DEFAULT_DATA.users[0]);
+    const modalHTML = `
+      <div class="p-6 text-right">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-700 to-emerald-500 text-white flex items-center justify-center font-black text-xl shadow-md">
+              ${user.name.charAt(0)}
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">${user.name}</h3>
+              <p class="text-xs text-emerald-700 dark:text-emerald-400 font-bold">${user.roleTitle}</p>
+              <p class="text-[10px] text-slate-400 font-mono mt-0.5">اسم المستخدم: @${user.username}</p>
+            </div>
+          </div>
+          <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+        </div>
+
+        <div class="space-y-2.5 text-xs">
+          <!-- 1. تغيير اسم المستخدم وكلمة المرور -->
+          <button onclick="closeModal(); openChangePasswordModal('${user.id}');" class="w-full p-3.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 rounded-2xl flex items-center justify-between font-bold transition shadow-sm active:scale-95">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">🔐</span>
+              <div class="text-right">
+                <p class="font-black text-sm">تغيير اسم المستخدم وكلمة المرور</p>
+                <p class="text-[10px] text-amber-700 dark:text-amber-300">تحديث كلمة السر لحسابك وحفظها في السحابة</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+
+          <!-- 2. إدارة حسابات الفريق الخمسة (للمدير) -->
+          <button onclick="closeModal(); switchSection('users');" class="w-full p-3.5 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl flex items-center justify-between font-bold transition border border-slate-200 dark:border-slate-700 shadow-sm active:scale-95">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">👥</span>
+              <div class="text-right">
+                <p class="font-black text-sm">إدارة كافة حسابات الفريق (5 مستخدمين)</p>
+                <p class="text-[10px] text-slate-400">تعديل كلمات مرور وصلاحيات باقي الأعضاء</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+
+          <!-- 3. تبديل الحساب -->
+          <button onclick="closeModal(); openLoginModal();" class="w-full p-3 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl flex items-center justify-between font-bold transition border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-3">
+              <span class="text-base">🔄</span>
+              <div class="text-right">
+                <p class="font-bold text-xs">تبديل الحساب</p>
+                <p class="text-[10px] text-slate-400">الدخول بحساب مستخدم آخر</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+
+          <!-- 4. تسجيل الخروج وقفل التطبيق -->
+          <button onclick="closeModal(); handleLogout();" class="w-full p-3.5 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200 rounded-2xl flex items-center justify-between font-bold transition shadow-sm active:scale-95">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">🚪</span>
+              <div class="text-right">
+                <p class="font-black text-sm">تسجيل الخروج وقفل التطبيق</p>
+                <p class="text-[10px] text-rose-600 dark:text-rose-400">قفل المنظومة ومطالبة كلمة المرور للدخول</p>
+              </div>
+            </div>
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    openModal(modalHTML);
   }
   
   function openLoginModal() {
