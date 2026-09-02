@@ -34,6 +34,9 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Supabase JS Client for Realtime Cloud Database -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- Custom Modern CSS -->
   <style>
 /* ========================================================
@@ -573,6 +576,12 @@ table tbody tr:hover {
         <!-- أزرار الإجراءات السريعة والتحكم والمستخدم النشط -->
         <div class="flex items-center gap-1.5">
           
+          <!-- زر ومؤشر الربط السحابي المشترك Supabase -->
+          <button id="cloud-sync-badge-btn" onclick="openSupabaseCloudModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm" title="الربط السحابي المشترك (Supabase PostgreSQL)">
+            <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+            <span id="cloud-status-text">☁️ السحابة</span>
+          </button>
+
           <!-- زر إدارة قاعدة البيانات والنسخ الاحتياطي البارز والدائم -->
           <button onclick="openDatabaseManagerModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-sm" title="إدارة قاعدة البيانات والنسخ الاحتياطي">
             <i data-lucide="database" class="w-3.5 h-3.5"></i>
@@ -2512,102 +2521,385 @@ table tbody tr:hover {
 }));
 /**
  * =========================================================================
- * AgroApp API Client & Cloud Sync Adapter
+ * AgroApp Cloud API & Supabase Client Adapter
  * Ù…Ø´Ø±ÙˆØ¹ Ø£Ø¨Ù†Ø§Ø¡ Ù…ØµØ·ÙÙ‰ Ø­Ø³Ù† Ø§Ù„Ø²Ø±Ø§Ø¹ÙŠ - Ø§Ù„Ù‚Ø¶Ø§Ø±Ù
- * Ø·Ø¨Ù‚Ø© Ø§Ù„Ø±Ø¨Ø· Ù…Ø¹ Ø£ÙŠ Ø®Ø§Ø¯Ù… Ø³Ø­Ø§Ø¨ÙŠ Ø£Ùˆ ÙˆØ§Ø¬Ù‡Ø© Ø¨Ø±Ù…Ø¬Ø© ØªØ·Ø¨ÙŠÙ‚Ø§Øª Ù…Ø³ØªÙ‚Ø¨Ù„ÙŠØ§Ù‹
+ * Ù…Ø­Ø±Ùƒ Ø§Ù„Ø±Ø¨Ø· Ø§Ù„Ø³Ø­Ø§Ø¨ÙŠ Ø§Ù„Ù…Ø¨Ø§Ø´Ø± Ù…Ø¹ Supabase (PostgreSQL + Realtime + Storage)
  * =========================================================================
  */
 
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['./database'], factory);
+    define([], factory);
   } else if (typeof module === 'object' && module.exports) {
-    module.exports = factory(require('./database'));
+    module.exports = factory();
   } else {
-    root.AgroAPI = factory(root.AgroDatabase);
+    root.AgroAPI = factory();
   }
-}(typeof self !== 'undefined' ? self : this, function (db) {
+}(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  class AgroApiClient {
-    constructor(config = {}) {
-      this.baseUrl = config.baseUrl || '/api/v1';
-      this.mode = config.mode || 'offline-first'; // 'offline-first' | 'online-only' | 'hybrid'
-      this.db = db || (typeof window !== 'undefined' ? window.AgroDatabase : null);
+  const STORAGE_CONFIG_KEY = 'AGRO_SUPABASE_CLOUD_CONFIG';
+
+  class SupabaseCloudAdapter {
+    constructor() {
+      this.client = null;
+      this.url = '';
+      this.anonKey = '';
+      this.isConnected = false;
+      this.realtimeChannel = null;
+      this.listeners = [];
+      this.loadConfig();
     }
 
     /**
-     * Generic fetch wrapper
+     * Load stored credentials from LocalStorage
      */
-    async request(endpoint, options = {}) {
-      if (this.mode === 'offline-first') {
-        return this.handleOfflineRequest(endpoint, options);
+    loadConfig() {
+      try {
+        const raw = localStorage.getItem(STORAGE_CONFIG_KEY);
+        if (raw) {
+          const cfg = JSON.parse(raw);
+          if (cfg && cfg.url && cfg.anonKey) {
+            this.url = cfg.url;
+            this.anonKey = cfg.anonKey;
+            this.initClient(this.url, this.anonKey);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load Supabase config:', e);
+      }
+    }
+
+    /**
+     * Save credentials and initialize
+     */
+    async saveConfig(url, anonKey) {
+      this.url = (url || '').trim();
+      this.anonKey = (anonKey || '').trim();
+      localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify({ url: this.url, anonKey: this.anonKey }));
+      return await this.initClient(this.url, this.anonKey);
+    }
+
+    /**
+     * Clear Supabase config
+     */
+    clearConfig() {
+      this.url = '';
+      this.anonKey = '';
+      this.client = null;
+      this.isConnected = false;
+      localStorage.removeItem(STORAGE_CONFIG_KEY);
+      this.notifyStatus(false, 'ØªÙ… ÙÙƒ Ø§Ù„Ø§Ø±ØªØ¨Ø§Ø· Ø§Ù„Ø³Ø­Ø§Ø¨ÙŠ');
+    }
+
+    /**
+     * Initialize Supabase JS Client
+     */
+    async initClient(url, anonKey) {
+      if (!url || !anonKey) {
+        this.isConnected = false;
+        return { success: false, error: 'Ø§Ù„Ø±Ø¬Ø§Ø¡ Ø¥Ø¯Ø®Ø§Ù„ Ø§Ù„Ø±Ø§Ø¨Ø· ÙˆØ§Ù„Ù…ÙØªØ§Ø­' };
       }
 
       try {
-        const response = await fetch(`${this.baseUrl}${endpoint}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-          },
-          ...options
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        return await response.json();
+        if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
+          this.client = window.supabase.createClient(url, anonKey);
+          // Test query
+          const { data, error } = await this.client.from('farm_info').select('id, name').limit(1);
+          if (error && error.code !== 'PGRST116') {
+            console.warn('Supabase test query warning:', error);
+          }
+          this.isConnected = true;
+          this.setupRealtimeSubscription();
+          this.notifyStatus(true, 'Ù…ØªØµÙ„ Ø³Ø­Ø§Ø¨ÙŠØ§Ù‹ Ù…Ø¹ Supabase PostgreSQL');
+          return { success: true, message: 'ØªÙ… Ø§Ù„Ø§ØªØµØ§Ù„ Ø§Ù„Ø³Ø­Ø§Ø¨ÙŠ Ø¨Ù†Ø¬Ø§Ø­!' };
+        } else {
+          return { success: false, error: 'Ù…ÙƒØªØ¨Ø© Supabase JS ØºÙŠØ± Ù…Ø­Ù…Ù„Ø©' };
+        }
       } catch (err) {
-        console.warn(`Cloud API request failed, falling back to local database:`, err);
-        return this.handleOfflineRequest(endpoint, options);
+        this.isConnected = false;
+        console.error('Supabase connection failed:', err);
+        return { success: false, error: err.message || 'ÙØ´Ù„ Ø§Ù„Ø§ØªØµØ§Ù„ Ø¨Ù€ Supabase' };
       }
     }
 
     /**
-     * Handle requests against local Database Engine
+     * Realtime Listeners for changes made by other 4 users
      */
-    handleOfflineRequest(endpoint, options) {
-      if (!this.db) return { success: false, error: 'Database not available' };
-      
-      const cleanEndpoint = endpoint.replace(/^\//, '');
-      const parts = cleanEndpoint.split('/');
-      const table = parts[0];
-      const id = parts[1];
+    setupRealtimeSubscription() {
+      if (!this.client || this.realtimeChannel) return;
 
-      if (options.method === 'POST') {
-        const record = JSON.parse(options.body || '{}');
-        const inserted = this.db.insert(table, record);
-        return { success: true, data: inserted };
-      } else if (options.method === 'PUT' || options.method === 'PATCH') {
-        const updateData = JSON.parse(options.body || '{}');
-        const updated = this.db.update(table, id, updateData);
-        return { success: !!updated, data: updated };
-      } else if (options.method === 'DELETE') {
-        const deleted = this.db.delete(table, id);
-        return { success: deleted };
-      } else {
-        // GET
-        if (id) {
-          const item = this.db.findById(table, id);
-          return { success: !!item, data: item };
-        } else {
-          const data = this.db.get(table);
-          return { success: true, data: data };
-        }
+      try {
+        this.realtimeChannel = this.client
+          .channel('agro-project-realtime')
+          .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
+            console.log('âš¡ Realtime Cloud Event:', payload);
+            this.notifyChange(payload);
+          })
+          .subscribe((status) => {
+            console.log('âš¡ Realtime Subscription Status:', status);
+          });
+      } catch (e) {
+        console.warn('Could not setup realtime channel:', e);
       }
     }
 
-    // High level domain methods
-    async getExpenses() { return this.request('/expenses'); }
-    async addExpense(exp) { return this.request('/expenses', { method: 'POST', body: JSON.stringify(exp) }); }
-    async getHarvest() { return this.request('/harvestIntakes'); }
-    async getSales() { return this.request('/cropSales'); }
-    async getPartners() { return this.request('/partners'); }
-    async getMachinery() { return this.request('/machinery'); }
-    async getLabor() { return this.request('/labor'); }
-    async getInventory() { return this.request('/inventory'); }
-    async getPlots() { return this.request('/plots'); }
-    async getFuel() { return this.request('/fuelTransactions'); }
+    /**
+     * Subscribe to Realtime Data Changes
+     */
+    onDataChange(callback) {
+      if (typeof callback === 'function') {
+        this.listeners.push(callback);
+      }
+      return () => {
+        this.listeners = this.listeners.filter(fn => fn !== callback);
+      };
+    }
+
+    notifyChange(payload) {
+      this.listeners.forEach(fn => {
+        try { fn(payload); } catch (e) { console.error(e); }
+      });
+    }
+
+    notifyStatus(status, message) {
+      if (typeof window !== 'undefined' && window.updateCloudStatusIndicator) {
+        window.updateCloudStatusIndicator(status, message);
+      }
+    }
+
+    /**
+     * Upload an invoice photo to Supabase Storage bucket 'invoices'
+     */
+    async uploadInvoicePhoto(file, expenseId) {
+      if (!this.client) throw new Error('Supabase ØºÙŠØ± Ù…ØªØµÙ„');
+      const ext = file.name ? file.name.split('.').pop() : 'jpg';
+      const fileName = `receipt-${expenseId || Date.now()}-${Math.floor(Math.random()*1000)}.${ext}`;
+      const filePath = `expenses/${fileName}`;
+
+      const { data, error } = await this.client.storage
+        .from('invoices')
+        .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+      if (error) throw error;
+
+      const { data: urlData } = this.client.storage.from('invoices').getPublicUrl(filePath);
+      return urlData.publicUrl;
+    }
+
+    /**
+     * Fetch complete snapshot from PostgreSQL
+     */
+    async fetchCloudState() {
+      if (!this.client) return null;
+      try {
+        const [
+          farmInfoRes, usersRes, partnersRes, capitalInjRes,
+          plotsRes, plotOpsRes, fuelTxRes, inventoryRes, inventoryTxRes,
+          harvestRes, salesRes, machineryRes, laborRes,
+          expensesRes, auditLogsRes
+        ] = await Promise.all([
+          this.client.from('farm_info').select('*').limit(1),
+          this.client.from('users').select('*'),
+          this.client.from('partners').select('*'),
+          this.client.from('capital_injections').select('*'),
+          this.client.from('plots').select('*'),
+          this.client.from('plot_operations').select('*'),
+          this.client.from('fuel_transactions').select('*').order('date', { ascending: false }),
+          this.client.from('inventory_items').select('*'),
+          this.client.from('inventory_transactions').select('*').order('date', { ascending: false }),
+          this.client.from('harvest_intakes').select('*').order('date', { ascending: false }),
+          this.client.from('crop_sales').select('*').order('date', { ascending: false }),
+          this.client.from('machinery').select('*'),
+          this.client.from('labor').select('*'),
+          this.client.from('expenses').select('*').order('date', { ascending: false }),
+          this.client.from('audit_logs').select('*').order('timestamp', { ascending: false }).limit(200)
+        ]);
+
+        const rawPlots = plotsRes.data || [];
+        const rawOps = plotOpsRes.data || [];
+
+        return {
+          farmInfo: (farmInfoRes.data && farmInfoRes.data[0]) ? {
+            name: farmInfoRes.data[0].name,
+            location: farmInfoRes.data[0].location,
+            totalArea: Number(farmInfoRes.data[0].total_area_feddan || 1450),
+            seasonStart: farmInfoRes.data[0].season_start,
+            seasonDurationMonths: farmInfoRes.data[0].season_duration_months || 6,
+            currency: farmInfoRes.data[0].currency || 'جنيه سوداني'
+          } : undefined,
+          users: usersRes.data || [],
+          partners: (partnersRes.data || []).map(p => ({
+            id: p.id, name: p.name, fullName: p.full_name,
+            shares: p.shares, totalShares: p.total_shares,
+            paidCapital: Number(p.paid_capital || 0), role: p.role, notes: p.notes
+          })),
+          capitalInjections: (capitalInjRes.data || []).map(ci => ({
+            id: ci.id, partnerId: ci.partner_id, partnerName: ci.partner_name,
+            date: ci.date, amount: Number(ci.amount || 0), paymentMethod: ci.payment_method,
+            purpose: ci.purpose, loggedBy: ci.logged_by, notes: ci.notes
+          })),
+          plots: rawPlots.map(pl => {
+            const ops = rawOps
+              .filter(op => op.plot_id === pl.id)
+              .map(op => ({
+                id: op.id,
+                type: op.type,
+                date: op.date,
+                status: op.status,
+                driver: op.driver,
+                fuelBarrels: Number(op.fuel_barrels || 0),
+                createdBy: op.created_by,
+                notes: op.notes
+              }));
+            return {
+              id: pl.id,
+              name: pl.name,
+              area: Number(pl.area_feddan || 0),
+              areaFeddan: Number(pl.area_feddan || 0),
+              crop: pl.crop,
+              targetSowingDate: pl.target_sowing_date,
+              prepFeddans: Number(pl.prep_feddans || 0),
+              plantedFeddans: Number(pl.planted_feddans || 0),
+              status: pl.status || 'active',
+              operations: ops
+            };
+          }),
+          fuelTransactions: (fuelTxRes.data || []).map(f => ({
+            id: f.id, date: f.date, type: f.type, quantity: Number(f.quantity || 0),
+            unit: f.unit || 'برميل', driver: f.driver, plot: f.plot,
+            operationName: f.operation_name, op: f.operation_name,
+            loggedBy: f.logged_by, notes: f.notes
+          })),
+          inventory: (inventoryRes.data || []).map(i => ({
+            id: i.id, name: i.name, category: i.category,
+            purchasedQty: Number(i.purchased_qty || 0),
+            usedQty: Number(i.used_qty || 0),
+            remainingQty: Number(i.remaining_qty || 0),
+            unit: i.unit, unitPrice: Number(i.unit_price || 0),
+            reorderLevel: Number(i.reorder_level || 0)
+          })),
+          inventoryTransactions: (inventoryTxRes.data || []).map(itx => ({
+            id: itx.id, date: itx.date, itemId: itx.item_id, itemName: itx.item_name,
+            category: itx.category, type: itx.type, quantity: Number(itx.quantity || 0),
+            unit: itx.unit, unitPrice: Number(itx.unit_price || 0), totalCost: Number(itx.total_cost || 0),
+            plot: itx.plot, crop: itx.crop, receiver: itx.receiver, loggedBy: itx.logged_by,
+            notes: itx.notes, saleId: itx.sale_id
+          })),
+          harvestIntakes: (harvestRes.data || []).map(h => ({
+            id: h.id, date: h.date, plot: h.plot, crop: h.crop,
+            bags: Number(h.bags || 0), weightTons: Number(h.weight_tons || 0),
+            storageLocation: h.storage_location, supervisor: h.supervisor,
+            qualityGrade: h.quality_grade, notes: h.notes
+          })),
+          cropSales: (salesRes.data || []).map(s => ({
+            id: s.id, date: s.date, buyerName: s.buyer_name, crop: s.crop,
+            bags: Number(s.bags || 0), pricePerBag: Number(s.price_per_bag || 0),
+            totalAmount: Number(s.total_amount || 0), paidAmount: Number(s.paid_amount || 0),
+            remainingAmount: Number(s.remaining_amount || 0), paymentMethod: s.payment_method,
+            deliveryLocation: s.delivery_location, status: s.status,
+            loggedBy: s.logged_by, notes: s.notes
+          })),
+          machinery: (machineryRes.data || []).map(m => ({
+            id: m.id, name: m.name, type: m.type, plate: m.plate, driver: m.driver,
+            status: m.status, hoursOperated: Number(m.hours_operated || 0),
+            oilChangeDueHours: Number(m.oil_change_due_hours || 0), fuelTankCapacity: Number(m.fuel_tank_capacity || 0),
+            feddanDone: Number(m.feddan_done || 0), fuelUsedBarrels: Number(m.fuel_used_barrels || 0)
+          })),
+          labor: (laborRes.data || []).map(l => ({
+            id: l.id, name: l.name, role: l.role, workerType: l.worker_type,
+            startDate: l.start_date, endDate: l.end_date, monthlySalary: Number(l.monthly_salary || 0),
+            daysWorked: Number(l.days_worked || 0), monthsWorked: Number(l.months_worked || 0),
+            deductionsAmount: Number(l.deductions_amount || 0), overtime: Number(l.overtime || 0),
+            totalDue: Number(l.total_due || 0), totalPaid: Number(l.total_paid || 0),
+            status: l.status, task: l.task, plot: l.plot, crop: l.crop,
+            areaFeddan: Number(l.area_feddan || 0), lastUpdatedBy: l.last_updated_by
+          })),
+          expenses: (expensesRes.data || []).map(e => ({
+            id: e.id, date: e.date, category: e.category, amount: Number(e.amount || 0),
+            plot: e.plot, crop: e.crop, op: e.op || e.notes, isUnderReview: !!e.is_under_review,
+            createdBy: e.created_by, modifiedBy: e.modified_by, receiptPhotoUrl: e.receipt_photo_url, notes: e.notes
+          })),
+          auditLogs: (auditLogsRes.data || []).map(a => ({
+            id: a.id, timestamp: a.timestamp, action: a.action, details: a.details,
+            section: a.section, userName: a.user_name
+          }))
+        };
+      } catch (err) {
+        console.error('Failed to fetch snapshot from Supabase:', err);
+        return null;
+      }
+    }
+
+    /**
+     * High-level CRUD operations against Supabase
+     */
+    async insertExpense(exp) {
+      if (!this.client) return null;
+      const row = {
+        id: exp.id, date: exp.date, category: exp.category, amount: exp.amount,
+        plot: exp.plot, crop: exp.crop, op: exp.op || exp.notes, is_under_review: !!exp.isUnderReview,
+        created_by: exp.createdBy, modified_by: exp.modifiedBy || null,
+        notes: exp.notes, receipt_photo_url: exp.receiptPhotoUrl || null
+      };
+      const { data, error } = await this.client.from('expenses').upsert(row).select().single();
+      if (error) console.warn('Supabase insert expense warning:', error);
+      return data;
+    }
+
+    async updateExpense(id, exp) {
+      if (!this.client) return null;
+      const row = {
+        date: exp.date, category: exp.category, amount: exp.amount,
+        plot: exp.plot, crop: exp.crop, op: exp.op || exp.notes, is_under_review: !!exp.isUnderReview,
+        modified_by: exp.modifiedBy, notes: exp.notes, receipt_photo_url: exp.receiptPhotoUrl || null
+      };
+      const { data, error } = await this.client.from('expenses').update(row).eq('id', id);
+      if (error) console.warn('Supabase update expense warning:', error);
+      return data;
+    }
+
+    async deleteExpense(id) {
+      if (!this.client) return null;
+      const { data, error } = await this.client.from('expenses').delete().eq('id', id);
+      if (error) console.warn('Supabase delete expense warning:', error);
+      return !error;
+    }
+
+    async insertHarvest(h) {
+      if (!this.client) return null;
+      const row = {
+        id: h.id, date: h.date, plot: h.plot, crop: h.crop, bags: h.bags,
+        weight_tons: h.weightTons, storage_location: h.storageLocation,
+        supervisor: h.supervisor, quality_grade: h.qualityGrade, notes: h.notes
+      };
+      return await this.client.from('harvest_intakes').upsert(row);
+    }
+
+    async insertSale(s) {
+      if (!this.client) return null;
+      const row = {
+        id: s.id, date: s.date, buyer_name: s.buyerName, crop: s.crop,
+        bags: s.bags, price_per_bag: s.pricePerBag, total_amount: s.totalAmount,
+        paid_amount: s.paidAmount, remaining_amount: s.remainingAmount,
+        payment_method: s.paymentMethod, delivery_location: s.deliveryLocation,
+        status: s.status, logged_by: s.loggedBy, notes: s.notes
+      };
+      return await this.client.from('crop_sales').upsert(row);
+    }
+
+    async insertFuelTx(f) {
+      if (!this.client) return null;
+      const row = {
+        id: f.id, date: f.date, type: f.type, quantity: f.quantity,
+        unit: f.unit || 'برميل', driver: f.driver, plot: f.plot,
+        operation_name: f.operationName || f.op, logged_by: f.loggedBy, notes: f.notes
+      };
+      return await this.client.from('fuel_transactions').upsert(row);
+    }
   }
 
-  return new AgroApiClient();
+  return new SupabaseCloudAdapter();
 }));
 // ØµÙˆØ± Ù…Ø´Ø§Ø±ÙŠØ¹ Ø§Ù„Ù‚Ø¶Ø§Ø±Ù Ø§Ù„Ø²Ø±Ø§Ø¹ÙŠØ© Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø© Ù„Ù…Ø´Ø±ÙˆØ¹ Ø£Ø¨Ù†Ø§Ø¡ Ù…ØµØ·ÙÙ‰ Ø­Ø³Ù†
 window.GEDAREF_IMAGES = {
@@ -8129,6 +8421,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     safeCreateIcons();
+
+    // تشغيل القراءة والمزامنة السحابية أولاً عند إقلاع التطبيق (Cloud-First Fetch)
+    setTimeout(() => {
+      if (typeof initCloudSyncOnStartup === 'function') {
+        initCloudSyncOnStartup();
+      }
+    }, 150);
   } catch (err) {
     console.error("Initialization error:", err);
   }
@@ -11856,15 +12155,22 @@ function saveExpense(e, expId, isEdit) {
         modifiedBy: currentUserName
       };
       logAudit("تعديل مصروف", `تعديل قيد (${category} - ${crop}) من ${oldAmount.toLocaleString()} إلى ${amount.toLocaleString()} ج.س`, plot);
+      if (window.AgroAPI && window.AgroAPI.isConnected) {
+        window.AgroAPI.updateExpense(expId, state.expenses[idx]);
+      }
     }
   } else {
-    state.expenses.unshift({
+    const newExp = {
       id: expId,
       date, category, amount, crop, plot, isUnderReview, notes, op: notes,
       createdBy: currentUserName,
       modifiedBy: null
-    });
+    };
+    state.expenses.unshift(newExp);
     logAudit("إضافة مصروف", `تسجيل مصروف جديد (${category} - ${crop}) بمبلغ ${amount.toLocaleString()} ج.س`, plot);
+    if (window.AgroAPI && window.AgroAPI.isConnected) {
+      window.AgroAPI.insertExpense(newExp);
+    }
   }
 
   saveData();
@@ -11877,6 +12183,9 @@ function deleteExpense(expId) {
     state.expenses = state.expenses.filter(e => e.id !== expId);
     if (exp) {
       logAudit("حذف مصروف", `حذف قيد مصروف (${exp.category}) بمبلغ ${exp.amount.toLocaleString()} ج.س`, exp.plot);
+    }
+    if (window.AgroAPI && window.AgroAPI.isConnected) {
+      window.AgroAPI.deleteExpense(expId);
     }
     saveData();
   }
@@ -13244,6 +13553,9 @@ function saveHarvestIntake(e, intakeId) {
     };
     state.harvestIntakes.unshift(newIntake);
     logAudit("تسجيل حصاد", `تسجيل دخولية حصاد جديدة من نمرة ${plot} (${bags} جوال ${crop} = ${weightTons} طن) لموقع ${storageLocation}`, "منظومة الحصاد");
+    if (window.AgroAPI && window.AgroAPI.isConnected) {
+      window.AgroAPI.insertHarvest(newIntake);
+    }
   }
 
   // تحديث ومزامنة رصيد صنف المحصول في المخزون الزراعي
@@ -13538,6 +13850,9 @@ function saveCropSale(e, saleId) {
     };
     state.cropSales.unshift(newSale);
     logAudit("تسجيل بيع محاصيل", `تسجيل صفقة بيع جديدة للتاجر/الشركة ${buyerName} (${bags} جوال ${crop} بسعر ${pricePerBag.toLocaleString()} ج.س = ${totalAmount.toLocaleString()} ج.س | المستلم: ${paidAmount.toLocaleString()} ج.س | المتبقي: ${remainingAmount.toLocaleString()} ج.س)`, "تسويق المحاصيل");
+    if (window.AgroAPI && window.AgroAPI.isConnected) {
+      window.AgroAPI.insertSale(newSale);
+    }
   }
 
   // مزامنة وخصم الكمية المباعة من المخزون الزراعي
@@ -14757,6 +15072,238 @@ function openPlotDetailsModal(plotId) {
   `;
   openModal(html);
 }
+
+// =========================================================================
+// وظائف الربط السحابي المشترك (Supabase PostgreSQL Cloud Integration)
+// =========================================================================
+
+function updateCloudStatusIndicator(isConnected, message) {
+  const dot = document.getElementById('cloud-status-dot');
+  const text = document.getElementById('cloud-status-text');
+  const btn = document.getElementById('cloud-sync-badge-btn');
+  if (!dot || !text || !btn) return;
+
+  if (isConnected) {
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+    text.textContent = '🟢 سحابي متصل';
+    btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold transition shadow-sm';
+  } else {
+    const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
+    if (rawCfg) {
+      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+      text.textContent = '🟡 وضع أوفلاين';
+      btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-bold transition shadow-sm';
+    } else {
+      dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+      text.textContent = '☁️ السحابة';
+      btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm';
+    }
+  }
+}
+
+function openSupabaseCloudModal() {
+  const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
+  let currentUrl = '';
+  let currentKey = '';
+  if (rawCfg) {
+    try {
+      const parsed = JSON.parse(rawCfg);
+      currentUrl = parsed.url || '';
+      currentKey = parsed.anonKey || '';
+    } catch (e) {}
+  }
+
+  const isConnected = window.AgroAPI && window.AgroAPI.isConnected;
+
+  const content = `
+    <div class="p-6">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-900/50 text-sky-600 flex items-center justify-center font-bold text-xl shadow-sm">
+            ☁️
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-800 dark:text-white">الربط السحابي المشترك (Supabase PostgreSQL)</h3>
+            <p class="text-xs text-slate-500">مزامنة حية بين هواتف المستخدمين الخمسة</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+      </div>
+
+      <div class="p-4 rounded-2xl mb-5 ${isConnected ? 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700'}">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}"></span>
+            <span class="text-xs font-black ${isConnected ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}">
+              ${isConnected ? 'المنظومة متصلة سحابياً بنجاح مع PostgreSQL' : 'غير متصل بالسحابة (يعمل حالياً في الوضع المحلي المستقل)'}
+            </span>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isConnected ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-700'}">
+            ${isConnected ? 'Live Sync Active' : 'Offline / Standalone'}
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">رابط مشروع Supabase (Project URL):</label>
+          <input type="text" id="supabase-url-input" value="${currentUrl}" placeholder="https://xyzcompany.supabase.co" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">المفتاح العام (Supabase Anon Key):</label>
+          <input type="password" id="supabase-key-input" value="${currentKey}" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button onclick="handleSaveSupabaseConfig()" class="flex-1 py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-1.5">
+            <span>💾 حفظ واختبار الاتصال السحابي</span>
+          </button>
+          ${currentUrl ? `
+          <button onclick="handleDisconnectSupabase()" class="px-3 py-2.5 bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 hover:bg-red-200 rounded-xl font-bold transition">
+            فك الارتباط
+          </button>` : ''}
+        </div>
+      </div>
+
+      <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 space-y-3">
+        <h4 class="text-xs font-black text-slate-800 dark:text-slate-200">🔄 أدوات المزامنة وضخ البيانات:</h4>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="handleFetchFromSupabase()" class="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition text-right">
+            <p class="font-black text-[11px] text-sky-700 dark:text-sky-400">📥 سحب البيانات من السحابة</p>
+            <p class="text-[10px] text-slate-400">تحديث شاشاتك ببيانات المستخدمين الآخرين</p>
+          </button>
+
+          <button onclick="handleExportSeedSQL()" class="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition text-right">
+            <p class="font-black text-[11px] text-emerald-700 dark:text-emerald-400">📄 سكريبتات SQL الجاهزة</p>
+            <p class="text-[10px] text-slate-400">موجودة في مجلد database بالمستودع</p>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  openModal(content);
+}
+
+async function handleSaveSupabaseConfig() {
+  const url = document.getElementById('supabase-url-input')?.value;
+  const key = document.getElementById('supabase-key-input')?.value;
+
+  if (!url || !key) {
+    showToast('الرجاء إدخال الرابط والمفتاح الخاص بـ Supabase', 'error');
+    return;
+  }
+
+  showToast('جاري الاتصال بقاعدة بيانات Supabase...', 'info');
+  if (window.AgroAPI) {
+    const res = await window.AgroAPI.saveConfig(url, key);
+    if (res.success) {
+      showToast('تم الاتصال السحابي بنجاح وتفعيل البث اللحظي!', 'success');
+      updateCloudStatusIndicator(true, 'متصل');
+      closeModal();
+    } else {
+      showToast('فشل الاتصال: ' + (res.error || 'تأكد من صحة الرابط والمفتاح'), 'error');
+      updateCloudStatusIndicator(false, 'خطأ اتصال');
+    }
+  }
+}
+
+function handleDisconnectSupabase() {
+  if (confirm('هل أنت متأكد من فك الارتباط السحابي والرجوع للوضع المحلي؟')) {
+    if (window.AgroAPI) {
+      window.AgroAPI.clearConfig();
+      updateCloudStatusIndicator(false, 'محلي');
+      showToast('تم فك الارتباط والرجوع لقاعدة البيانات المحلية', 'info');
+      closeModal();
+    }
+  }
+}
+
+async function initCloudSyncOnStartup() {
+  if (!window.AgroAPI) return;
+  
+  const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
+  if (rawCfg && !window.AgroAPI.isConnected) {
+    try {
+      const cfg = JSON.parse(rawCfg);
+      if (cfg.url && cfg.anonKey) {
+        await window.AgroAPI.initClient(cfg.url, cfg.anonKey);
+      }
+    } catch(e) {
+      console.warn("Could not auto-connect Supabase:", e);
+    }
+  }
+
+  if (window.AgroAPI.isConnected) {
+    updateCloudStatusIndicator(true, 'جاري مزامنة السحابة...');
+    try {
+      const cloudState = await window.AgroAPI.fetchCloudState();
+      if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0)) {
+        state = {
+          ...state,
+          ...cloudState,
+          farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
+          forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
+        };
+        saveData();
+        updateActiveViews();
+        safeCreateIcons();
+        updateCloudStatusIndicator(true, '🟢 سحابي متصل (محدث)');
+        console.log("✓ تم تحديث وتطبيق كامل البيانات بنجاح من PostgreSQL السحابية!");
+      } else {
+        updateCloudStatusIndicator(true, '🟢 سحابي متصل');
+      }
+    } catch (err) {
+      console.warn("Cloud startup sync fallback to local cache:", err);
+      updateCloudStatusIndicator(true, '🟢 سحابي متصل');
+    }
+  }
+}
+
+async function handleFetchFromSupabase() {
+  if (!window.AgroAPI || !window.AgroAPI.client) {
+    showToast('الرجاء الاتصال بـ Supabase أولاً', 'error');
+    return;
+  }
+  showToast('جاري سحب أحدث نسخة من السحابة...', 'info');
+  const cloudState = await window.AgroAPI.fetchCloudState();
+  if (cloudState && cloudState.expenses && cloudState.expenses.length > 0) {
+    state = {
+      ...state,
+      ...cloudState,
+      farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
+      forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
+    };
+    saveData();
+    updateActiveViews();
+    safeCreateIcons();
+    showToast(`تم استيراد ومزامنة ${cloudState.expenses.length} قيد مالي من السحابة بنجاح!`, 'success');
+    closeModal();
+  } else {
+    showToast('لم يتم العثور على بيانات جديدة في السحابة', 'info');
+  }
+}
+
+function handleExportSeedSQL() {
+  showToast('ملف Kasamor_Supabase_Full_Setup.sql متوفر على سطح المكتب وداخل مجلد database/', 'info');
+}
+
+// Initialise Supabase real-time listener
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      if (window.AgroAPI) {
+        window.AgroAPI.onDataChange((payload) => {
+          showToast(`⚡ تحديث سحابي فوري: تم تعديل جدول (${payload.table}) من قبل مستخدم آخر!`, 'info');
+          handleFetchFromSupabase();
+        });
+        updateCloudStatusIndicator(window.AgroAPI.isConnected, window.AgroAPI.isConnected ? '🟢 سحابي متصل' : 'سحابة غير متصلة');
+      }
+    }, 800);
+  });
+}
+
 
 </script>
 </body>

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * تطبيق إدارة مشروع أبناء مصطفى حسن الزراعي (القضارف - كسمور الشرقي)
  * نظام مالي وتشغيلي ومخزني متكامل
  * يحتوي على كامل سجل القيود والمصروفات الفعلية المعتمدة (182 قيد بإجمالي 130,129,000 جنيه سوداني)
@@ -5508,6 +5508,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     safeCreateIcons();
+
+    // تشغيل القراءة والمزامنة السحابية أولاً عند إقلاع التطبيق (Cloud-First Fetch)
+    setTimeout(() => {
+      if (typeof initCloudSyncOnStartup === 'function') {
+        initCloudSyncOnStartup();
+      }
+    }, 150);
   } catch (err) {
     console.error("Initialization error:", err);
   }
@@ -9235,15 +9242,22 @@ function saveExpense(e, expId, isEdit) {
         modifiedBy: currentUserName
       };
       logAudit("تعديل مصروف", `تعديل قيد (${category} - ${crop}) من ${oldAmount.toLocaleString()} إلى ${amount.toLocaleString()} ج.س`, plot);
+      if (window.AgroAPI && window.AgroAPI.isConnected) {
+        window.AgroAPI.updateExpense(expId, state.expenses[idx]);
+      }
     }
   } else {
-    state.expenses.unshift({
+    const newExp = {
       id: expId,
       date, category, amount, crop, plot, isUnderReview, notes, op: notes,
       createdBy: currentUserName,
       modifiedBy: null
-    });
+    };
+    state.expenses.unshift(newExp);
     logAudit("إضافة مصروف", `تسجيل مصروف جديد (${category} - ${crop}) بمبلغ ${amount.toLocaleString()} ج.س`, plot);
+    if (window.AgroAPI && window.AgroAPI.isConnected) {
+      window.AgroAPI.insertExpense(newExp);
+    }
   }
 
   saveData();
@@ -9256,6 +9270,9 @@ function deleteExpense(expId) {
     state.expenses = state.expenses.filter(e => e.id !== expId);
     if (exp) {
       logAudit("حذف مصروف", `حذف قيد مصروف (${exp.category}) بمبلغ ${exp.amount.toLocaleString()} ج.س`, exp.plot);
+    }
+    if (window.AgroAPI && window.AgroAPI.isConnected) {
+      window.AgroAPI.deleteExpense(expId);
     }
     saveData();
   }
@@ -10623,6 +10640,9 @@ function saveHarvestIntake(e, intakeId) {
     };
     state.harvestIntakes.unshift(newIntake);
     logAudit("تسجيل حصاد", `تسجيل دخولية حصاد جديدة من نمرة ${plot} (${bags} جوال ${crop} = ${weightTons} طن) لموقع ${storageLocation}`, "منظومة الحصاد");
+    if (window.AgroAPI && window.AgroAPI.isConnected) {
+      window.AgroAPI.insertHarvest(newIntake);
+    }
   }
 
   // تحديث ومزامنة رصيد صنف المحصول في المخزون الزراعي
@@ -10917,6 +10937,9 @@ function saveCropSale(e, saleId) {
     };
     state.cropSales.unshift(newSale);
     logAudit("تسجيل بيع محاصيل", `تسجيل صفقة بيع جديدة للتاجر/الشركة ${buyerName} (${bags} جوال ${crop} بسعر ${pricePerBag.toLocaleString()} ج.س = ${totalAmount.toLocaleString()} ج.س | المستلم: ${paidAmount.toLocaleString()} ج.س | المتبقي: ${remainingAmount.toLocaleString()} ج.س)`, "تسويق المحاصيل");
+    if (window.AgroAPI && window.AgroAPI.isConnected) {
+      window.AgroAPI.insertSale(newSale);
+    }
   }
 
   // مزامنة وخصم الكمية المباعة من المخزون الزراعي
@@ -12136,3 +12159,235 @@ function openPlotDetailsModal(plotId) {
   `;
   openModal(html);
 }
+
+// =========================================================================
+// وظائف الربط السحابي المشترك (Supabase PostgreSQL Cloud Integration)
+// =========================================================================
+
+function updateCloudStatusIndicator(isConnected, message) {
+  const dot = document.getElementById('cloud-status-dot');
+  const text = document.getElementById('cloud-status-text');
+  const btn = document.getElementById('cloud-sync-badge-btn');
+  if (!dot || !text || !btn) return;
+
+  if (isConnected) {
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+    text.textContent = '🟢 سحابي متصل';
+    btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold transition shadow-sm';
+  } else {
+    const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
+    if (rawCfg) {
+      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+      text.textContent = '🟡 وضع أوفلاين';
+      btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-bold transition shadow-sm';
+    } else {
+      dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+      text.textContent = '☁️ السحابة';
+      btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm';
+    }
+  }
+}
+
+function openSupabaseCloudModal() {
+  const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
+  let currentUrl = '';
+  let currentKey = '';
+  if (rawCfg) {
+    try {
+      const parsed = JSON.parse(rawCfg);
+      currentUrl = parsed.url || '';
+      currentKey = parsed.anonKey || '';
+    } catch (e) {}
+  }
+
+  const isConnected = window.AgroAPI && window.AgroAPI.isConnected;
+
+  const content = `
+    <div class="p-6">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-900/50 text-sky-600 flex items-center justify-center font-bold text-xl shadow-sm">
+            ☁️
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-800 dark:text-white">الربط السحابي المشترك (Supabase PostgreSQL)</h3>
+            <p class="text-xs text-slate-500">مزامنة حية بين هواتف المستخدمين الخمسة</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+      </div>
+
+      <div class="p-4 rounded-2xl mb-5 ${isConnected ? 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800' : 'bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700'}">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}"></span>
+            <span class="text-xs font-black ${isConnected ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}">
+              ${isConnected ? 'المنظومة متصلة سحابياً بنجاح مع PostgreSQL' : 'غير متصل بالسحابة (يعمل حالياً في الوضع المحلي المستقل)'}
+            </span>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isConnected ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-200 text-slate-700'}">
+            ${isConnected ? 'Live Sync Active' : 'Offline / Standalone'}
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">رابط مشروع Supabase (Project URL):</label>
+          <input type="text" id="supabase-url-input" value="${currentUrl}" placeholder="https://xyzcompany.supabase.co" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">المفتاح العام (Supabase Anon Key):</label>
+          <input type="password" id="supabase-key-input" value="${currentKey}" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button onclick="handleSaveSupabaseConfig()" class="flex-1 py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-1.5">
+            <span>💾 حفظ واختبار الاتصال السحابي</span>
+          </button>
+          ${currentUrl ? `
+          <button onclick="handleDisconnectSupabase()" class="px-3 py-2.5 bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 hover:bg-red-200 rounded-xl font-bold transition">
+            فك الارتباط
+          </button>` : ''}
+        </div>
+      </div>
+
+      <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 space-y-3">
+        <h4 class="text-xs font-black text-slate-800 dark:text-slate-200">🔄 أدوات المزامنة وضخ البيانات:</h4>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="handleFetchFromSupabase()" class="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition text-right">
+            <p class="font-black text-[11px] text-sky-700 dark:text-sky-400">📥 سحب البيانات من السحابة</p>
+            <p class="text-[10px] text-slate-400">تحديث شاشاتك ببيانات المستخدمين الآخرين</p>
+          </button>
+
+          <button onclick="handleExportSeedSQL()" class="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition text-right">
+            <p class="font-black text-[11px] text-emerald-700 dark:text-emerald-400">📄 سكريبتات SQL الجاهزة</p>
+            <p class="text-[10px] text-slate-400">موجودة في مجلد database بالمستودع</p>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  openModal(content);
+}
+
+async function handleSaveSupabaseConfig() {
+  const url = document.getElementById('supabase-url-input')?.value;
+  const key = document.getElementById('supabase-key-input')?.value;
+
+  if (!url || !key) {
+    showToast('الرجاء إدخال الرابط والمفتاح الخاص بـ Supabase', 'error');
+    return;
+  }
+
+  showToast('جاري الاتصال بقاعدة بيانات Supabase...', 'info');
+  if (window.AgroAPI) {
+    const res = await window.AgroAPI.saveConfig(url, key);
+    if (res.success) {
+      showToast('تم الاتصال السحابي بنجاح وتفعيل البث اللحظي!', 'success');
+      updateCloudStatusIndicator(true, 'متصل');
+      closeModal();
+    } else {
+      showToast('فشل الاتصال: ' + (res.error || 'تأكد من صحة الرابط والمفتاح'), 'error');
+      updateCloudStatusIndicator(false, 'خطأ اتصال');
+    }
+  }
+}
+
+function handleDisconnectSupabase() {
+  if (confirm('هل أنت متأكد من فك الارتباط السحابي والرجوع للوضع المحلي؟')) {
+    if (window.AgroAPI) {
+      window.AgroAPI.clearConfig();
+      updateCloudStatusIndicator(false, 'محلي');
+      showToast('تم فك الارتباط والرجوع لقاعدة البيانات المحلية', 'info');
+      closeModal();
+    }
+  }
+}
+
+async function initCloudSyncOnStartup() {
+  if (!window.AgroAPI) return;
+  
+  const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
+  if (rawCfg && !window.AgroAPI.isConnected) {
+    try {
+      const cfg = JSON.parse(rawCfg);
+      if (cfg.url && cfg.anonKey) {
+        await window.AgroAPI.initClient(cfg.url, cfg.anonKey);
+      }
+    } catch(e) {
+      console.warn("Could not auto-connect Supabase:", e);
+    }
+  }
+
+  if (window.AgroAPI.isConnected) {
+    updateCloudStatusIndicator(true, 'جاري مزامنة السحابة...');
+    try {
+      const cloudState = await window.AgroAPI.fetchCloudState();
+      if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0)) {
+        state = {
+          ...state,
+          ...cloudState,
+          farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
+          forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
+        };
+        saveData();
+        updateActiveViews();
+        safeCreateIcons();
+        updateCloudStatusIndicator(true, '🟢 سحابي متصل (محدث)');
+        console.log("✓ تم تحديث وتطبيق كامل البيانات بنجاح من PostgreSQL السحابية!");
+      } else {
+        updateCloudStatusIndicator(true, '🟢 سحابي متصل');
+      }
+    } catch (err) {
+      console.warn("Cloud startup sync fallback to local cache:", err);
+      updateCloudStatusIndicator(true, '🟢 سحابي متصل');
+    }
+  }
+}
+
+async function handleFetchFromSupabase() {
+  if (!window.AgroAPI || !window.AgroAPI.client) {
+    showToast('الرجاء الاتصال بـ Supabase أولاً', 'error');
+    return;
+  }
+  showToast('جاري سحب أحدث نسخة من السحابة...', 'info');
+  const cloudState = await window.AgroAPI.fetchCloudState();
+  if (cloudState && cloudState.expenses && cloudState.expenses.length > 0) {
+    state = {
+      ...state,
+      ...cloudState,
+      farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
+      forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
+    };
+    saveData();
+    updateActiveViews();
+    safeCreateIcons();
+    showToast(`تم استيراد ومزامنة ${cloudState.expenses.length} قيد مالي من السحابة بنجاح!`, 'success');
+    closeModal();
+  } else {
+    showToast('لم يتم العثور على بيانات جديدة في السحابة', 'info');
+  }
+}
+
+function handleExportSeedSQL() {
+  showToast('ملف Kasamor_Supabase_Full_Setup.sql متوفر على سطح المكتب وداخل مجلد database/', 'info');
+}
+
+// Initialise Supabase real-time listener
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      if (window.AgroAPI) {
+        window.AgroAPI.onDataChange((payload) => {
+          showToast(`⚡ تحديث سحابي فوري: تم تعديل جدول (${payload.table}) من قبل مستخدم آخر!`, 'info');
+          handleFetchFromSupabase();
+        });
+        updateCloudStatusIndicator(window.AgroAPI.isConnected, window.AgroAPI.isConnected ? '🟢 سحابي متصل' : 'سحابة غير متصلة');
+      }
+    }, 800);
+  });
+}
+

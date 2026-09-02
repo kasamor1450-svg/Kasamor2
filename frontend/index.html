@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
@@ -33,6 +33,29 @@
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Supabase JS Client for Realtime Cloud Database -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Progressive Web App (PWA) Mobile Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#15803d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="كسمور 2026">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2315803d'/%3E%3Ctext x='50%25' y='68%25' font-size='60' text-anchor='middle' fill='white'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('✓ Service Worker PWA Registered successfully:', reg.scope);
+        }).catch((err) => {
+          console.log('Service Worker registration skipped or unsupported:', err);
+        });
+      });
+    }
+  </script>
 
   <!-- Custom Modern CSS -->
   <link rel="stylesheet" href="css/styles.css">
@@ -82,6 +105,12 @@
         <!-- أزرار الإجراءات السريعة والتحكم والمستخدم النشط -->
         <div class="flex items-center gap-1.5">
           
+          <!-- زر ومؤشر الربط السحابي المشترك Supabase -->
+          <button id="cloud-sync-badge-btn" onclick="openSupabaseCloudModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm" title="الربط السحابي المشترك (Supabase PostgreSQL)">
+            <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+            <span id="cloud-status-text">☁️ السحابة</span>
+          </button>
+
           <!-- زر إدارة قاعدة البيانات والنسخ الاحتياطي البارز والدائم -->
           <button onclick="openDatabaseManagerModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-sm" title="إدارة قاعدة البيانات والنسخ الاحتياطي">
             <i data-lucide="database" class="w-3.5 h-3.5"></i>
@@ -1732,6 +1761,6 @@
     <p>مشروع أبناء مصطفى حسن الزراعي (القضارف - كسمور الشرقي) • نظام الإدارة المالية والتشغيلية 2026</p>
   </footer>
 
-  <script src="../database/database.js"></script>`r`n  <script src="../database/api.js"></script>`r`n  <script src="js/images_data.js"></script>`r`n  <script src="js/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
