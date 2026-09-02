@@ -108,7 +108,14 @@
 
       try {
         if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
-          this.client = window.supabase.createClient(url, anonKey);
+          this.client = window.supabase.createClient(url, anonKey, {
+            global: {
+              headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
+              }
+            }
+          });
           // Test query
           const { data, error } = await this.client.from('farm_info').select('id, name').limit(1);
           if (error && error.code !== 'PGRST116') {

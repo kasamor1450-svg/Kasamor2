@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mustagro-v3.0';
+const CACHE_NAME = 'mustagro-v3.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -31,6 +31,10 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+  // NEVER cache or touch Supabase database calls
+  if (url.hostname.includes('supabase.co') || url.hostname.includes('supabase.in')) {
+    return;
+  }
 
   // If navigation or index.html -> Network first, fallback to cache
   if (event.request.mode === 'navigate' || event.request.destination === 'document' || url.pathname.endsWith('index.html') || url.pathname.endsWith('/')) {
