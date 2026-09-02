@@ -17,6 +17,17 @@
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
+  
+  async function waitForSupabaseCDN() {
+    for (let i = 0; i < 40; i++) {
+      if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
+        return true;
+      }
+      await new Promise(r => setTimeout(r, 100));
+    }
+    return (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function');
+  }
+  
   const STORAGE_CONFIG_KEY = 'AGRO_SUPABASE_CLOUD_CONFIG';
   const DEFAULT_SUPABASE_URL = 'https://iuavmonqyvokldpvdqtm.supabase.co';
   const DEFAULT_SUPABASE_KEY = 'sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l';
@@ -83,10 +94,17 @@
      * Initialize Supabase JS Client
      */
     async initClient(url, anonKey) {
-      if (!url || !anonKey) {
+      const finalUrl = (url || DEFAULT_SUPABASE_URL || '').trim();
+      const finalKey = (anonKey || DEFAULT_SUPABASE_KEY || '').trim();
+      this.url = finalUrl;
+      this.anonKey = finalKey;
+
+      if (!finalUrl || !finalKey) {
         this.isConnected = false;
-        return { success: false, error: 'Ø§Ù„Ø±Ø¬Ø§Ø¡ Ø¥Ø¯Ø®Ø§Ù„ Ø§Ù„Ø±Ø§Ø¨Ø· ÙˆØ§Ù„Ù…ÙØªØ§Ø­' };
+        return { success: false, error: 'الرجاء إدخال الرابط والمفتاح' };
       }
+
+      await waitForSupabaseCDN();
 
       try {
         if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {

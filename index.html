@@ -628,11 +628,11 @@ table tbody tr:hover {
           <!-- زر ومؤشر الربط السحابي المشترك Supabase -->
           
           <!-- زر تثبيت التطبيق على الجوال PWA -->
-          <button id="pwa-install-app-btn" onclick="triggerPwaInstall()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-sm animate-pulse" title="تثبيت التطبيق كـ App على شاشة هاتفك">
+          <button id="pwa-install-app-btn" class="flex-shrink-0" onclick="triggerPwaInstall()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-sm animate-pulse" title="تثبيت التطبيق كـ App على شاشة هاتفك">
             <span>📱 تثبيت التطبيق</span>
           </button>
 
-          <button id="cloud-sync-badge-btn" onclick="openSupabaseCloudModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm" title="الربط السحابي المشترك (Supabase PostgreSQL)">
+          <button id="cloud-sync-badge-btn" class="flex-shrink-0" onclick="openSupabaseCloudModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm" title="الربط السحابي المشترك (Supabase PostgreSQL)">
             <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
             <span id="cloud-status-text">☁️ السحابة</span>
           </button>
@@ -2593,6 +2593,17 @@ table tbody tr:hover {
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
+  
+  async function waitForSupabaseCDN() {
+    for (let i = 0; i < 40; i++) {
+      if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
+        return true;
+      }
+      await new Promise(r => setTimeout(r, 100));
+    }
+    return (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function');
+  }
+  
   const STORAGE_CONFIG_KEY = 'AGRO_SUPABASE_CLOUD_CONFIG';
   const DEFAULT_SUPABASE_URL = 'https://iuavmonqyvokldpvdqtm.supabase.co';
   const DEFAULT_SUPABASE_KEY = 'sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l';
@@ -2659,10 +2670,17 @@ table tbody tr:hover {
      * Initialize Supabase JS Client
      */
     async initClient(url, anonKey) {
-      if (!url || !anonKey) {
+      const finalUrl = (url || DEFAULT_SUPABASE_URL || '').trim();
+      const finalKey = (anonKey || DEFAULT_SUPABASE_KEY || '').trim();
+      this.url = finalUrl;
+      this.anonKey = finalKey;
+
+      if (!finalUrl || !finalKey) {
         this.isConnected = false;
-        return { success: false, error: 'Ø§Ù„Ø±Ø¬Ø§Ø¡ Ø¥Ø¯Ø®Ø§Ù„ Ø§Ù„Ø±Ø§Ø¨Ø· ÙˆØ§Ù„Ù…ÙØªØ§Ø­' };
+        return { success: false, error: 'الرجاء إدخال الرابط والمفتاح' };
       }
+
+      await waitForSupabaseCDN();
 
       try {
         if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
@@ -8490,7 +8508,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof initCloudSyncOnStartup === 'function') {
         initCloudSyncOnStartup();
       }
-    }, 150);
+    }, 50);
+    setTimeout(() => {
+      if (window.AgroAPI && !window.AgroAPI.isConnected && typeof initCloudSyncOnStartup === 'function') {
+        console.log("Retrying cloud connection...");
+        initCloudSyncOnStartup();
+      }
+    }, 1500);
   } catch (err) {
     console.error("Initialization error:", err);
   }
@@ -15147,21 +15171,15 @@ function updateCloudStatusIndicator(isConnected, message) {
   if (!dot || !text || !btn) return;
 
   if (isConnected) {
-    dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
-    text.textContent = '🟢 سحابي متصل';
-    btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold transition shadow-sm';
+    dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+    text.textContent = message || '🟢 سحابي متصل';
+    btn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-black transition shadow-md';
   } else {
-    const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
-    if (rawCfg) {
-      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-      text.textContent = '🟡 وضع أوفلاين';
-      btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-bold transition shadow-sm';
-    } else {
-      dot.className = 'w-2 h-2 rounded-full bg-slate-400';
-      text.textContent = '☁️ السحابة';
-      btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm';
-    }
+    dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+    text.textContent = message || '☁️ السحابة';
+    btn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm';
   }
+}
 }
 
 function openSupabaseCloudModal() {
@@ -15286,16 +15304,21 @@ function handleDisconnectSupabase() {
 async function initCloudSyncOnStartup() {
   if (!window.AgroAPI) return;
   
-  const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
-  if (rawCfg && !window.AgroAPI.isConnected) {
-    try {
+  if (typeof updateCloudStatusIndicator === 'function') {
+    updateCloudStatusIndicator(false, 'جاري الاتصال بالسحابة...');
+  }
+
+  try {
+    let url = 'https://iuavmonqyvokldpvdqtm.supabase.co';
+    let key = 'sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l';
+    const rawCfg = localStorage.getItem('AGRO_SUPABASE_CLOUD_CONFIG');
+    if (rawCfg) {
       const cfg = JSON.parse(rawCfg);
-      if (cfg.url && cfg.anonKey) {
-        await window.AgroAPI.initClient(cfg.url, cfg.anonKey);
-      }
-    } catch(e) {
-      console.warn("Could not auto-connect Supabase:", e);
+      if (cfg.url && cfg.anonKey) { url = cfg.url; key = cfg.anonKey; }
     }
+    await window.AgroAPI.initClient(url, key);
+  } catch(e) {
+    console.warn("Could not connect to Supabase:", e);
   }
 
   if (window.AgroAPI.isConnected) {
