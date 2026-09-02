@@ -12,7 +12,8 @@
       "id": "u-1",
       "name": "محمد مصطفى",
       "username": "mohammed",
-      "password": "123",
+      "password": "Moh@2026",
+      "password_hash": "Moh@2026",
       "role": "admin",
       "roleTitle": "المدير العام",
       "phone": "0912345678"
@@ -21,7 +22,8 @@
       "id": "u-2",
       "name": "حسن مصطفى",
       "username": "hassan",
-      "password": "123",
+      "password": "Has@2026",
+      "password_hash": "Has@2026",
       "role": "admin",
       "roleTitle": "المدير الإداري",
       "phone": "0923456789"
@@ -30,7 +32,8 @@
       "id": "u-3",
       "name": "مصطفى الجعلي",
       "username": "mustafa",
-      "password": "123",
+      "password": "Mus@2026",
+      "password_hash": "Mus@2026",
       "role": "accountant",
       "roleTitle": "المدير المالي",
       "phone": "0934567890"
@@ -39,7 +42,8 @@
       "id": "u-4",
       "name": "عبدالقادر",
       "username": "abdelqader",
-      "password": "123",
+      "password": "Abd@2026",
+      "password_hash": "Abd@2026",
       "role": "supervisor",
       "roleTitle": "الوكيل والمشرف العام",
       "phone": "0945678901"
@@ -48,7 +52,8 @@
       "id": "u-5",
       "name": "أبوبكر مصطفى",
       "username": "abubakr",
-      "password": "123",
+      "password": "Abu@2026",
+      "password_hash": "Abu@2026",
       "role": "partner",
       "roleTitle": "شريك في المشروع",
       "phone": "0956789012"

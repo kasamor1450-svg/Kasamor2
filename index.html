@@ -3102,7 +3102,7 @@ const DEFAULT_DATA = {
       "id": "u-1",
       "name": "محمد مصطفى",
       "username": "mohammed",
-      "password": "123",
+      "password": "2026",
       "role": "admin",
       "roleTitle": "المدير العام",
       "phone": "0912345678"
@@ -3111,7 +3111,7 @@ const DEFAULT_DATA = {
       "id": "u-2",
       "name": "حسن مصطفى",
       "username": "hassan",
-      "password": "123",
+      "password": "2026",
       "role": "admin",
       "roleTitle": "المدير الإداري",
       "phone": "0923456789"
@@ -3120,7 +3120,7 @@ const DEFAULT_DATA = {
       "id": "u-3",
       "name": "مصطفى الجعلي",
       "username": "mustafa",
-      "password": "123",
+      "password": "2026",
       "role": "accountant",
       "roleTitle": "المدير المالي",
       "phone": "0934567890"
@@ -3129,7 +3129,7 @@ const DEFAULT_DATA = {
       "id": "u-4",
       "name": "عبدالقادر",
       "username": "abdelqader",
-      "password": "123",
+      "password": "2026",
       "role": "supervisor",
       "roleTitle": "الوكيل والمشرف العام",
       "phone": "0945678901"
@@ -3138,7 +3138,7 @@ const DEFAULT_DATA = {
       "id": "u-5",
       "name": "أبوبكر مصطفى",
       "username": "abubakr",
-      "password": "123",
+      "password": "2026",
       "role": "partner",
       "roleTitle": "شريك في المشروع",
       "phone": "0956789012"
@@ -10654,6 +10654,9 @@ function renderUsersSection() {
         </div>
 
         <div class="flex gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button onclick="openChangePasswordModal('${u.id}')" class="py-1.5 px-2.5 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 border border-amber-300 rounded-xl text-xs font-bold transition flex items-center gap-1" title="تغيير كلمة المرور">
+            <span>🔐 كلمة المرور</span>
+          </button>
           <button onclick="switchUser('${u.id}')" class="flex-1 py-1.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-bold transition">
             تبديل لهذا الحساب
           </button>
@@ -11889,7 +11892,116 @@ function generateSmartAnswer(q) {
   💡 <em>يمكنك سؤالي عن: الشركاء والأنصبة، الحصاد والمبيعات، الزكاة، الوقود، الجرارات، أو مسحوبات البقالة.</em>`;
 }
 
-function openLoginModal() {
+
+  // =========================================================================
+  // نظام إدارة كلمات المرور وتأمين الحسابات
+  // =========================================================================
+
+  function openChangePasswordModal(userId) {
+    const user = state.users.find(u => u.id === userId) || currentUser;
+    if (!user) return;
+
+    const modalHTML = `
+      <div class="p-6 text-right">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 flex items-center justify-center font-bold">🔐</span>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">تعديل بيانات الدخول وكلمة المرور</h3>
+              <p class="text-[11px] text-slate-400">للمستخدم: <strong class="text-emerald-700 dark:text-emerald-400">${user.name}</strong> (${user.roleTitle})</p>
+            </div>
+          </div>
+          <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+        </div>
+
+        <form onsubmit="handleChangePasswordSubmit(event, '${user.id}')" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">اسم المستخدم (Username):</label>
+            <input type="text" id="edit-user-username" value="${user.username}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold text-sm" required>
+          </div>
+
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">كلمة المرور الجديدة:</label>
+            <div class="relative">
+              <input type="password" id="edit-user-password" value="${user.password || user.password_hash || ''}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold text-sm pr-3 pl-10" required>
+              <button type="button" onclick="togglePasswordVisibility('edit-user-password', this)" class="absolute left-3 top-2.5 text-slate-400 hover:text-slate-600 font-bold">👁️</button>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">يُفضل استخدام كلمة مرور مكونة من 6 خانات أو أكثر وتحتوي أحرف وأرقام.</p>
+          </div>
+
+          <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-[11px] text-emerald-800 dark:text-emerald-300">
+            ℹ️ عند الحفظ، سيتم تحديث كلمة المرور في قاعدة البيانات السحابية فوراً لتسري على جميع الأجهزة.
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold">إلغاء</button>
+            <button type="submit" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold shadow-sm">حفظ التعديلات في السحابة</button>
+          </div>
+        </form>
+      </div>
+    `;
+    openModal(modalHTML);
+  }
+
+  async function handleChangePasswordSubmit(e, userId) {
+    e.preventDefault();
+    const newUsername = document.getElementById('edit-user-username').value.trim().toLowerCase();
+    const newPassword = document.getElementById('edit-user-password').value.trim();
+
+    if (!newUsername || !newPassword) {
+      showToast('الرجاء إدخال اسم مستخدم وكلمة مرور صحيحة', 'error');
+      return;
+    }
+
+    const userIdx = state.users.findIndex(u => u.id === userId);
+    if (userIdx !== -1) {
+      state.users[userIdx].username = newUsername;
+      state.users[userIdx].password = newPassword;
+      state.users[userIdx].password_hash = newPassword;
+
+      if (currentUser && currentUser.id === userId) {
+        currentUser.username = newUsername;
+        currentUser.password = newPassword;
+        setCurrentSession(currentUser);
+      }
+
+      saveData('✓ تم حفظ كلمة المرور واسم المستخدم محلياً');
+
+      // تحديث السحابة
+      showToast('جاري تحديث كلمة المرور في السحابة...', 'info');
+      try {
+        if (window.AgroAPI && window.AgroAPI.updateUserCredentials) {
+          const res = await window.AgroAPI.updateUserCredentials(userId, newUsername, newPassword);
+          if (res && res.success) {
+            showToast('✓ تم تحديث كلمة المرور في السحابة بنجاح لجميع الأجهزة!', 'success');
+          } else {
+            showToast('تم الحفظ محلياً (سيتم المزامنة تلقائياً عند الاتصال)', 'info');
+          }
+        }
+      } catch (err) {
+        console.warn('Could not sync user credentials to cloud:', err);
+      }
+
+      logAudit('أمان الحسابات', `تغيير كلمة المرور للمستخدم (${state.users[userIdx].name})`, 'نظام الأمان');
+      updateActiveViews();
+      closeModal();
+    }
+  }
+
+  function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input) {
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+  }
+  
+  function openLoginModal() {
   const html = `
     <div class="p-6">
       <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -11905,7 +12017,7 @@ function openLoginModal() {
 
         <div>
           <label class="block font-bold mb-1">كلمة المرور:</label>
-          <input type="password" id="login-password" value="123" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono" required>
+          <input type="password" id="login-password" placeholder="أدخل كلمة المرور الخاصة بك" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono" required>
         </div>
 
         <div class="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl space-y-2 text-[11px]">

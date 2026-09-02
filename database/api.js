@@ -240,7 +240,16 @@
             seasonDurationMonths: farmInfoRes.data[0].season_duration_months || 6,
             currency: farmInfoRes.data[0].currency || 'جنيه سوداني'
           } : undefined,
-          users: usersRes.data || [],
+          users: (usersRes.data || []).map(u => ({
+          id: u.id,
+          name: u.name,
+          username: u.username,
+          password: u.password_hash || u.password || 'Moh@2026',
+          password_hash: u.password_hash || u.password || 'Moh@2026',
+          role: u.role,
+          roleTitle: u.role_title || u.roleTitle || 'عضو في الإدارة',
+          phone: u.phone
+        })),
           partners: (partnersRes.data || []).map(p => ({
             id: p.id, name: p.name, fullName: p.full_name,
             shares: p.shares, totalShares: p.total_shares,
@@ -358,6 +367,24 @@
       if (error) console.warn('Supabase insert expense warning:', error);
       return data;
     }
+
+    async updateUserCredentials(userId, newUsername, newPassword) {
+      if (!this.client) return { success: false, error: 'No client' };
+      try {
+        const { data, error } = await this.client
+          .from('users')
+          .update({
+            username: newUsername,
+            password_hash: newPassword
+          })
+          .eq('id', userId);
+        if (error) throw error;
+        return { success: true };
+      } catch (err) {
+        console.error('Supabase update user credentials error:', err);
+        return { success: false, error: err.message };
+      }
+    },
 
     async updateExpense(id, exp) {
       if (!this.client) return null;
