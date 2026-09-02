@@ -487,3 +487,39 @@ table tbody tr:hover {
   }
 }
 
+
+
+/* =========================================================================
+   Mobile Viewport & Shell Containment Rules (Mustagro Mobile-First UX)
+   ========================================================================= */
+
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 768px) {
+  /* Prevent any table overflow from breaking mobile bounds */
+  table {
+    font-size: 0.75rem;
+  }
+  
+  th, td {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    white-space: nowrap;
+  }
+
+  .table-responsive, .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    border-radius: 1rem;
+  }
+
+  /* Safe padding for bottom navigation bar */
+  #main-content {
+    padding-bottom: 6.5rem !important;
+  }
+}
