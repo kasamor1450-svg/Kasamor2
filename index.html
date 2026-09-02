@@ -12157,16 +12157,7 @@ function generateSmartAnswer(q) {
       if (header) header.style.filter = 'none';
       updateUserInterface();
     }
-    const gate = document.getElementById('app-login-gate');
-    const bottomNav = document.getElementById('mobile-bottom-nav');
-    if (!currentUser) {
-      if (gate) gate.classList.remove('hidden'); gate.style.display = 'flex';
-      if (bottomNav) bottomNav.classList.add('hidden');
-    } else {
-      if (gate) gate.classList.add('hidden'); gate.style.display = 'none';
-      if (bottomNav) bottomNav.classList.remove('hidden');
-      updateUserInterface();
-    }
+
   }
 
   
