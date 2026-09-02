@@ -255,7 +255,7 @@
             const refMatch = (p.notes || '').match(/\[مسترد:\s*([\d\.]+)\]/);
             const paid = Number(p.paid_capital || 0);
             const nonRef = nonRefMatch ? parseFloat(nonRefMatch[1]) : 0;
-            const ref = refMatch ? parseFloat(refMatch[1]) : (paid > 0 ? paid - nonRef : (p.shares === 2 ? 46153846.15 : 23076923.08));
+            const ref = refMatch ? parseFloat(refMatch[1]) : Math.max(0, paid - nonRef);
             return {
               id: p.id, name: p.name, fullName: p.full_name,
               shares: p.shares, totalShares: p.total_shares,
@@ -265,12 +265,16 @@
               role: p.role, notes: p.notes
             };
           }),
-          capitalInjections: (capitalInjRes.data || []).map(ci => ({
-            id: ci.id, partnerId: ci.partner_id, partnerName: ci.partner_name,
-            date: ci.date, amount: Number(ci.amount || 0), paymentMethod: ci.payment_method,
-            purpose: ci.purpose, loggedBy: ci.logged_by, notes: ci.notes,
-            capitalType: (ci.notes && ci.notes.includes('[نوع: غير مسترد]')) ? 'non_refundable' : ((ci.notes && ci.notes.includes('[نوع: مسترد]')) ? 'refundable' : (ci.capital_type || 'refundable'))
-          })),
+          capitalInjections: (capitalInjRes.data || []).map(ci => {
+            const typeMatch = (ci.notes || '').match(/\[نوع:\s*(غير مسترد|مسترد)\]/);
+            const capitalType = typeMatch ? (typeMatch[1] === 'غير مسترد' ? 'non_refundable' : 'refundable') : (ci.capital_type || 'refundable');
+            return {
+              id: ci.id, partnerId: ci.partner_id, partnerName: ci.partner_name,
+              date: ci.date, amount: Number(ci.amount || 0), paymentMethod: ci.payment_method,
+              purpose: ci.purpose, loggedBy: ci.logged_by, notes: ci.notes,
+              capitalType: capitalType
+            };
+          }),
           plots: rawPlots.map(pl => {
             const ops = rawOps
               .filter(op => op.plot_id === pl.id)
