@@ -12234,12 +12234,12 @@ function openSupabaseCloudModal() {
       <div class="space-y-4 text-xs">
         <div>
           <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">رابط مشروع Supabase (Project URL):</label>
-          <input type="text" id="supabase-url-input" value="${currentUrl}" placeholder="https://xyzcompany.supabase.co" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
+          <input type="text" id="supabase-url-input" value="${currentUrl}" value="https://iuavmonqyvokldpvdqtm.supabase.co" placeholder="https://iuavmonqyvokldpvdqtm.supabase.co" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
         </div>
 
         <div>
           <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">المفتاح العام (Supabase Anon Key):</label>
-          <input type="password" id="supabase-key-input" value="${currentKey}" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
+          <input type="password" id="supabase-key-input" value="${currentKey}" value="sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l" placeholder="sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500 text-left" dir="ltr">
         </div>
 
         <div class="flex gap-2 pt-2">

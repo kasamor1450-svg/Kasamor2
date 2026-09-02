@@ -18,6 +18,8 @@
   'use strict';
 
   const STORAGE_CONFIG_KEY = 'AGRO_SUPABASE_CLOUD_CONFIG';
+  const DEFAULT_SUPABASE_URL = 'https://iuavmonqyvokldpvdqtm.supabase.co';
+  const DEFAULT_SUPABASE_KEY = 'sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l';
 
   class SupabaseCloudAdapter {
     constructor() {
@@ -41,8 +43,14 @@
           if (cfg && cfg.url && cfg.anonKey) {
             this.url = cfg.url;
             this.anonKey = cfg.anonKey;
-            this.initClient(this.url, this.anonKey);
           }
+        }
+        if (!this.url || !this.anonKey) {
+          this.url = DEFAULT_SUPABASE_URL;
+          this.anonKey = DEFAULT_SUPABASE_KEY;
+        }
+        if (this.url && this.anonKey) {
+          this.initClient(this.url, this.anonKey);
         }
       } catch (e) {
         console.warn('Could not load Supabase config:', e);
