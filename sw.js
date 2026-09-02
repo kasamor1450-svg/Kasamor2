@@ -1,65 +1,69 @@
-const CACHE_NAME = 'mustagro-v3.1';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
+// Service Worker for Mustagro PWA
+// Cache Version: mustagro-v5.0-lockdown (Strict Mandatory Login)
+const CACHE_NAME = 'mustagro-v5.0-lockdown';
+
+const PRECACHE_ASSETS = [
   './manifest.json',
+  './frontend/css/styles.css',
   './assets/icon-192.png',
-  './assets/icon-512.png',
-  './assets/icon-maskable.png'
+  './assets/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
-  );
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
+  );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log('[SW] Purging old cache:', key);
+            return caches.delete(key);
+          }
+        })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Network-First for HTML/Navigations so users immediately receive updates
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
   const url = new URL(event.request.url);
-  // NEVER cache or touch Supabase database calls
+
+  // NEVER cache or intercept Supabase database requests
   if (url.hostname.includes('supabase.co') || url.hostname.includes('supabase.in')) {
     return;
   }
 
-  // If navigation or index.html -> Network first, fallback to cache
-  if (event.request.mode === 'navigate' || event.request.destination === 'document' || url.pathname.endsWith('index.html') || url.pathname.endsWith('/')) {
+  // Network-First for HTML navigation so updates appear IMMEDIATELY
+  if (event.request.mode === 'navigate' || event.request.destination === 'document' || url.pathname.endsWith('index.html')) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: 'no-cache' })
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
-            const copy = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+            const resClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
           }
           return networkResponse;
         })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+        .catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html')))
     );
     return;
   }
 
-  // Assets / Static -> Cache first, fallback to network
+  // Cache First with Network Fallback for static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) return cachedResponse;
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
-          const copy = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          const resClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
         }
         return networkResponse;
       });
