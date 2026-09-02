@@ -620,7 +620,7 @@ table tbody tr:hover {
   
   
   <!-- شاشة الدخول الإلزامية وقفل التطبيق (Mandatory Authentication Gate) -->
-  <div id="app-login-gate" style="z-index: 999999 !important; display: flex !important;" class="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 flex items-center justify-center p-4 overflow-y-auto">
+  <div id="app-login-gate" style="z-index: 999999;" class="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 flex items-center justify-center p-4 overflow-y-auto">
     <div class="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 text-right">
       
       <!-- شعار النظام والهوية -->
@@ -639,35 +639,35 @@ table tbody tr:hover {
       <div class="mb-4">
         <label class="block font-black text-[11px] text-slate-600 dark:text-slate-400 mb-1.5">اختر حسابك للدخول السريع:</label>
         <div class="grid grid-cols-2 gap-1.5 text-xs">
-          <button type="button" onclick="selectGateUser('mohammed')" class="p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
+          <button type="button" id="gate-btn-mohammed" onclick="selectGateUser('mohammed')" class="gate-user-btn p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
             <span>👤</span>
             <div>
               <p class="text-[11px] font-black leading-tight">محمد مصطفى</p>
               <p class="text-[9px] text-emerald-700 font-normal">المدير العام</p>
             </div>
           </button>
-          <button type="button" onclick="selectGateUser('hassan')" class="p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
+          <button type="button" id="gate-btn-hassan" onclick="selectGateUser('hassan')" class="gate-user-btn p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
             <span>👤</span>
             <div>
               <p class="text-[11px] font-black leading-tight">حسن مصطفى</p>
               <p class="text-[9px] text-emerald-700 font-normal">المدير الإداري</p>
             </div>
           </button>
-          <button type="button" onclick="selectGateUser('mustafa')" class="p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
+          <button type="button" id="gate-btn-mustafa" onclick="selectGateUser('mustafa')" class="gate-user-btn p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
             <span>👤</span>
             <div>
               <p class="text-[11px] font-black leading-tight">مصطفى الجعلي</p>
               <p class="text-[9px] text-emerald-700 font-normal">المدير المالي</p>
             </div>
           </button>
-          <button type="button" onclick="selectGateUser('abdelqader')" class="p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
+          <button type="button" id="gate-btn-abdelqader" onclick="selectGateUser('abdelqader')" class="gate-user-btn p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
             <span>👤</span>
             <div>
               <p class="text-[11px] font-black leading-tight">عبدالقادر</p>
               <p class="text-[9px] text-emerald-700 font-normal">المشرف العام</p>
             </div>
           </button>
-          <button type="button" onclick="selectGateUser('abubakr')" class="col-span-2 p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
+          <button type="button" id="gate-btn-abubakr" onclick="selectGateUser('abubakr')" class="gate-user-btn col-span-2 p-2 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 rounded-xl text-right font-bold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
             <span>👤</span>
             <div>
               <p class="text-[11px] font-black leading-tight">أبوبكر مصطفى</p>
@@ -12142,7 +12142,7 @@ function generateSmartAnswer(q) {
     if (!currentUser) {
       if (gate) {
         gate.classList.remove('hidden');
-        gate.style.display = 'flex';
+        gate.style.setProperty('display', 'flex', 'important');
       }
       if (bottomNav) bottomNav.classList.add('hidden');
       if (mainContent) mainContent.style.filter = 'blur(10px)';
@@ -12150,7 +12150,7 @@ function generateSmartAnswer(q) {
     } else {
       if (gate) {
         gate.classList.add('hidden');
-        gate.style.display = 'none';
+        gate.style.setProperty('display', 'none', 'important');
       }
       if (bottomNav) bottomNav.classList.remove('hidden');
       if (mainContent) mainContent.style.filter = 'none';
@@ -12165,7 +12165,19 @@ function generateSmartAnswer(q) {
     const unameInput = document.getElementById('gate-username');
     const passInput = document.getElementById('gate-password');
     if (unameInput) unameInput.value = uname;
-    if (passInput) passInput.focus();
+    
+    // إبراز الزر المحدد
+    document.querySelectorAll('.gate-user-btn').forEach(b => {
+      b.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-100', 'dark:bg-emerald-900');
+    });
+    const activeBtn = document.getElementById('gate-btn-' + uname);
+    if (activeBtn) {
+      activeBtn.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-100', 'dark:bg-emerald-900');
+    }
+    
+    if (passInput) {
+      passInput.focus();
+    }
   }
 
   const OFFICIAL_AUTH_USERS = [
@@ -12280,11 +12292,11 @@ function generateSmartAnswer(q) {
       const sessionObj = { ...user, authenticated: true, authTime: Date.now() };
       setCurrentSession(sessionObj);
 
-      // إخفاء بوابة الدخول
+      // إخفاء بوابة الدخول فوراً وبشكل حاسم
       const gate = document.getElementById('app-login-gate');
       if (gate) {
+        gate.style.setProperty('display', 'none', 'important');
         gate.classList.add('hidden');
-        gate.style.display = 'none';
       }
       const bottomNav = document.getElementById('mobile-bottom-nav');
       if (bottomNav) bottomNav.classList.remove('hidden');
