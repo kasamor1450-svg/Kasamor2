@@ -1,0 +1,35 @@
+{
+  "id": "com.kasamor.app",
+  "name": "Ù…Ø´Ø±ÙˆØ¹ Ø£Ø¨Ù†Ø§Ø¡ Ù…ØµØ·ÙÙ‰ Ø­Ø³Ù† Ø§Ù„Ø²Ø±Ø§Ø¹ÙŠ",
+  "short_name": "ÙƒØ³Ù…ÙˆØ± 2026",
+  "description": "Ø§Ù„Ù†Ø¸Ø§Ù… Ø§Ù„Ù…Ø§Ù„ÙŠ ÙˆØ§Ù„ØªØ´ØºÙŠÙ„ÙŠ Ø§Ù„Ù…ØªÙƒØ§Ù…Ù„ Ù„Ù…Ø´Ø±ÙˆØ¹ Ø£Ø¨Ù†Ø§Ø¡ Ù…ØµØ·ÙÙ‰ Ø­Ø³Ù† Ø§Ù„Ø²Ø±Ø§Ø¹ÙŠ - Ø§Ù„Ù‚Ø¶Ø§Ø±ÙØŒ ÙƒØ³Ù…ÙˆØ± Ø§Ù„Ø´Ø±Ù‚ÙŠ 1450 ÙØ¯Ø§Ù†",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#064e3b",
+  "theme_color": "#15803d",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

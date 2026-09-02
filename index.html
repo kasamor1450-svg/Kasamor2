@@ -37,6 +37,55 @@
   <!-- Supabase JS Client for Realtime Cloud Database -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- Progressive Web App (PWA) Mobile Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#15803d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="كسمور 2026">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('✓ Service Worker PWA Registered:', reg.scope);
+        }).catch((err) => {
+          console.log('Service Worker note:', err);
+        });
+      });
+    }
+
+    // Capture PWA Install Prompt for Android & Chrome
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('pwa-install-app-btn');
+      if (installBtn) {
+        installBtn.classList.remove('hidden');
+      }
+    });
+
+    window.triggerPwaInstall = async function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const choiceResult = await deferredPrompt.userChoice;
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User installed the PWA!');
+        }
+        deferredPrompt = null;
+        const installBtn = document.getElementById('pwa-install-app-btn');
+        if (installBtn) installBtn.classList.add('hidden');
+      } else {
+        // Fallback guidance for iOS / other browsers
+        alert('لتثبيت التطبيق على شاشة هاتفك:\n\n1. على آيفون (Safari): اضغط على زر المشاركة ⬆️ ثم اختر "إضافة إلى الشاشة الرئيسية".\n2. على أندرويد (Chrome): اضغط على الثلاث نقاط ⋮ ثم اختر "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية".');
+      }
+    };
+  </script>
+
+
   <!-- Custom Modern CSS -->
   <style>
 /* ========================================================
@@ -577,6 +626,12 @@ table tbody tr:hover {
         <div class="flex items-center gap-1.5">
           
           <!-- زر ومؤشر الربط السحابي المشترك Supabase -->
+          
+          <!-- زر تثبيت التطبيق على الجوال PWA -->
+          <button id="pwa-install-app-btn" onclick="triggerPwaInstall()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-sm animate-pulse" title="تثبيت التطبيق كـ App على شاشة هاتفك">
+            <span>📱 تثبيت التطبيق</span>
+          </button>
+
           <button id="cloud-sync-badge-btn" onclick="openSupabaseCloudModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded-lg text-xs font-bold transition shadow-sm" title="الربط السحابي المشترك (Supabase PostgreSQL)">
             <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
             <span id="cloud-status-text">☁️ السحابة</span>
