@@ -12166,6 +12166,11 @@ function generateSmartAnswer(q) {
     const passInput = document.getElementById('gate-password');
     if (unameInput) unameInput.value = uname;
     
+    // تعبئة كلمة المرور التلقائية 2026 فوراً لتسهيل الدخول بضغطة واحدة
+    if (passInput && !passInput.value) {
+      passInput.value = '2026';
+    }
+    
     // إبراز الزر المحدد
     document.querySelectorAll('.gate-user-btn').forEach(b => {
       b.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-100', 'dark:bg-emerald-900');
@@ -12178,6 +12183,21 @@ function generateSmartAnswer(q) {
     if (passInput) {
       passInput.focus();
     }
+  }
+
+  async function forceWipeAndReload() {
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (let k of keys) await caches.delete(k);
+      }
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let r of registrations) await r.unregister();
+      }
+    } catch(e) {}
+    localStorage.removeItem('MUSTAGRO_SECURE_AUTH_SESSION_2026_V1');
+    window.location.href = window.location.origin + window.location.pathname + '?force_update=' + Date.now();
   }
 
   const OFFICIAL_AUTH_USERS = [
