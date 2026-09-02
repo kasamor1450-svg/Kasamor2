@@ -258,7 +258,8 @@
           capitalInjections: (capitalInjRes.data || []).map(ci => ({
             id: ci.id, partnerId: ci.partner_id, partnerName: ci.partner_name,
             date: ci.date, amount: Number(ci.amount || 0), paymentMethod: ci.payment_method,
-            purpose: ci.purpose, loggedBy: ci.logged_by, notes: ci.notes
+            purpose: ci.purpose, loggedBy: ci.logged_by, notes: ci.notes,
+            capitalType: (ci.notes && ci.notes.includes('[نوع: غير مسترد]')) ? 'non_refundable' : ((ci.notes && ci.notes.includes('[نوع: مسترد]')) ? 'refundable' : (ci.capital_type || 'refundable'))
           })),
           plots: rawPlots.map(pl => {
             const ops = rawOps
