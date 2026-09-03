@@ -901,6 +901,11 @@ table tbody tr:hover {
           </button>
 
           <div id="more-sections-dropdown" class="hidden absolute left-0 top-10 z-50 w-52 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 text-right space-y-1">
+            
+            <button onclick="switchSection('section-rainfall'); toggleMoreSectionsDropdown();" class="w-full px-3 py-2 text-right text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl flex items-center gap-2 transition">
+              <i data-lucide="cloud-rain" class="w-4 h-4 text-sky-500"></i>
+              <span>سجل رصد الأمطار والطقس</span>
+            </button>
             <button onclick="switchSection('section-machinery'); toggleMoreSectionsDropdown();" class="w-full px-3 py-2 text-right text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl flex items-center gap-2 transition">
               <i data-lucide="wrench" class="w-4 h-4 text-blue-500"></i>
               <span>الآليات والأسطول</span>
@@ -973,7 +978,7 @@ table tbody tr:hover {
         <!-- أزرار العمليات السريعة الأربعة الأكثر استخداماً (The 4 Primary Actions) -->
         <div>
           <p class="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2.5">⚡ الإجراءات السريعة اليومية</p>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
             
             <button onclick="openEditExpenseModal()" class="p-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right">
               <span class="text-xl">💰</span>
@@ -996,6 +1001,15 @@ table tbody tr:hover {
               <div>
                 <p class="font-black text-xs">صرف وقود</p>
                 <p class="text-[9px] text-sky-100">صرف جازولين للجرارات</p>
+              </div>
+            </button>
+
+            
+            <button onclick="openAddRainfallModal()" class="p-3 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right">
+              <span class="text-xl">🌧️</span>
+              <div>
+                <p class="font-black text-xs">تسجيل أمطار</p>
+                <p class="text-[9px] text-sky-100">رصد هطول أمطار كسمور</p>
               </div>
             </button>
 
@@ -1671,6 +1685,69 @@ table tbody tr:hover {
     <!-- ======================================================== -->
     <!-- القسم: منظومة الحصاد ومبيعات المحاصيل والزكاة (Harvest & Marketing) -->
     <!-- ======================================================== -->
+    
+    <!-- ======================================================== -->
+    <!-- وحدة رصد وتسجيل الأمطار والطقس (Rainfall & Weather Section) -->
+    <!-- ======================================================== -->
+    <section id="section-rainfall" class="app-section hidden space-y-6">
+      
+      <!-- ترويسة القسم وأزرار الإجراءات -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🌧️ سجل رصد الأمطار والطقس</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            توثيق هطول أمطار خريف 2026 في سهول كسمور الشرقي (الوقت، والمدة، وحالة الهطول، والأثر الزراعي).
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openAddRainfallModal()" class="px-4 py-2 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-sm active:scale-95">
+            <span class="text-sm">➕</span>
+            <span>تسجيل هطول أمطار جديد</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- كروت المؤشرات الحية للأمطار -->
+      <div id="rainfall-kpi-container" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+
+      <!-- جدول وبطاقات سجل الأمطار الكاملة -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🌧️</span>
+            <h3 class="text-xs font-black text-slate-900 dark:text-white">بيان المطرات المسجلة لموسم 2026 (كسمور الشرقي)</h3>
+          </div>
+          <span id="rainfall-count-badge" class="px-2.5 py-0.5 bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 rounded-full text-[10px] font-black border border-sky-300">
+            0 مطرات
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[11px] font-bold border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="py-3 px-4">اليوم والتاريخ</th>
+                <th class="py-3 px-4">بداية الهطول</th>
+                <th class="py-3 px-4">نهاية الهطول</th>
+                <th class="py-3 px-4">المدة الزمنية</th>
+                <th class="py-3 px-4">الحالة (الشدة)</th>
+                <th class="py-3 px-4">الكمية (ملم)</th>
+                <th class="py-3 px-4">الموقع / النمرة</th>
+                <th class="py-3 px-4">الأثر الحقلي والملاحظات</th>
+                <th class="py-3 px-4">المسجل</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="rainfall-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
     <section id="section-harvest" class="app-section hidden space-y-6">
       
       <!-- بانر حصاد الذرة وتسويق الغلال -->
@@ -5472,6 +5549,50 @@ const DEFAULT_DATA = {
     }
   ],
   "groceryTransactions": [],
+  "rainfallLogs": [
+    {
+      "id": "rain-1",
+      "date": "2026-07-15",
+      "dayName": "الأربعاء",
+      "startTime": "03:30",
+      "endTime": "06:15",
+      "durationMinutes": 165,
+      "intensity": "قوية",
+      "amountMm": 45,
+      "location": "كسمور الشرقي - نمرة 500",
+      "fieldImpact": "مطرة خريفية غزيرة سيلت الجداول، روت الأرض تماماً وجهزتها للكسرة",
+      "loggedBy": "عبدالقادر (الوكيل)",
+      "notes": "سيل في خور كسمور وري عميق"
+    },
+    {
+      "id": "rain-2",
+      "date": "2026-08-02",
+      "dayName": "الأحد",
+      "startTime": "16:00",
+      "endTime": "18:30",
+      "durationMinutes": 150,
+      "intensity": "وسط",
+      "amountMm": 28,
+      "location": "كسمور الشرقي - عامة",
+      "fieldImpact": "مطرة متوسطة ملائمة لنمو بادرات الذرة والتسالي",
+      "loggedBy": "محمد مصطفى",
+      "notes": "أمطار رطبة جيدة للمحصول"
+    },
+    {
+      "id": "rain-3",
+      "date": "2026-08-18",
+      "dayName": "الثلاثاء",
+      "startTime": "21:15",
+      "endTime": "22:45",
+      "durationMinutes": 90,
+      "intensity": "خفيفة",
+      "amountMm": 12,
+      "location": "نمرة 250 ذرة والكمبو",
+      "fieldImpact": "رشاش رطب الجو ورشح التربة الخفيفة",
+      "loggedBy": "حسن مصطفى",
+      "notes": "رذاذ متقطع"
+    }
+  ],
   "partners": [
     {
       "id": "prt-1",
@@ -8563,6 +8684,7 @@ function loadData() {
     machineryMaintenance: Array.isArray(loaded.machineryMaintenance) ? loaded.machineryMaintenance : (def.machineryMaintenance || []),
     labor: Array.isArray(loaded.labor) ? loaded.labor : def.labor,
     expenses: Array.isArray(loaded.expenses) ? loaded.expenses : def.expenses,
+    rainfallLogs: Array.isArray(loaded.rainfallLogs) ? loaded.rainfallLogs : (def.rainfallLogs || []),
     capitalPlan: loaded.capitalPlan || def.capitalPlan,
     budgetCaps: Array.isArray(loaded.budgetCaps) ? loaded.budgetCaps : def.budgetCaps,
     forecastSettings: {
@@ -9380,6 +9502,7 @@ function updateActiveViews() {
     renderPlotsDashboard();
     renderExpensesSection();
     renderHarvestSection();
+    renderRainfallSection();
     renderMachinerySection();
     renderFuelSection();
     renderLaborSection();
@@ -9749,7 +9872,15 @@ function renderPlotsDashboard() {
         </div>
 
         <div class="flex gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-          <button onclick="openAddOperationModal('${plot.id}')" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+          
+        <button onclick="toggleMobileMenuDrawer(); switchSection('section-rainfall');" class="w-full p-2.5 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 text-sky-900 dark:text-sky-200 rounded-xl border border-sky-200 dark:border-sky-800 font-bold text-xs flex items-center justify-between transition">
+          <div class="flex items-center gap-2">
+            <span class="text-base">🌧️</span>
+            <span>سجل رصد الأمطار والطقس</span>
+          </div>
+          <span>&larr;</span>
+        </button>
+        <button onclick="openAddOperationModal('${plot.id}')" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span>إضافة عملية</span>
           </button>
@@ -15484,6 +15615,430 @@ function setCustomPhotoAsBanner(photoId) {
 
 // وحدة الحصاد ومبيعات المحاصيل وتوريد زكاة الزروع (10%)
 // ========================================================
+
+
+// ========================================================
+// وحدة رصد وتسجيل الأمطار والطقس (Rainfall Monitoring Module)
+// ========================================================
+
+const ARABIC_DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+function getArabicDayName(dateString) {
+  if (!dateString) return '';
+  const d = new Date(dateString + 'T12:00:00');
+  return ARABIC_DAYS[d.getDay()] || '';
+}
+
+function calculateRainDuration(startTime, endTime) {
+  if (!startTime || !endTime) return { minutes: 0, formatted: '-' };
+  const [sH, sM] = startTime.split(':').map(Number);
+  const [eH, eM] = endTime.split(':').map(Number);
+  
+  let startTotal = sH * 60 + sM;
+  let endTotal = eH * 60 + eM;
+  
+  // إذا امتد الهطول لبعد منتصف الليل
+  if (endTotal < startTotal) {
+    endTotal += 24 * 60;
+  }
+  
+  const diffMinutes = endTotal - startTotal;
+  const hours = Math.floor(diffMinutes / 60);
+  const mins = diffMinutes % 60;
+  
+  let formatted = '';
+  if (hours > 0 && mins > 0) {
+    formatted = `${hours} س و ${mins} دقيقة`;
+  } else if (hours > 0) {
+    formatted = `${hours} ساعة`;
+  } else {
+    formatted = `${mins} دقيقة`;
+  }
+  
+  return { minutes: diffMinutes, formatted };
+}
+
+function renderRainfallSection() {
+  if (!state.rainfallLogs) {
+    state.rainfallLogs = (DEFAULT_DATA && DEFAULT_DATA.rainfallLogs) ? JSON.parse(JSON.stringify(DEFAULT_DATA.rainfallLogs)) : [];
+  }
+
+  const logs = state.rainfallLogs || [];
+  
+  // 1. حساب المؤشرات
+  const totalRains = logs.length;
+  const strongRains = logs.filter(r => r.intensity === 'قوية').length;
+  const mediumRains = logs.filter(r => r.intensity === 'وسط').length;
+  const lightRains = logs.filter(r => r.intensity === 'خفيفة').length;
+  const totalMinutes = logs.reduce((sum, r) => sum + (Number(r.durationMinutes) || 0), 0);
+  const totalHours = (totalMinutes / 60).toFixed(1);
+
+  // تحديث شارة العداد
+  const countBadge = document.getElementById('rainfall-count-badge');
+  if (countBadge) countBadge.innerText = `${totalRains} مطرات مسجلة`;
+
+  // 2. رسم كروت المؤشرات
+  const kpiEl = document.getElementById('rainfall-kpi-container');
+  if (kpiEl) {
+    kpiEl.innerHTML = `
+      <div class="glass-card p-4 rounded-2xl border border-sky-200 dark:border-sky-900 flex items-center gap-3 bg-sky-50/40 dark:bg-sky-950/20">
+        <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 flex items-center justify-center font-black text-lg shadow-sm">
+          🌧️
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-500 font-bold">إجمالي المطرات المسجلة:</p>
+          <h4 class="text-base font-black text-slate-900 dark:text-white font-mono">${totalRains} <span class="text-xs">مطرة</span></h4>
+          <span class="text-[10px] text-sky-600 font-bold">مجموع ${totalHours} ساعة هطول</span>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border border-blue-200 dark:border-blue-900 flex items-center gap-3 bg-blue-50/40 dark:bg-blue-950/20">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 flex items-center justify-center font-black text-lg shadow-sm">
+          ⛈️
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-500 font-bold">أمطار قوية (سيلية):</p>
+          <h4 class="text-base font-black text-blue-700 dark:text-blue-400 font-mono">${strongRains} <span class="text-xs">مطرات</span></h4>
+          <span class="text-[10px] text-blue-600 font-bold">ري عميق وجداول ممتلئة</span>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border border-teal-200 dark:border-teal-900 flex items-center gap-3 bg-teal-50/40 dark:bg-teal-950/20">
+        <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300 flex items-center justify-center font-black text-lg shadow-sm">
+          🌦️
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-500 font-bold">أمطار وسط (متوسطة):</p>
+          <h4 class="text-base font-black text-teal-700 dark:text-teal-400 font-mono">${mediumRains} <span class="text-xs">مطرات</span></h4>
+          <span class="text-[10px] text-teal-600 font-bold">روى الأرض وملائم للنمو</span>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center font-black text-lg shadow-sm">
+          🌦️
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-500 font-bold">أمطار خفيفة (رشاش):</p>
+          <h4 class="text-base font-black text-slate-700 dark:text-slate-300 font-mono">${lightRains} <span class="text-xs">مطرات</span></h4>
+          <span class="text-[10px] text-slate-400 font-bold">رذاذ رطب السطح</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. رسم الجدول
+  const tbody = document.getElementById('rainfall-table-body');
+  if (tbody) {
+    if (logs.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="10" class="text-center py-8 text-slate-400 text-xs">
+            لا توجد هطولات أمطار مسجلة حتى الآن. اضغط "تسجيل هطول أمطار جديد" في الأعلى للبدء.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = logs.map(r => {
+      let badgeStyle = 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200';
+      let icon = '🌧️';
+      if (r.intensity === 'قوية') {
+        badgeStyle = 'bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200 border-blue-300 font-black';
+        icon = '⛈️';
+      } else if (r.intensity === 'وسط') {
+        badgeStyle = 'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200 border-sky-300 font-bold';
+        icon = '🌦️';
+      } else if (r.intensity === 'خفيفة') {
+        badgeStyle = 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300';
+        icon = '🌧️';
+      }
+
+      const durObj = calculateRainDuration(r.startTime, r.endTime);
+
+      return `
+        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+          <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+            <div>${r.dayName ? r.dayName + '، ' : ''}${r.date}</div>
+          </td>
+          
+          <td class="py-3.5 px-4 font-mono font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+            ${r.startTime || '-'}
+          </td>
+
+          <td class="py-3.5 px-4 font-mono font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+            ${r.endTime || '-'}
+          </td>
+
+          <td class="py-3.5 px-4 font-mono font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
+            ${durObj.formatted}
+          </td>
+
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <span class="px-2.5 py-1 rounded-full text-xs border ${badgeStyle} inline-flex items-center gap-1">
+              <span>${icon}</span>
+              <span>${r.intensity}</span>
+            </span>
+          </td>
+
+          <td class="py-3.5 px-4 font-mono font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+            ${r.amountMm ? r.amountMm + ' ملم' : '-'}
+          </td>
+
+          <td class="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
+            ${r.location || 'كسمور الشرقي'}
+          </td>
+
+          <td class="py-3.5 px-4 text-[11px] text-slate-600 dark:text-slate-300 max-w-xs">
+            ${r.fieldImpact || r.notes || '-'}
+          </td>
+
+          <td class="py-3.5 px-4 text-[10px] text-slate-400 font-medium whitespace-nowrap">
+            ${r.loggedBy || 'محمد مصطفى'}
+          </td>
+
+          <td class="py-3.5 px-4 text-left whitespace-nowrap">
+            <div class="flex items-center gap-1.5">
+              <button onclick="openAddRainfallModal('${r.id}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-slate-600 transition" title="تعديل">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteRainfallRecord('${r.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 rounded-lg transition" title="حذف">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+}
+
+// نافذة تسجيل / تعديل هطول الأمطار
+function openAddRainfallModal(editId = null) {
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
+    showToast('⚠️ عفواً، حسابك للاطلاع فقط ولا يملك صلاحية إضافة أو تعديل البيانات.', 'warning');
+    return;
+  }
+
+  const isEdit = !!editId;
+  const existing = isEdit ? (state.rainfallLogs || []).find(r => r.id === editId) : null;
+  
+  const today = new Date().toISOString().split('T')[0];
+  const dateVal = existing ? existing.date : today;
+  const startVal = existing ? existing.startTime : '04:00';
+  const endVal = existing ? existing.endTime : '06:30';
+  const intensityVal = existing ? existing.intensity : 'وسط';
+  const amountVal = existing ? (existing.amountMm || '') : '';
+  const locationVal = existing ? (existing.location || '') : 'كسمور الشرقي - نمرة 500';
+  const impactVal = existing ? (existing.fieldImpact || '') : '';
+  const notesVal = existing ? (existing.notes || '') : '';
+
+  const modalHTML = `
+    <div class="p-5 sm:p-6 text-right max-w-md mx-auto">
+      
+      <!-- ترويسة النافذة -->
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span class="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 flex items-center justify-center text-xl font-black shadow-sm">
+            🌧️
+          </span>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">
+              ${isEdit ? 'تعديل تسجيل هطول الأمطار' : 'تسجيل هطول أمطار جديد'}
+            </h3>
+            <p class="text-xs text-slate-400">توثيق مواعيد وشدة أمطار خريف كسمور 2026</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+      </div>
+
+      <form onsubmit="handleSaveRainfallSubmit(event, '${editId || ''}')" class="space-y-3.5 text-xs">
+        
+        <!-- 1. اليوم والتاريخ -->
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">اليوم والتاريخ:</label>
+          <input type="date" id="rain-input-date" value="${dateVal}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+        </div>
+
+        <!-- 2. بداية الهطول ونهايته -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">بداية الهطول:</label>
+            <input type="time" id="rain-input-start" value="${startVal}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold font-mono" required>
+          </div>
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">نهاية الهطول:</label>
+            <input type="time" id="rain-input-end" value="${endVal}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold font-mono" required>
+          </div>
+        </div>
+
+        <!-- 3. الحالة: قوية، خفيفة، وسط -->
+        <div>
+          <label class="block font-bold mb-1.5 text-slate-700 dark:text-slate-300">حالة الهطول (الشدة):</label>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            
+            <label class="cursor-pointer border-2 rounded-2xl p-2.5 flex flex-col items-center gap-1 transition ${intensityVal === 'قوية' ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-black' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'}">
+              <input type="radio" name="rain-intensity" value="قوية" ${intensityVal === 'قوية' ? 'checked' : ''} class="hidden" onchange="updateRainIntensitySelection(this)">
+              <span class="text-xl">⛈️</span>
+              <span class="text-xs">قوية</span>
+              <span class="text-[9px] opacity-75">غزيرة / سيل</span>
+            </label>
+
+            <label class="cursor-pointer border-2 rounded-2xl p-2.5 flex flex-col items-center gap-1 transition ${intensityVal === 'وسط' ? 'border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200 font-black' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'}">
+              <input type="radio" name="rain-intensity" value="وسط" ${intensityVal === 'وسط' ? 'checked' : ''} class="hidden" onchange="updateRainIntensitySelection(this)">
+              <span class="text-xl">🌦️</span>
+              <span class="text-xs">وسط</span>
+              <span class="text-[9px] opacity-75">روى الأرض</span>
+            </label>
+
+            <label class="cursor-pointer border-2 rounded-2xl p-2.5 flex flex-col items-center gap-1 transition ${intensityVal === 'خفيفة' ? 'border-slate-500 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-black' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'}">
+              <input type="radio" name="rain-intensity" value="خفيفة" ${intensityVal === 'خفيفة' ? 'checked' : ''} class="hidden" onchange="updateRainIntensitySelection(this)">
+              <span class="text-xl">🌧️</span>
+              <span class="text-xs">خفيفة</span>
+              <span class="text-[9px] opacity-75">رشاش / رذاذ</span>
+            </label>
+
+          </div>
+        </div>
+
+        <!-- 4. الموقع / النمرة والكمية بالملم -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">الموقع / النمرة:</label>
+            <select id="rain-input-location" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="كسمور الشرقي - عامة" ${locationVal.includes('عامة') ? 'selected' : ''}>كسمور الشرقي - عامة</option>
+              <option value="كسمور الشرقي - نمرة 500" ${locationVal.includes('500') ? 'selected' : ''}>نمرة 500 (ذرة/تسالي)</option>
+              <option value="كسمور الشرقي - نمرة 250" ${locationVal.includes('250') ? 'selected' : ''}>نمرة 250 (ذرة)</option>
+              <option value="كسمور الشرقي - نمرة 200" ${locationVal.includes('200') ? 'selected' : ''}>نمرة 200 (ذرة)</option>
+              <option value="الكمبو وموقع السكن" ${locationVal.includes('الكمبو') ? 'selected' : ''}>الكمبو وموقع السكن</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">الكمية (ملم - اختياري):</label>
+            <input type="number" step="0.5" id="rain-input-amount" value="${amountVal}" placeholder="مثال: 35 ملم" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+        </div>
+
+        <!-- 5. الأثر الحقلي والملاحظات الزراعية -->
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">الأثر الحقلي والملاحظات:</label>
+          <textarea id="rain-input-impact" rows="2" placeholder="مثال: روت الأرض تماماً وجهزتها للبذر، أوقفت حركة الجرارات 24 ساعة..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">${impactVal}</textarea>
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+          <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white rounded-xl font-black transition shadow-sm active:scale-95 text-xs">
+            💾 ${isEdit ? 'حفظ التعديلات' : 'تسجيل المطرة الآن'}
+          </button>
+          <button type="button" onclick="closeModal()" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-xl font-bold text-xs">
+            إلغاء
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  `;
+  openModal(modalHTML);
+}
+
+function updateRainIntensitySelection(radio) {
+  const container = radio.closest('.grid');
+  if (!container) return;
+  container.querySelectorAll('label').forEach(lbl => {
+    lbl.className = 'cursor-pointer border-2 rounded-2xl p-2.5 flex flex-col items-center gap-1 transition border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400';
+  });
+  
+  const selectedLabel = radio.closest('label');
+  const val = radio.value;
+  if (val === 'قوية') {
+    selectedLabel.className = 'cursor-pointer border-2 rounded-2xl p-2.5 flex flex-col items-center gap-1 transition border-blue-600 bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-black';
+  } else if (val === 'وسط') {
+    selectedLabel.className = 'cursor-pointer border-2 rounded-2xl p-2.5 flex flex-col items-center gap-1 transition border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200 font-black';
+  } else {
+    selectedLabel.className = 'cursor-pointer border-2 rounded-2xl p-2.5 flex flex-col items-center gap-1 transition border-slate-500 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-black';
+  }
+}
+
+function handleSaveRainfallSubmit(event, editId) {
+  event.preventDefault();
+
+  const date = document.getElementById('rain-input-date').value;
+  const startTime = document.getElementById('rain-input-start').value;
+  const endTime = document.getElementById('rain-input-end').value;
+  
+  const intensityRadio = document.querySelector('input[name="rain-intensity"]:checked');
+  const intensity = intensityRadio ? intensityRadio.value : 'وسط';
+  
+  const location = document.getElementById('rain-input-location').value;
+  const amountMm = parseFloat(document.getElementById('rain-input-amount').value) || null;
+  const fieldImpact = document.getElementById('rain-input-impact').value.trim();
+
+  const durationObj = calculateRainDuration(startTime, endTime);
+  const dayName = getArabicDayName(date);
+
+  const currentUserObj = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : { name: 'محمد مصطفى' };
+
+  if (!state.rainfallLogs) state.rainfallLogs = [];
+
+  if (editId) {
+    const idx = state.rainfallLogs.findIndex(r => r.id === editId);
+    if (idx !== -1) {
+      state.rainfallLogs[idx] = {
+        ...state.rainfallLogs[idx],
+        date, dayName, startTime, endTime,
+        durationMinutes: durationObj.minutes,
+        intensity, amountMm, location, fieldImpact,
+        loggedBy: currentUserObj.name
+      };
+      showToast('✓ تم تحديث سجل هطول المطر بنجاح');
+    }
+  } else {
+    const newRecord = {
+      id: 'rain-' + Date.now(),
+      date, dayName, startTime, endTime,
+      durationMinutes: durationObj.minutes,
+      intensity, amountMm, location, fieldImpact,
+      loggedBy: currentUserObj.name,
+      notes: `هطول أمطار ${intensity} من ${startTime} إلى ${endTime}`
+    };
+    state.rainfallLogs.unshift(newRecord);
+    showToast(`✓ تم تسجيل هطول أمطار (${intensity}) بنجاح!`);
+  }
+
+  saveData();
+  renderRainfallSection();
+  closeModal();
+
+  // إشعار فوري في مركز الإشعارات
+  if (typeof addSystemNotification === 'function') {
+    addSystemNotification({
+      title: '🌧️ تسجيل هطول أمطار في كسمور',
+      desc: `أمطار ${intensity} يوم ${dayName} (${date}) من ${startTime} إلى ${endTime} (${durationObj.formatted})`,
+      category: 'operations',
+      targetSection: 'section-rainfall'
+    });
+  }
+
+  // تدوين في سجل التدقيق
+  if (typeof logAudit === 'function') {
+    logAudit('تسجيل هطول أمطار', `أمطار ${intensity} في ${location} (${durationObj.formatted})`, currentUserObj.name);
+  }
+}
+
+function deleteRainfallRecord(rainId) {
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
+    showToast('⚠️ عفواً، حسابك للاطلاع فقط ولا يملك صلاحية إضافة أو تعديل البيانات.', 'warning');
+    return;
+  }
+  
+  if (!confirm('هل أنت متأكد من حذف هذا السجل لهطول الأمطار؟')) return;
+  state.rainfallLogs = (state.rainfallLogs || []).filter(r => r.id !== rainId);
+  saveData('✓ تم حذف سجل هطول المطر');
+  renderRainfallSection();
+}
+
 
 function renderHarvestSection() {
   const intakes = state.harvestIntakes || [];
