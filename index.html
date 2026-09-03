@@ -1033,8 +1033,8 @@ table tbody tr:hover {
 
           <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right">
             <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي رأس المال المضخوخ</p>
-            <h3 id="kpi-total-capital" class="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-400 font-mono mt-0.5">118,500,000 ج.س</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">13 سهماً (غير مسترد + مسترد)</p>
+            <h3 id="kpi-total-capital" class="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-400 font-mono mt-0.5">136,118,003 ج.س</h3>
+            <p class="text-[10px] text-slate-400 mt-0.5">غير مسترد: 69,618,003 • مسترد: 66,500,000</p>
           </div>
 
         </div>
@@ -5480,8 +5480,10 @@ const DEFAULT_DATA = {
       "shares": 2,
       "totalShares": 13,
       "paidCapital": 77210462,
+      "nonRefundableCapital": 10710462,
+      "refundableCapital": 66500000,
       "role": "شريك مؤسس",
-      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) [غير مسترد: 10710462] [مسترد: 66500000]"
     },
     {
       "id": "prt-2",
@@ -5490,8 +5492,10 @@ const DEFAULT_DATA = {
       "shares": 2,
       "totalShares": 13,
       "paidCapital": 10710462,
+      "nonRefundableCapital": 10710462,
+      "refundableCapital": 0,
       "role": "شريك ومدير عام وميداني",
-      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) [غير مسترد: 10710462] [مسترد: 0]"
     },
     {
       "id": "prt-3",
@@ -5500,8 +5504,10 @@ const DEFAULT_DATA = {
       "shares": 2,
       "totalShares": 13,
       "paidCapital": 10710462,
+      "nonRefundableCapital": 10710462,
+      "refundableCapital": 0,
       "role": "شريك مؤسس",
-      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) [غير مسترد: 10710462] [مسترد: 0]"
     },
     {
       "id": "prt-4",
@@ -5510,8 +5516,10 @@ const DEFAULT_DATA = {
       "shares": 2,
       "totalShares": 13,
       "paidCapital": 10710462,
+      "nonRefundableCapital": 10710462,
+      "refundableCapital": 0,
       "role": "شريكة مؤسسة",
-      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) [غير مسترد: 10710462] [مسترد: 0]"
     },
     {
       "id": "prt-5",
@@ -5520,8 +5528,10 @@ const DEFAULT_DATA = {
       "shares": 1,
       "totalShares": 13,
       "paidCapital": 5355231,
+      "nonRefundableCapital": 5355231,
+      "refundableCapital": 0,
       "role": "شريك ومدير مالي",
-      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) [غير مسترد: 5355231] [مسترد: 0]"
     },
     {
       "id": "prt-6",
@@ -5530,8 +5540,10 @@ const DEFAULT_DATA = {
       "shares": 1,
       "totalShares": 13,
       "paidCapital": 5355231,
+      "nonRefundableCapital": 5355231,
+      "refundableCapital": 0,
       "role": "شريكة مؤسسة",
-      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) [غير مسترد: 5355231] [مسترد: 0]"
     },
     {
       "id": "prt-7",
@@ -5540,8 +5552,10 @@ const DEFAULT_DATA = {
       "shares": 1,
       "totalShares": 13,
       "paidCapital": 5355231,
+      "nonRefundableCapital": 5355231,
+      "refundableCapital": 0,
       "role": "شريكة مؤسسة",
-      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) [غير مسترد: 5355231] [مسترد: 0]"
     },
     {
       "id": "prt-8",
@@ -5550,8 +5564,10 @@ const DEFAULT_DATA = {
       "shares": 1,
       "totalShares": 13,
       "paidCapital": 5355231,
+      "nonRefundableCapital": 5355231,
+      "refundableCapital": 0,
       "role": "شريكة مؤسسة",
-      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) [غير مسترد: 5355231] [مسترد: 0]"
     },
     {
       "id": "prt-9",
@@ -5560,8 +5576,10 @@ const DEFAULT_DATA = {
       "shares": 1,
       "totalShares": 13,
       "paidCapital": 5355231,
+      "nonRefundableCapital": 5355231,
+      "refundableCapital": 0,
       "role": "شريكة مؤسسة",
-      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) • رأس المال مسترد بالكامل"
+      "notes": "نسبة ربح ثابتة 1 من 13 (7.69%) [غير مسترد: 5355231] [مسترد: 0]"
     }
   ],
   "capitalInjections": [
@@ -9439,10 +9457,32 @@ function renderHeaderKPIs() {
   const elOverallProgress = document.getElementById('kpi-overall-progress');
 
   if (elTotalArea) elTotalArea.innerText = `${m.totalArea.toLocaleString()} فدان`;
-  if (elTotalSpent) elTotalSpent.innerText = `${m.totalExpenses.toLocaleString()} جنيه`;
+  if (elTotalSpent) elTotalSpent.innerText = `${m.totalExpenses.toLocaleString()} ج.س`;
   if (elSorghumCost) elSorghumCost.innerText = `${Math.round(m.costPerFeddanSorghum).toLocaleString()} ج/فدان`;
   if (elTasaliCost) elTasaliCost.innerText = `${Math.round(m.costPerFeddanTasali).toLocaleString()} ج/فدان`;
-  if (elFuelStock) elFuelStock.innerText = `${m.fuelInStock} برميل متبقي`;
+  if (elFuelStock) elFuelStock.innerText = `${m.fuelInStock} برميل`;
+
+  // Dynamic calculation of Injected Capital KPI
+  const elTotalCapital = document.getElementById('kpi-total-capital');
+  if (elTotalCapital) {
+    if (typeof recalculatePartnerCapital === 'function') recalculatePartnerCapital();
+    const totalPaidCap = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
+    const totalNonRef = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.nonRefundableCapital) || 0), 0);
+    const totalRef = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.refundableCapital) || 0), 0);
+    
+    elTotalCapital.innerText = `${formatCapitalMoney(totalPaidCap)} ج.س`;
+    const elCapSub = elTotalCapital.nextElementSibling;
+    if (elCapSub) {
+      elCapSub.innerText = `غير مسترد: ${formatCapitalMoney(totalNonRef)} • مسترد: ${formatCapitalMoney(totalRef)}`;
+    }
+  }
+
+  // Dynamic calculation of Total Sales KPI
+  const elTotalSales = document.getElementById('kpi-total-sales');
+  if (elTotalSales) {
+    const totalSalesAmount = (state.cropSales || []).reduce((sum, s) => sum + (parseFloat(s.totalAmount) || 0), 0);
+    elTotalSales.innerText = `${formatCapitalMoney(totalSalesAmount)} ج.س`;
+  }
   
   const progressPercent = Math.round((m.totalPlanted / m.totalArea) * 100) || 0;
   if (elOverallProgress) {
@@ -11535,33 +11575,49 @@ function recalculatePartnerCapital() {
   if (!state.capitalInjections) state.capitalInjections = [];
 
   state.partners.forEach(p => {
-    const nonRef = parseFloat(p.nonRefundableCapital);
-    const ref = parseFloat(p.refundableCapital);
-    
-    // إذا كانت الأرقام موجودة، لا نقوم بمسحها أو تصفيرها نهائياً
-    if (!isNaN(nonRef) && !isNaN(ref) && (nonRef > 0 || ref > 0)) {
-      p.paidCapital = nonRef + ref;
-      return;
+    // 1. First check if partner has explicit nonRefundableCapital or refundableCapital set
+    let nonRef = parseFloat(p.nonRefundableCapital);
+    let ref = parseFloat(p.refundableCapital);
+
+    // 2. Check partner's notes for breakdown tag [غير مسترد: ...] [مسترد: ...]
+    if (p.notes) {
+      const nrMatch = p.notes.match(/\[غير مسترد:\s*([0-9.]+)\]/);
+      const rMatch = p.notes.match(/\[مسترد:\s*([0-9.]+)\]/);
+      if (nrMatch) nonRef = parseFloat(nrMatch[1]);
+      if (rMatch) ref = parseFloat(rMatch[1]);
     }
 
+    // 3. Check injections for this partner
     const pInjections = state.capitalInjections.filter(inj => 
       inj.partnerId === p.id || inj.partnerName === p.name || inj.partnerName === p.fullName
     );
+
     if (pInjections.length > 0) {
-      p.nonRefundableCapital = pInjections
-        .filter(inj => inj.capitalType === 'non_refundable' || (inj.notes && inj.notes.includes('غير مسترد')))
+      const injNonRef = pInjections
+        .filter(inj => inj.capitalType === 'non_refundable' || (inj.notes && inj.notes.includes('غير مسترد')) || (inj.purpose && inj.purpose.includes('غير مسترد')))
         .reduce((sum, inj) => sum + (parseFloat(inj.amount) || 0), 0);
 
-      p.refundableCapital = pInjections
-        .filter(inj => inj.capitalType !== 'non_refundable' && (!inj.notes || !inj.notes.includes('غير مسترد')))
+      const injRef = pInjections
+        .filter(inj => inj.capitalType === 'refundable' || (inj.notes && inj.notes.includes('مسترد') && !inj.notes.includes('غير مسترد')) || (inj.purpose && inj.purpose.includes('مسترد') && !inj.purpose.includes('غير مسترد')))
         .reduce((sum, inj) => sum + (parseFloat(inj.amount) || 0), 0);
 
-      p.paidCapital = p.nonRefundableCapital + p.refundableCapital;
-    } else {
-      p.nonRefundableCapital = 0;
-      p.refundableCapital = parseFloat(p.paidCapital) || (p.shares === 2 ? 46153846.15 : 23076923.08);
-      p.paidCapital = p.nonRefundableCapital + p.refundableCapital;
+      if (injNonRef > 0 || injRef > 0) {
+        nonRef = injNonRef;
+        ref = injRef;
+      }
     }
+
+    // 4. Default fallback: all paid amounts are non-refundable except the 66,500,000 for Amr
+    if (isNaN(nonRef) || nonRef === 0) {
+      nonRef = p.shares === 2 ? 10710462 : 5355231;
+    }
+    if (isNaN(ref)) {
+      ref = (p.id === 'prt-1' || p.name === 'عمرو') ? 66500000 : 0;
+    }
+
+    p.nonRefundableCapital = nonRef;
+    p.refundableCapital = ref;
+    p.paidCapital = nonRef + ref;
   });
 }
 
@@ -15081,8 +15137,35 @@ function switchDashboardHeroImage(imgKey) {
   }
 }
 
+
+// ========================================================
+// وحدة معرض صور القضارف وإمكانية رفع صور جديدة للمشروع
+// ========================================================
+
+const GALLERY_STORAGE_KEY = 'MUSTAGRO_CUSTOM_GALLERY_PHOTOS';
+
+function getCustomGalleryPhotos() {
+  try {
+    const raw = localStorage.getItem(GALLERY_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) {
+    console.warn('Error loading custom gallery photos:', e);
+    return [];
+  }
+}
+
+function saveCustomGalleryPhotos(photos) {
+  try {
+    localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(photos));
+  } catch(e) {
+    console.error('Error saving custom gallery photos:', e);
+  }
+}
+
 function openGedarefGalleryModal() {
-  const galleryItems = [
+  const customPhotos = getCustomGalleryPhotos();
+  
+  const defaultGalleryItems = [
     { title: "صوامع غلال القضارف الشهيرة", desc: "أكبر مركز استراتيجي لتخزين ومناولة الغلال في السودان وسوق المحاصيل الرئيسي", key: "silo", tag: "صومعة القضارف" },
     { title: "حصاد سنابل الذرة الرفيعة", desc: "سنابل الذرة الممتلئة (ارفع قدمك وفترتية) وحصادات المشروع والعمالة", key: "sorghumHarvest", tag: "الذرة الرفيعة" },
     { title: "الحراثات وتجهيز طين القضارف", desc: "جرارات ثقيلة مع ديسكات وهاروات الحراثة والكسرة في سهول كسمور", key: "tractors", tag: "الحراثات والآليات" },
@@ -15093,50 +15176,299 @@ function openGedarefGalleryModal() {
   ];
 
   const html = `
-    <div class="p-6 max-h-[85vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div class="flex items-center gap-2">
-          <span class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-lg font-black">📸</span>
+    <div class="p-5 sm:p-6 max-h-[88vh] overflow-y-auto text-right">
+      
+      <!-- ترويسة المعرض مع زر الإضافة -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-xl font-black shadow-sm">📸</span>
           <div>
-            <h3 class="text-base font-black text-slate-900 dark:text-white">معرض مشاهد مشاريع القضارف الزراعية (كسمور الشرقي)</h3>
-            <p class="text-xs text-slate-500">الذرة الرفيعة، الحراثات، السمسم، صوامع الغلال، ومزارع المشروع</p>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">ألبوم صور ومشاهد مشروع القضارف الزراعي</h3>
+            <p class="text-xs text-slate-500">كسمور الشرقي • ${customPhotos.length + defaultGalleryItems.length} صورة موثقة للمشروع والمحاصيل</p>
           </div>
         </div>
-        <button onclick="closeModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+
+        <div class="flex items-center gap-2">
+          <!-- زر رفع صورة جديدة -->
+          <button type="button" onclick="openUploadPhotoModal()" class="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-sm active:scale-95">
+            <span class="text-sm">➕</span>
+            <span>تحميل صورة جديدة بالألبوم</span>
+          </button>
+          
+          <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        ${galleryItems.map(item => `
-          <div class="glass-card rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md group">
-            <div class="relative h-44 overflow-hidden bg-slate-900">
-              <img src="${GEDAREF_IMAGES[item.key]}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-              <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 bg-emerald-600/90 text-white text-[10px] font-black rounded-full backdrop-blur-sm border border-emerald-400/40">
-                ${item.tag}
-              </span>
-            </div>
-            <div class="p-3.5 space-y-1">
-              <h4 class="font-black text-xs text-slate-900 dark:text-white">${item.title}</h4>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">${item.desc}</p>
-              <div class="pt-2 flex justify-end">
-                <button onclick="switchDashboardHeroImage('${item.key}'); closeModal(); showToast('✓ تم تعيين المشهد في واجهة لوحة القيادة');" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
-                  <span>تعيين كخلفية للبانر</span>
-                  <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-                </button>
+      <!-- القسم 1: صور المشروع المضافة حديثاً من المستخدم (إن وجدت) -->
+      ${customPhotos.length > 0 ? `
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🌟</span>
+              <span>صور المشروع المضافة حديثاً (${customPhotos.length} صورة)</span>
+            </h4>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${customPhotos.map(photo => `
+              <div class="glass-card rounded-2xl overflow-hidden border border-emerald-300/60 dark:border-emerald-700/60 shadow-md group flex flex-col justify-between">
+                <div class="relative h-48 overflow-hidden bg-slate-900">
+                  <img src="${photo.dataUrl}" alt="${photo.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 cursor-pointer" onclick="viewPhotoLightbox('${photo.dataUrl}', '${photo.title}')">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
+                  <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 bg-emerald-600/90 text-white text-[10px] font-black rounded-full backdrop-blur-sm border border-emerald-400/40">
+                    ${photo.tag || 'صورة مضافة'}
+                  </span>
+                  <button onclick="deleteCustomPhoto('${photo.id}')" class="absolute top-2.5 left-2.5 w-7 h-7 bg-rose-600/80 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-xs transition shadow" title="حذف الصورة">
+                    🗑️
+                  </button>
+                </div>
+                <div class="p-3.5 space-y-1">
+                  <h4 class="font-black text-xs text-slate-900 dark:text-white">${photo.title}</h4>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">${photo.desc || 'توثيق ميداني لمشروع القضارف'}</p>
+                  <p class="text-[10px] text-slate-400 font-mono pt-1">📅 ${photo.date || 'الموسم الحالي'}</p>
+                  <div class="pt-2 flex justify-between items-center border-t border-slate-100 dark:border-slate-800">
+                    <button onclick="viewPhotoLightbox('${photo.dataUrl}', '${photo.title}')" class="text-[11px] font-bold text-sky-600 hover:underline">
+                      🔍 تكبير
+                    </button>
+                    <button onclick="setCustomPhotoAsBanner('${photo.id}'); closeModal();" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
+                      <span>تعيين كبانر</span>
+                      <i data-lucide="arrow-left" class="w-3 h-3"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- القسم 2: مشاهد القضارف المعتمدة -->
+      <div>
+        <h4 class="text-xs font-black text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <span>🌾</span>
+          <span>مشاهد القضارف ومزارع كسمور المعتمدة</span>
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${defaultGalleryItems.map(item => `
+            <div class="glass-card rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md group flex flex-col justify-between">
+              <div class="relative h-44 overflow-hidden bg-slate-900">
+                <img src="${GEDAREF_IMAGES[item.key]}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 cursor-pointer" onclick="viewPhotoLightbox('${GEDAREF_IMAGES[item.key]}', '${item.title}')">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
+                <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 bg-emerald-600/90 text-white text-[10px] font-black rounded-full backdrop-blur-sm border border-emerald-400/40">
+                  ${item.tag}
+                </span>
+              </div>
+              <div class="p-3.5 space-y-1">
+                <h4 class="font-black text-xs text-slate-900 dark:text-white">${item.title}</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">${item.desc}</p>
+                <div class="pt-2 flex justify-between items-center border-t border-slate-100 dark:border-slate-800">
+                  <button onclick="viewPhotoLightbox('${GEDAREF_IMAGES[item.key]}', '${item.title}')" class="text-[11px] font-bold text-sky-600 hover:underline">
+                    🔍 تكبير
+                  </button>
+                  <button onclick="switchDashboardHeroImage('${item.key}'); closeModal(); showToast('✓ تم تعيين المشهد بنجاح');" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
+                    <span>تعيين كبانر</span>
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
       </div>
 
-      <div class="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-800 mt-4">
-        <button type="button" onclick="closeModal()" class="px-5 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold text-xs">إغلاق المعرض</button>
+      <div class="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-800 mt-5">
+        <button type="button" onclick="closeModal()" class="px-5 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-xl font-bold text-xs">إغلاق المعرض</button>
       </div>
     </div>
   `;
   openModal(html);
+  safeCreateIcons();
 }
-// ========================================================
+
+// نافذة رفع صورة جديدة مع ضغط الحجم ومعاينة فورية
+function openUploadPhotoModal() {
+  const modalHTML = `
+    <div class="p-5 sm:p-6 text-right max-w-md mx-auto">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📷</span>
+          <h3 class="text-base font-black text-slate-900 dark:text-white">تحميل صورة جديدة إلى ألبوم المشروع</h3>
+        </div>
+        <button onclick="openGedarefGalleryModal()" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-sm">&times;</button>
+      </div>
+
+      <form onsubmit="handleSaveCustomPhoto(event)" class="space-y-3.5 text-xs">
+        <!-- منطقة اختيار ومعاينة الصورة -->
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">اختر الصورة من جهازك أو كاميرا الهاتف:</label>
+          <div onclick="document.getElementById('upload-photo-file-input').click()" class="cursor-pointer border-2 border-dashed border-emerald-400 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100/50 rounded-2xl p-4 text-center transition">
+            <div id="upload-photo-preview-box" class="space-y-1">
+              <span class="text-3xl block">🖼️</span>
+              <p class="font-bold text-emerald-800 dark:text-emerald-300 text-xs">اضغط هنا لاختيار صورة</p>
+              <p class="text-[10px] text-slate-400">يدعم JPG و PNG وكاميرا الجوال المباشرة</p>
+            </div>
+            <img id="upload-photo-preview-img" src="" alt="معاينة" class="hidden w-full max-h-48 object-cover rounded-xl shadow mt-2 mx-auto">
+          </div>
+          <input type="file" id="upload-photo-file-input" accept="image/*" onchange="previewSelectedPhoto(event)" class="hidden" required>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">عنوان الصورة (مطلوب):</label>
+          <input type="text" id="upload-photo-title" placeholder="مثال: حصاد نمرة 500 تسالي، أو الجرارات في الكمبو" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">تصنيف المشهد / الوسم:</label>
+          <select id="upload-photo-tag" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+            <option value="الذرة الرفيعة">الذرة الرفيعة</option>
+            <option value="التسالي">محصول التسالي</option>
+            <option value="الحصاد">عمليات الحصاد</option>
+            <option value="الحراثات والآليات">الحراثات والآليات</option>
+            <option value="الوقود والمستودع">الوقود والمستودع</option>
+            <option value="الكمبو والعمالة">الكمبو والعمالة</option>
+            <option value="مزارع كسمور">مزارع كسمور</option>
+            <option value="مشاهد عامة">مشاهد عامة</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">وصف أو ملاحظة (اختياري):</label>
+          <textarea id="upload-photo-desc" rows="2" placeholder="أدخل أي تفاصيل إضافية عن موقع أو تاريخ الصورة..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+          <button type="submit" id="btn-save-photo-submit" class="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-xl font-black transition shadow-sm active:scale-95 text-xs">
+            💾 حفظ الصورة في الألبوم
+          </button>
+          <button type="button" onclick="openGedarefGalleryModal()" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-xl font-bold text-xs">
+            إلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  openModal(modalHTML);
+}
+
+let currentSelectedPhotoDataUrl = null;
+
+function previewSelectedPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // ضغط الصورة تلقائياً باستخدام Canvas لتكون خفيفة وسريعة (حد أقصى 1280px)
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      const maxDim = 1280;
+
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // تحويل إلى JPEG عالي الجودة بحجم صغير
+      currentSelectedPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+      const previewImg = document.getElementById('upload-photo-preview-img');
+      const previewBox = document.getElementById('upload-photo-preview-box');
+      if (previewImg && previewBox) {
+        previewImg.src = currentSelectedPhotoDataUrl;
+        previewImg.classList.remove('hidden');
+        previewBox.classList.add('hidden');
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleSaveCustomPhoto(event) {
+  event.preventDefault();
+  if (!currentSelectedPhotoDataUrl) {
+    showToast('⚠️ يرجى اختيار صورة أولاً');
+    return;
+  }
+
+  const title = document.getElementById('upload-photo-title').value.trim();
+  const tag = document.getElementById('upload-photo-tag').value;
+  const desc = document.getElementById('upload-photo-desc').value.trim();
+
+  const newPhoto = {
+    id: 'photo-' + Date.now(),
+    title: title || 'مشهد من مشروع كسمور',
+    tag: tag || 'صورة مضافة',
+    desc: desc || 'توثيق ميداني لمشروع القضارف الزراعي',
+    dataUrl: currentSelectedPhotoDataUrl,
+    date: new Date().toLocaleDateString('ar-SD', { year: 'numeric', month: 'short', day: 'numeric' })
+  };
+
+  const photos = getCustomGalleryPhotos();
+  photos.unshift(newPhoto);
+  saveCustomGalleryPhotos(photos);
+
+  currentSelectedPhotoDataUrl = null;
+  showToast('✓ تم حفظ الصورة بنجاح في ألبوم المشروع');
+
+  if (typeof logAudit === 'function') {
+    logAudit('إضافة صورة للألبوم', `تمت إضافة صورة جديدة: "${newPhoto.title}"`, 'محمد مصطفى');
+  }
+
+  openGedarefGalleryModal();
+}
+
+function deleteCustomPhoto(photoId) {
+  if (!confirm('هل أنت متأكد من حذف هذه الصورة من الألبوم؟')) return;
+  let photos = getCustomGalleryPhotos();
+  photos = photos.filter(p => p.id !== photoId);
+  saveCustomGalleryPhotos(photos);
+  showToast('✓ تم حذف الصورة');
+  openGedarefGalleryModal();
+}
+
+function viewPhotoLightbox(imgSrc, title) {
+  const modalHTML = `
+    <div class="p-3 text-center max-w-4xl mx-auto">
+      <div class="flex justify-between items-center mb-2 px-2">
+        <h4 class="font-black text-sm text-slate-900 dark:text-white">${title}</h4>
+        <button onclick="openGedarefGalleryModal()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold">&times;</button>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-2xl bg-black max-h-[75vh] flex items-center justify-center">
+        <img src="${imgSrc}" alt="${title}" class="max-w-full max-h-[75vh] object-contain">
+      </div>
+      <div class="flex justify-center gap-2 mt-3">
+        <button onclick="openGedarefGalleryModal()" class="px-5 py-1.5 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold text-xs">العودة للألبوم</button>
+      </div>
+    </div>
+  `;
+  openModal(modalHTML);
+}
+
+function setCustomPhotoAsBanner(photoId) {
+  const photos = getCustomGalleryPhotos();
+  const photo = photos.find(p => p.id === photoId);
+  if (!photo) return;
+
+  const heroImg = document.getElementById('dashboard-hero-img');
+  if (heroImg) {
+    heroImg.src = photo.dataUrl;
+    showToast('✓ تم تعيين صورتك كخلفية للوحة القيادة');
+  }
+}
+
 // وحدة الحصاد ومبيعات المحاصيل وتوريد زكاة الزروع (10%)
 // ========================================================
 
