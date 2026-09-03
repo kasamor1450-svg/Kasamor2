@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
 // Cache Version: mustagro-v5.0-lockdown (Strict Mandatory Login)
-const CACHE_NAME = 'mustagro-v7.0-cloud-sync-fixed';
+const CACHE_NAME = 'mustagro-v8.0-notifications';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
