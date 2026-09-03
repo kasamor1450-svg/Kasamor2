@@ -980,7 +980,8 @@ table tbody tr:hover {
           <p class="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2.5">⚡ الإجراءات السريعة اليومية</p>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
             
-            <button onclick="openEditExpenseModal()" class="p-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right">
+            <!-- 1. تسجيل مصروف -->
+            <button type="button" onclick="openEditExpenseModal()" class="p-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="إضافة قيد مالي جديد">
               <span class="text-xl">💰</span>
               <div>
                 <p class="font-black text-xs">تسجيل مصروف</p>
@@ -988,7 +989,8 @@ table tbody tr:hover {
               </div>
             </button>
 
-            <button onclick="openAddSaleModal()" class="p-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right">
+            <!-- 2. تسجيل بيع محصول -->
+            <button type="button" onclick="openAddCropSaleModal()" class="p-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="تسجيل مبيعات ذرة أو تسالي">
               <span class="text-xl">🌾</span>
               <div>
                 <p class="font-black text-xs">تسجيل بيع محصول</p>
@@ -996,7 +998,8 @@ table tbody tr:hover {
               </div>
             </button>
 
-            <button onclick="openAddFuelTxModal()" class="p-3 bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right">
+            <!-- 3. صرف وقود -->
+            <button type="button" onclick="openIssueFuelModal()" class="p-3 bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="صرف جازولين للجرارات وسائقيها">
               <span class="text-xl">⛽</span>
               <div>
                 <p class="font-black text-xs">صرف وقود</p>
@@ -1004,20 +1007,21 @@ table tbody tr:hover {
               </div>
             </button>
 
-            
-            <button onclick="openAddRainfallModal()" class="p-3 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right">
+            <!-- 4. تسجيل هطول أمطار -->
+            <button type="button" onclick="openAddRainfallModal()" class="p-3 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="توثيق موعد وشدة هطول المطر">
               <span class="text-xl">🌧️</span>
               <div>
                 <p class="font-black text-xs">تسجيل أمطار</p>
-                <p class="text-[9px] text-sky-100">رصد هطول أمطار كسمور</p>
+                <p class="text-[9px] text-blue-100">رصد هطول أمطار كسمور</p>
               </div>
             </button>
 
-            <button onclick="switchSection('section-partners')" class="p-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right">
+            <!-- 5. رأس المال وتوريدات الشركاء -->
+            <button type="button" onclick="openAddCapitalInjectionModal()" class="p-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="توريد أو تعديل رأس المال للشريك">
               <span class="text-xl">👥</span>
               <div>
-                <p class="font-black text-xs">رأس المال والشركاء</p>
-                <p class="text-[9px] text-indigo-100">تعديل ومتابعة الأنصبة</p>
+                <p class="font-black text-xs">توريد رأس مال</p>
+                <p class="text-[9px] text-purple-100">ضخ وتعديل الأنصبة</p>
               </div>
             </button>
 
@@ -2370,6 +2374,23 @@ table tbody tr:hover {
           <div>
             <p class="font-black text-slate-900 dark:text-white">بيع محاصيل</p>
             <span class="text-[10px] text-slate-500">عقد بيع ذرة أو تسالي</span>
+          </div>
+        </button>
+
+        
+        <button onclick="toggleMobileQuickActions(); openAddRainfallModal()" class="p-3.5 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 rounded-2xl border border-blue-200 dark:border-blue-800 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-base">🌧️</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">تسجيل أمطار</p>
+            <span class="text-[10px] text-slate-500">رصد هطول كسمور</span>
+          </div>
+        </button>
+
+        <button onclick="toggleMobileQuickActions(); openAddCapitalInjectionModal()" class="p-3.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 rounded-2xl border border-purple-200 dark:border-purple-800 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center text-base">💵</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">توريد رأس مال</p>
+            <span class="text-[10px] text-slate-500">ضخ مبالغ الشركاء</span>
           </div>
         </button>
 
@@ -9396,6 +9417,46 @@ document.addEventListener('click', (e) => {
     dd.classList.add('hidden');
   }
 });
+
+
+// ========================================================
+// ربط وتثبيت دوال الإجراءات السريعة (Quick Actions Aliases)
+// ========================================================
+window.openAddSaleModal = function(saleId = null) {
+  if (typeof openAddCropSaleModal === 'function') {
+    openAddCropSaleModal(saleId);
+  } else {
+    console.warn('openAddCropSaleModal is not available');
+  }
+};
+
+window.openAddFuelTxModal = function(txId = null) {
+  if (typeof openIssueFuelModal === 'function') {
+    openIssueFuelModal();
+  } else if (typeof openAddFuelStockModal === 'function') {
+    openAddFuelStockModal();
+  } else {
+    console.warn('Fuel modal is not available');
+  }
+};
+
+window.openAddCapitalModal = function(partnerId = null) {
+  if (typeof openAddCapitalInjectionModal === 'function') {
+    openAddCapitalInjectionModal(partnerId);
+  }
+};
+
+window.openAddExpenseModal = function(expenseId = null) {
+  if (typeof openEditExpenseModal === 'function') {
+    openEditExpenseModal(expenseId);
+  }
+};
+
+window.openAddRainModal = function(rainId = null) {
+  if (typeof openAddRainfallModal === 'function') {
+    openAddRainfallModal(rainId);
+  }
+};
 
 function switchSection(targetId) {
   if (!targetId) return;
