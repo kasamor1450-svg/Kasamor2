@@ -1510,6 +1510,10 @@ table tbody tr:hover {
             <i data-lucide="calculator" class="w-4 h-4"></i>
             <span>➕ حاسبة مقاولات الحصاد (الصرامة والدراس)</span>
           </button>
+          <button type="button" onclick="openDisburseWageModal()" class="px-3.5 py-2 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer">
+            <span class="text-sm">💵</span>
+            <span>صرف أجر / دفعة راتب</span>
+          </button>
           <button onclick="openEditLaborModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
             <i data-lucide="user-plus" class="w-4 h-4"></i>
             <span>إضافة عامل / موظف جديد</span>
@@ -8683,8 +8687,9 @@ function loadData() {
     partners: (() => {
       let pList = Array.isArray(loaded.partners) ? loaded.partners : def.partners;
       const curSum = pList.reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
-      if (Math.round(curSum) !== 136118003) {
-        console.log("⚡ ترقية فورية لبيانات الشركاء ورأس المال إلى 136,118,003 ج.س");
+      // ترقية فقط إذا كانت البيانات العالقة هي النسخة القديمة 118,500,000 ج.س
+      if (Math.round(curSum) === 118500000) {
+        console.log("⚡ ترقية فورية لبيانات الشركاء ورأس المال من 118.5م القديمة إلى المعتمد");
         return JSON.parse(JSON.stringify(def.partners));
       }
       return pList;
@@ -8692,8 +8697,8 @@ function loadData() {
     capitalInjections: (() => {
       let cList = Array.isArray(loaded.capitalInjections) ? loaded.capitalInjections : def.capitalInjections;
       const curSum = cList.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
-      if (Math.round(curSum) !== 136118003) {
-        console.log("⚡ ترقية فورية لبيانات توريدات رأس المال إلى 136,118,003 ج.س");
+      if (Math.round(curSum) === 118500000) {
+        console.log("⚡ ترقية فورية لتوريدات رأس المال من 118.5م القديمة إلى المعتمد");
         return JSON.parse(JSON.stringify(def.capitalInjections));
       }
       return cList;
@@ -11125,6 +11130,280 @@ function deleteFuelTransaction(txId) {
 }
 
 // مسير رواتب العمالة والمشرفين مع نوع العامل وتاريخ المباشرة وتاريخ الانتهاء والاحتساب التلقائي
+
+// =========================================================================
+// منظومة صرف ودفع الأجور والرواتب للعمال والمشرفين (Wage Disbursement)
+// =========================================================================
+
+function openDisburseWageModal(preselectedWorkerId = null) {
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
+    showToast('⚠️ عفواً، حسابك للاطلاع فقط ولا يملك صلاحية صرف الأجور.', 'warning');
+    return;
+  }
+
+  if (!state.labor || state.labor.length === 0) {
+    showToast('⚠️ لا يوجد عمال مسجلين في النظام حالياً', 'warning');
+    return;
+  }
+
+  autoUpdateLaborWages();
+
+  const activeWorkerId = preselectedWorkerId || state.labor[0].id;
+  const currentWorker = state.labor.find(w => w.id === activeWorkerId) || state.labor[0];
+  const balance = Math.max(0, (currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0));
+  const today = new Date().toISOString().split('T')[0];
+
+  const workersOptions = state.labor.map(w => {
+    const wBal = Math.max(0, (w.totalDue || 0) - (w.totalPaid || 0));
+    return `<option value="${w.id}" ${w.id === activeWorkerId ? 'selected' : ''}>${w.name} (${w.role}) - متبقي: ${wBal.toLocaleString()} ج.س</option>`;
+  }).join('');
+
+  const modalHTML = `
+    <div class="p-5 sm:p-6 text-right max-w-md mx-auto">
+      
+      <!-- ترويسة النافذة -->
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span class="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 flex items-center justify-center text-xl font-black shadow-sm">
+            💵
+          </span>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">صرف أجر / دفعة راتب لعامل</h3>
+            <p class="text-xs text-slate-400">توثيق دفع الراتب وخصم المسحوبات والمزامنة مع المصروفات</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+      </div>
+
+      <form onsubmit="handleSaveDisburseWage(event)" class="space-y-3.5 text-xs">
+        
+        <!-- 1. اختيار العامل -->
+        <div>
+          <label class="block font-black text-slate-700 dark:text-slate-300 mb-1">اسم العامل / الموظف المستلم:</label>
+          <select id="disburse-worker-id" onchange="onDisburseWorkerSelectChange()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+            ${workersOptions}
+          </select>
+        </div>
+
+        <!-- 2. بطاقة رصيد العامل الحية -->
+        <div id="disburse-worker-card" class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-teal-200 dark:border-teal-900 text-[11px] space-y-1.5">
+          <div class="flex justify-between items-center font-bold">
+            <span class="text-slate-500">الراتب الشهري المتفق عليه:</span>
+            <span class="font-mono text-slate-900 dark:text-white">${(currentWorker.monthlySalary || 0).toLocaleString()} ج.س/شهر</span>
+          </div>
+          <div class="flex justify-between items-center font-bold">
+            <span class="text-slate-500">صافي المستحق حتى تاريخه:</span>
+            <span class="font-mono text-slate-900 dark:text-white">${(currentWorker.totalDue || 0).toLocaleString()} ج.س</span>
+          </div>
+          <div class="flex justify-between items-center font-bold">
+            <span class="text-slate-500">إجمالي المدفوع سابقاً:</span>
+            <span class="font-mono text-emerald-600">${(currentWorker.totalPaid || 0).toLocaleString()} ج.س</span>
+          </div>
+          <div class="flex justify-between items-center font-black pt-1 border-t border-slate-200 dark:border-slate-700 text-xs">
+            <span class="text-rose-600 dark:text-rose-400">المبلغ المتبقي المستحق:</span>
+            <span id="disburse-balance-badge" class="font-mono text-rose-600 dark:text-rose-400">${balance.toLocaleString()} ج.س</span>
+          </div>
+        </div>
+
+        <!-- 3. تاريخ الصرف والمبلغ المصروف -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">تاريخ الصرف:</label>
+            <input type="date" id="disburse-date" value="${today}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold font-mono" required>
+          </div>
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">المبلغ المصروف (ج.س):</label>
+            <input type="number" id="disburse-amount" min="1" step="any" value="${balance > 0 ? balance : (currentWorker.monthlySalary || '')}" class="w-full p-2.5 rounded-xl border border-teal-400 dark:border-teal-700 bg-white dark:bg-slate-800 font-black font-mono text-teal-800 dark:text-teal-300 text-sm" required>
+          </div>
+        </div>
+
+        <!-- أزرار سريعة للمبلغ -->
+        <div class="flex flex-wrap gap-1.5 pt-0.5">
+          <span class="text-[10px] text-slate-400 font-bold ml-1">خيارات سريعة:</span>
+          <button type="button" onclick="setDisburseAmountQuick('balance')" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-800 rounded-lg text-[10px] font-bold border border-rose-200">صرف كامل المتبقي</button>
+          <button type="button" onclick="setDisburseAmountQuick('salary')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-[10px] font-bold">راتب شهر كامل</button>
+          <button type="button" onclick="setDisburseAmountQuick('half_salary')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-[10px] font-bold">نصف شهر (سلفة)</button>
+        </div>
+
+        <!-- 4. نوع الدفعة وطريقة الصرف -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">نوع الصرف:</label>
+            <select id="disburse-type" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="راتب شهري">دفعة راتب شهرية</option>
+              <option value="سلفة مؤقتة">سلفة تحت الحساب</option>
+              <option value="تصفية نهائية">تصفية ومخالصة نهائية</option>
+              <option value="حافز ومكافأة">حافز ومكافأة إضافية</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">طريقة الدفع:</label>
+            <select id="disburse-method" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="تحويل بنكك">تحويل بنكك (Bankak)</option>
+              <option value="نقداً كاش">نقداً كاش من الخزينة</option>
+              <option value="إيداع بنكي">إيداع بنكي مباشر</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 5. البيان والملاحظات -->
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">البيان والملاحظات:</label>
+          <input type="text" id="disburse-notes" placeholder="مثال: صرف راتب شهر أغسطس 2026 - تسليم مباشر" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium">
+        </div>
+
+        <!-- 6. خيار قيد المصروف في المصروفات العامة -->
+        <div class="p-2.5 bg-emerald-50/70 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
+          <label class="flex items-center gap-2 cursor-pointer font-bold text-emerald-950 dark:text-emerald-200 text-xs">
+            <input type="checkbox" id="disburse-record-expense" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
+            <span>تسجيل هذا المبلغ كمصروف رسمي في حسابات المزرعة (بند: رواتب وأجور)</span>
+          </label>
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+          <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 text-white rounded-xl font-black transition shadow-sm active:scale-95 text-xs">
+            💾 تأكيد صرف الأجر وتسجيل السند
+          </button>
+          <button type="button" onclick="closeModal()" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-xl font-bold text-xs">
+            إلغاء
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  `;
+  openModal(modalHTML);
+}
+
+function onDisburseWorkerSelectChange() {
+  const workerId = document.getElementById('disburse-worker-id')?.value;
+  const worker = (state.labor || []).find(w => w.id === workerId);
+  if (!worker) return;
+
+  const balance = Math.max(0, (worker.totalDue || 0) - (worker.totalPaid || 0));
+  const card = document.getElementById('disburse-worker-card');
+  const amountInput = document.getElementById('disburse-amount');
+
+  if (card) {
+    card.innerHTML = `
+      <div class="flex justify-between items-center font-bold">
+        <span class="text-slate-500">الراتب الشهري المتفق عليه:</span>
+        <span class="font-mono text-slate-900 dark:text-white">${(worker.monthlySalary || 0).toLocaleString()} ج.س/شهر</span>
+      </div>
+      <div class="flex justify-between items-center font-bold">
+        <span class="text-slate-500">صافي المستحق حتى تاريخه:</span>
+        <span class="font-mono text-slate-900 dark:text-white">${(worker.totalDue || 0).toLocaleString()} ج.س</span>
+      </div>
+      <div class="flex justify-between items-center font-bold">
+        <span class="text-slate-500">إجمالي المدفوع سابقاً:</span>
+        <span class="font-mono text-emerald-600">${(worker.totalPaid || 0).toLocaleString()} ج.س</span>
+      </div>
+      <div class="flex justify-between items-center font-black pt-1 border-t border-slate-200 dark:border-slate-700 text-xs">
+        <span class="text-rose-600 dark:text-rose-400">المبلغ المتبقي المستحق:</span>
+        <span id="disburse-balance-badge" class="font-mono text-rose-600 dark:text-rose-400">${balance.toLocaleString()} ج.س</span>
+      </div>
+    `;
+  }
+
+  if (amountInput && (!amountInput.value || parseFloat(amountInput.value) <= 0)) {
+    amountInput.value = balance > 0 ? balance : (worker.monthlySalary || '');
+  }
+}
+
+function setDisburseAmountQuick(mode) {
+  const workerId = document.getElementById('disburse-worker-id')?.value;
+  const worker = (state.labor || []).find(w => w.id === workerId);
+  const amountInput = document.getElementById('disburse-amount');
+  if (!worker || !amountInput) return;
+
+  if (mode === 'balance') {
+    const bal = Math.max(0, (worker.totalDue || 0) - (worker.totalPaid || 0));
+    amountInput.value = bal;
+  } else if (mode === 'salary') {
+    amountInput.value = worker.monthlySalary || 0;
+  } else if (mode === 'half_salary') {
+    amountInput.value = Math.round((worker.monthlySalary || 0) / 2);
+  }
+}
+
+function handleSaveDisburseWage(event) {
+  event.preventDefault();
+
+  const workerId = document.getElementById('disburse-worker-id').value;
+  const worker = (state.labor || []).find(w => w.id === workerId);
+  if (!worker) {
+    showToast('⚠️ يرجى اختيار العامل أولاً', 'warning');
+    return;
+  }
+
+  const date = document.getElementById('disburse-date').value;
+  const amount = parseFloat(document.getElementById('disburse-amount').value) || 0;
+  if (amount <= 0) {
+    showToast('⚠️ يرجى إدخال مبلغ صحيح أكبر من الصفر', 'warning');
+    return;
+  }
+
+  const disburseType = document.getElementById('disburse-type').value;
+  const method = document.getElementById('disburse-method').value;
+  const notes = document.getElementById('disburse-notes').value.trim();
+  const recordExpense = document.getElementById('disburse-record-expense').checked;
+  const currentUserName = currentUser ? currentUser.name : "عبدالقادر (الوكيل)";
+
+  // 1. تحديث المدفوع للعامل
+  worker.totalPaid = (parseFloat(worker.totalPaid) || 0) + amount;
+  autoUpdateLaborWages();
+
+  // 2. إذا تم اختيار تسجيله كمصروف رسمي للمزرعة
+  if (recordExpense) {
+    if (!state.expenses) state.expenses = [];
+    const expRecord = {
+      id: `exp-wages-${Date.now()}`,
+      date: date,
+      category: 'رواتب وأجور',
+      amount: amount,
+      plot: worker.plot || 'كامل المشروع',
+      crop: 'مشترك',
+      op: `صرف ${disburseType} للعامل (${worker.name}) - ${method}`,
+      notes: notes || `صرف أجر لعامل (${worker.name} - ${worker.role})`,
+      createdBy: currentUserName,
+      isUnderReview: false
+    };
+    state.expenses.unshift(expRecord);
+
+    // مزامنة المصروف سحابياً
+    if (window.AgroAPI && window.AgroAPI.insertExpense) {
+      window.AgroAPI.insertExpense(expRecord).catch(() => {});
+    }
+  }
+
+  // 3. توثيق في سجل التدقيق الميداني
+  logAudit("صرف أجر", `صرف ${disburseType} للعامل (${worker.name}) بمبلغ ${amount.toLocaleString()} ج.س (${method})`, "الرواتب والأجور");
+
+  // 4. حفظ وتحديث الواجهات والمزامنة السحابية
+  saveData(`✓ تم صرف أجر بمبلغ (${amount.toLocaleString()} ج.س) للعامل ${worker.name} بنجاح!`);
+  closeModal();
+
+  // مزامنة سجل العامل مع جدول labor السحابي
+  if (window.AgroAPI && window.AgroAPI.client) {
+    window.AgroAPI.client.from('labor').update({
+      total_paid: worker.totalPaid,
+      total_due: worker.totalDue,
+      status: worker.status
+    }).eq('id', worker.id).catch(() => {});
+  }
+
+  // إشعار في مركز الإشعارات
+  if (typeof addSystemNotification === 'function') {
+    addSystemNotification({
+      title: '💵 صرف أجر / دفعة راتب',
+      desc: `تم صرف ${amount.toLocaleString()} ج.س للعامل ${worker.name} (${disburseType} - ${method})`,
+      category: 'finance',
+      targetSection: 'section-labor'
+    });
+  }
+}
+
 function renderLaborSection() {
   const laborTable = document.getElementById('labor-table-body');
   if (!laborTable) return;
@@ -11206,6 +11485,10 @@ function renderLaborSection() {
         <td class="py-3.5 px-4">${statusHtml}</td>
         <td class="py-3.5 px-4 text-left">
           <div class="flex items-center gap-1.5">
+            <button onclick="openDisburseWageModal('${w.id}')" class="px-2 py-1 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 text-teal-800 dark:text-teal-300 rounded-lg text-[10px] font-black transition flex items-center gap-1 border border-teal-200 dark:border-teal-800" title="صرف أجر أو سلفة للعامل">
+              <span>💵</span>
+              <span>صرف أجر</span>
+            </button>
             <button onclick="openWorkerSettlementVoucherModal('${w.id}')" class="px-2 py-1 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 rounded-lg text-emerald-700 dark:text-emerald-300 font-bold transition flex items-center gap-1 text-[10px]" title="طباعة سند مخالصة وتصفية نهائية">
               <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
               <span>سند مخالصة</span>
@@ -12477,40 +12760,54 @@ function updateCapitalSharesPreview() {
   }
 }
 
-function saveCapitalInjection(e, injectionId = null) {
-  e.preventDefault();
+async function saveCapitalInjection(e, injectionId = null) {
+  if (e) {
+    e.preventDefault();
+  }
 
   const partnerSelect = document.getElementById('inj-partner-id');
   const partnerId = partnerSelect ? partnerSelect.value : '';
-  const date = document.getElementById('inj-date').value;
-  const totalAmount = parseFloat(document.getElementById('inj-amount').value) || 0;
-  const method = document.getElementById('inj-method').value;
-  const loggedBy = document.getElementById('inj-logged-by').value.trim();
-  const purpose = document.getElementById('inj-purpose').value.trim();
-  let notes = document.getElementById('inj-notes').value.trim();
+  const dateInput = document.getElementById('inj-date');
+  const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+  const amountInput = document.getElementById('inj-amount');
+  const totalAmount = parseFloat(amountInput ? amountInput.value : 0) || 0;
+  
+  if (totalAmount <= 0) {
+    showToast('⚠️ يرجى إدخال مبلغ صحيح أكبر من الصفر', 'warning');
+    if (amountInput) amountInput.focus();
+    return;
+  }
+
+  const methodSelect = document.getElementById('inj-method');
+  const method = methodSelect ? methodSelect.value : 'تحويل بنكك';
+  const loggedByInput = document.getElementById('inj-logged-by');
+  const loggedBy = (loggedByInput && loggedByInput.value.trim()) ? loggedByInput.value.trim() : (currentUser ? currentUser.name : 'المدير المالي');
+  const purposeInput = document.getElementById('inj-purpose');
+  const purpose = (purposeInput && purposeInput.value.trim()) ? purposeInput.value.trim() : 'توريد رأس مال تشغيلي';
+  const notesInput = document.getElementById('inj-notes');
+  let notes = notesInput ? notesInput.value.trim() : '';
 
   const typeRadio = injectionId ? 
     document.querySelector('input[name="inj-edit-capital-type"]:checked') : 
     document.querySelector('input[name="inj-capital-type"]:checked');
-  const capitalType = typeRadio ? typeRadio.value : 'refundable';
+  const capitalType = typeRadio ? typeRadio.value : 'non_refundable';
 
   const typeTag = capitalType === 'non_refundable' ? '[نوع: غير مسترد]' : '[نوع: مسترد]';
   notes = notes.replace(/\[نوع:\s*(غير مسترد|مسترد)\]/g, '').trim();
   notes = notes ? `${notes} ${typeTag}` : typeTag;
 
   if (!state.capitalInjections) state.capitalInjections = [];
-  if (!state.partners) state.partners = DEFAULT_DATA.partners || [];
+  if (!state.partners) state.partners = DEFAULT_DATA.partners ? JSON.parse(JSON.stringify(DEFAULT_DATA.partners)) : [];
 
-  // إذا تم اختيار التوزيع التلقائي على الأسهم (أو رأس مال غير مسترد عام يوزع على الـ 13 سهماً)
+  // 1. حالة التوزيع التلقائي على جميع الأسهم (13 سهماً)
   if (partnerId === 'DISTRIBUTE_ALL_SHARES') {
     const perShareAmount = totalAmount / 13;
     const nowTs = Date.now();
 
-    state.partners.forEach((p, pIdx) => {
+    state.partners.forEach(p => {
       const pShares = p.shares || 1;
       const pAmount = Math.round(perShareAmount * pShares);
 
-      // تحديث رصيد الشريك
       if (capitalType === 'non_refundable') {
         p.nonRefundableCapital = (parseFloat(p.nonRefundableCapital) || 0) + pAmount;
       } else {
@@ -12518,7 +12815,6 @@ function saveCapitalInjection(e, injectionId = null) {
       }
       p.paidCapital = (parseFloat(p.nonRefundableCapital) || 0) + (parseFloat(p.refundableCapital) || 0);
 
-      // إنشاء قيد توريد لكل شريك
       const injRecord = {
         id: `inj-${nowTs}-${p.id}`,
         partnerId: p.id,
@@ -12533,34 +12829,38 @@ function saveCapitalInjection(e, injectionId = null) {
       };
       state.capitalInjections.unshift(injRecord);
 
-      // مزامنة سحابية مع جدول capital_injections و partners
+      // مزامنة سحابية آمنة بدون تعليق
       if (window.AgroAPI && window.AgroAPI.client) {
-        window.AgroAPI.client.from('capital_injections').insert({
-          id: injRecord.id,
-          partner_id: p.id,
-          partner_name: p.name,
-          date: date,
-          amount: pAmount,
-          payment_method: method,
-          logged_by: loggedBy,
-          purpose: injRecord.purpose,
-          notes: injRecord.notes
-        }).catch(err => console.warn('Cloud injection sync err:', err));
+        try {
+          window.AgroAPI.client.from('capital_injections').insert({
+            id: injRecord.id,
+            partner_id: p.id,
+            partner_name: p.name,
+            date: date,
+            amount: pAmount,
+            payment_method: method,
+            logged_by: loggedBy,
+            purpose: injRecord.purpose,
+            notes: injRecord.notes
+          }).then(() => {}).catch(() => {});
 
-        window.AgroAPI.client.from('partners').update({
-          paid_capital: p.paidCapital,
-          notes: `نسبة ربح ثابتة ${pShares} من 13 [غير مسترد: ${p.nonRefundableCapital || 0}] [مسترد: ${p.refundableCapital || 0}]`
-        }).eq('id', p.id).catch(err => console.warn('Cloud partner sync err:', err));
+          window.AgroAPI.client.from('partners').update({
+            paid_capital: p.paidCapital,
+            notes: `نسبة ربح ثابتة ${pShares} من 13 [غير مسترد: ${p.nonRefundableCapital || 0}] [مسترد: ${p.refundableCapital || 0}]`
+          }).eq('id', p.id).then(() => {}).catch(() => {});
+        } catch (e) {
+          console.warn('Silent cloud sync catch:', e);
+        }
       }
     });
 
-    logAudit("توزيع رأس مال على الأسهم", `توزيع رأس مال (${capitalType === 'non_refundable' ? 'غير مسترد' : 'مسترد'}) بمبلغ إجمالي ${totalAmount.toLocaleString()} ج.س على الـ 13 سهماً بواقع ${Math.round(perShareAmount).toLocaleString()} ج.س للسهم`, "رأس المال");
+    logAudit("توزيع رأس مال على الأسهم", `توزيع رأس مال (${capitalType === 'non_refundable' ? 'غير مسترد' : 'مسترد'}) بمبلغ ${totalAmount.toLocaleString()} ج.س على الـ 13 سهماً بواقع ${Math.round(perShareAmount).toLocaleString()} ج.س للسهم`, "رأس المال");
     saveData(`✓ تم توزيع رأس المال (${totalAmount.toLocaleString()} ج.س) بنجاح على جميع الأسهم (13 سهماً)!`);
     closeModal();
     return;
   }
 
-  // إضافة عادية لشريك محدد
+  // 2. حالة إضافة أو تعديل لشريك محدد
   const partner = state.partners.find(p => p.id === partnerId);
   const partnerName = partner ? partner.name : '';
 
@@ -12571,7 +12871,7 @@ function saveCapitalInjection(e, injectionId = null) {
         ...state.capitalInjections[idx],
         partnerId, partnerName, date, amount: totalAmount, method, loggedBy, purpose, notes, capitalType
       };
-      logAudit("تعديل قيد ضخ رأس مال", `تعديل قيد ضخ للشريك (${partnerName}) بمبلغ ${totalAmount.toLocaleString()} ج.س (${method})`, "رأس المال");
+      logAudit("تعديل قيد ضخ رأس مال", `تعديل قيد ضخ للشريك (${partnerName}) بمبلغ ${totalAmount.toLocaleString()} ج.س`, "رأس المال");
     }
   } else {
     const newInj = {
@@ -12579,7 +12879,44 @@ function saveCapitalInjection(e, injectionId = null) {
       partnerId, partnerName, date, amount: totalAmount, method, loggedBy, purpose, notes, capitalType
     };
     state.capitalInjections.unshift(newInj);
-    logAudit("ضخ رأس مال جديد", `تسجيل ضخ وتوريد رأس مال من الشريك (${partnerName}) بمبلغ ${totalAmount.toLocaleString()} ج.س (${method}) - ${purpose}`, "رأس المال");
+
+    // تحديث رصيد الشريك مباشرة
+    if (partner) {
+      if (capitalType === 'non_refundable') {
+        partner.nonRefundableCapital = (parseFloat(partner.nonRefundableCapital) || 0) + totalAmount;
+      } else {
+        partner.refundableCapital = (parseFloat(partner.refundableCapital) || 0) + totalAmount;
+      }
+      partner.paidCapital = (parseFloat(partner.nonRefundableCapital) || 0) + (parseFloat(partner.refundableCapital) || 0);
+    }
+
+    logAudit("ضخ رأس مال جديد", `تسجيل ضخ وتوريد رأس مال من الشريك (${partnerName}) بمبلغ ${totalAmount.toLocaleString()} ج.س - ${purpose}`, "رأس المال");
+
+    // مزامنة سحابية
+    if (window.AgroAPI && window.AgroAPI.client) {
+      try {
+        window.AgroAPI.client.from('capital_injections').insert({
+          id: newInj.id,
+          partner_id: partnerId,
+          partner_name: partnerName,
+          date: date,
+          amount: totalAmount,
+          payment_method: method,
+          logged_by: loggedBy,
+          purpose: purpose,
+          notes: notes
+        }).then(() => {}).catch(() => {});
+
+        if (partner) {
+          window.AgroAPI.client.from('partners').update({
+            paid_capital: partner.paidCapital,
+            notes: `نسبة ربح ثابتة ${partner.shares} من 13 [غير مسترد: ${partner.nonRefundableCapital || 0}] [مسترد: ${partner.refundableCapital || 0}]`
+          }).eq('id', partner.id).then(() => {}).catch(() => {});
+        }
+      } catch (e) {
+        console.warn('Silent cloud sync catch:', e);
+      }
+    }
   }
 
   saveData("✓ تم تسجيل حركة ضخ رأس المال وتحديث رصيد الشريك بنجاح");
