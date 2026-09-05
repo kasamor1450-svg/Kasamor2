@@ -895,9 +895,9 @@ table tbody tr:hover {
 
         <!-- 8. قائمة منسدلة هادئة لباقي الأقسام (More Sections Dropdown) -->
         <div class="relative inline-block" id="more-sections-menu-wrapper">
-          <button type="button" onclick="toggleMoreSectionsDropdown()" id="btn-more-sections" class="px-3 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1 whitespace-nowrap border border-slate-200 dark:border-slate-700">
+          <button type="button" onclick="toggleMoreSectionsDropdown(event)" id="btn-more-sections" class="px-3 py-1.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap border border-slate-300 dark:border-slate-700 font-bold active:scale-95 cursor-pointer shadow-sm">
             <span>باقي الأقسام</span>
-            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" id="icon-more-sections"></i>
           </button>
 
           <div id="more-sections-dropdown" class="hidden absolute left-0 top-10 z-50 w-52 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 text-right space-y-1">
@@ -9304,18 +9304,22 @@ function autoUpdateLaborWages() {
 
     // إذا كان الموظف لديه تاريخ مباشرة وراتب شهري
     if (w.startDate && w.monthlySalary > 0) {
-      let calcEndDate = now;
-      if (w.endDate) {
-        const endD = new Date(w.endDate);
-        if (!isNaN(endD.getTime())) {
-          calcEndDate = (endD < now) ? endD : now;
-        }
+      let calcEndDate;
+      let hasEnded = false;
+      
+      // قاعدة حاسمة: عند تسجيل تاريخ الانتهاء، يتوقف الاحتساب حصراً عند هذا التاريخ ولا يستمر لليوم
+      if (w.endDate && w.endDate.trim() !== '') {
+        calcEndDate = w.endDate;
+        hasEnded = true;
+      } else {
+        calcEndDate = now;
       }
 
       const days = Math.max(1, getDaysDiff(w.startDate, calcEndDate));
       const computedMonths = +(days / 30).toFixed(1);
       w.daysWorked = days;
       w.monthsWorked = Math.max(0.1, computedMonths);
+      w.isContractEnded = hasEnded;
     } else {
       w.daysWorked = Math.round((parseFloat(w.monthsWorked) || 1) * 30);
     }
@@ -9327,7 +9331,7 @@ function autoUpdateLaborWages() {
     const groceryDeductions = parseFloat(w.groceryTotal) || 0;
     
     w.totalDeductions = generalDeductions + groceryDeductions;
-    w.totalDue = Math.round(months * salary) + overtime - w.totalDeductions;
+    w.totalDue = Math.max(0, Math.round(months * salary) + overtime - w.totalDeductions);
     w.status = (w.totalPaid || 0) >= w.totalDue ? 'paid' : ((w.totalPaid || 0) > 0 ? 'partial' : 'pending');
   });
 }
@@ -9404,11 +9408,62 @@ function updateUserInterface() {
 }
 
 
-function toggleMoreSectionsDropdown() {
+function toggleMoreSectionsDropdown(event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
   const dd = document.getElementById('more-sections-dropdown');
-  if (!dd) return;
-  dd.classList.toggle('hidden');
+  const btn = document.getElementById('btn-more-sections');
+  const icon = document.getElementById('icon-more-sections');
+  if (!dd || !btn) return;
+
+  const isHidden = dd.classList.contains('hidden');
+  if (isHidden) {
+    // Positioning logic using fixed coordinates to escape any overflow-x-auto or overflow-hidden
+    const rect = btn.getBoundingClientRect();
+    dd.style.position = 'fixed';
+    dd.style.top = (rect.bottom + 6) + 'px';
+    
+    // In RTL, align right edge of dropdown with right edge of button if possible
+    const ddWidth = 230;
+    let leftPos = rect.right - ddWidth;
+    if (leftPos < 10) leftPos = 10;
+    if (leftPos + ddWidth > window.innerWidth - 10) {
+      leftPos = window.innerWidth - ddWidth - 10;
+    }
+    dd.style.left = leftPos + 'px';
+    dd.style.zIndex = '999999';
+    dd.classList.remove('hidden');
+    if (icon) icon.style.transform = 'rotate(180deg)';
+  } else {
+    dd.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+  }
 }
+
+// Global click listener to close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('more-sections-dropdown');
+  const btn = document.getElementById('btn-more-sections');
+  const icon = document.getElementById('icon-more-sections');
+  if (dd && !dd.classList.contains('hidden')) {
+    if (btn && btn.contains(e.target)) return;
+    if (dd && dd.contains(e.target)) return;
+    dd.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+  }
+});
+
+// Also close on window scroll or resize
+window.addEventListener('resize', () => {
+  const dd = document.getElementById('more-sections-dropdown');
+  const icon = document.getElementById('icon-more-sections');
+  if (dd && !dd.classList.contains('hidden')) {
+    dd.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+  }
+});
 
 document.addEventListener('click', (e) => {
   const wrapper = document.getElementById('more-sections-menu-wrapper');
@@ -11451,6 +11506,21 @@ function saveGroceryTx(e, txId, isEdit) {
   autoUpdateLaborWages();
   saveData("✓ تم حفظ قيد مشتريات البقالة وخصمها من مستحقات العامل بنجاح");
   closeModal();
+
+  // مزامنة خصميات البقالة مع السحابة فوراً
+  if (window.AgroAPI && window.AgroAPI.client) {
+    const updatedWorker = (state.labor || []).find(w => w.id === workerId);
+    if (updatedWorker) {
+      window.AgroAPI.client.from('labor').update({
+        deductions_amount: updatedWorker.totalDeductions || (updatedWorker.deductionsAmount + (updatedWorker.groceryTotal || 0)),
+        total_due: updatedWorker.totalDue || 0,
+        status: updatedWorker.status || 'pending'
+      }).eq('id', workerId).then(({ error }) => {
+        if (error) console.warn('Supabase labor deduction sync warning:', error);
+        else console.log('✓ تم تثبيت خصم البقالة في السحابة للعامل:', updatedWorker.name);
+      }).catch(err => console.warn('Grocery deduction sync error:', err));
+    }
+  }
 }
 
 function deleteGroceryTx(txId) {
@@ -12187,7 +12257,8 @@ function openAddCapitalInjectionModal(partnerId = null) {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold mb-1">الشريك المورّد:</label>
-            <select id="inj-partner-id" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+            <select id="inj-partner-id" onchange="onCapitalPartnerChange()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+              <option value="DISTRIBUTE_ALL_SHARES">⚡ توزيع تلقائي على جميع الشركاء حسب الأسهم (13 سهماً)</option>
               ${partnersOptions}
             </select>
           </div>
@@ -12221,8 +12292,20 @@ function openAddCapitalInjectionModal(partnerId = null) {
   
         <div class="p-3.5 bg-gradient-to-r from-purple-50 to-emerald-50 dark:from-purple-950/40 dark:to-emerald-950/40 rounded-2xl border border-purple-200 dark:border-purple-900/50">
           <label class="block font-black text-purple-950 dark:text-purple-200 mb-1">💰 المبلغ المضخوخ (بالجنيه السوداني):</label>
-          <input type="number" id="inj-amount" min="0" step="any" placeholder="مثال: 10000000" class="w-full p-2.5 rounded-xl border border-purple-300 dark:border-purple-700 bg-white dark:bg-slate-800 font-black text-purple-800 dark:text-purple-200 text-base font-mono" required>
-          <p class="text-[10px] text-purple-700 dark:text-purple-300 mt-1">✓ يتم احتساب هذا المبلغ كأصل مدفوع مسترد بالكامل 100% للشريك عند بيع وتصفية المحصول.</p>
+          <input type="number" id="inj-amount" min="0" step="any" oninput="updateCapitalSharesPreview()" placeholder="مثال: 13000000" class="w-full p-2.5 rounded-xl border border-purple-300 dark:border-purple-700 bg-white dark:bg-slate-800 font-black text-purple-800 dark:text-purple-200 text-base font-mono" required>
+          
+          <!-- معاينة توزيع الحصص التلقائي على الأسهم -->
+          <div id="capital-shares-preview" class="mt-2.5 p-2.5 bg-white/80 dark:bg-slate-900/80 rounded-xl border border-purple-200 dark:border-purple-800 text-[11px] space-y-1.5 hidden">
+            <div class="font-bold text-teal-800 dark:text-teal-300 flex justify-between items-center border-b pb-1 border-purple-100 dark:border-slate-800">
+              <span>📊 احتساب نصيب السهم من رأس المال غير المسترد:</span>
+              <span id="preview-share-unit" class="font-mono font-black">0 ج.س/سهم</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-600 dark:text-slate-300 font-medium pt-0.5">
+              <div>• الشريك بـ 2 أسهم (15.38%): <strong id="preview-share-two" class="text-teal-700 dark:text-teal-400 font-mono">0 ج.س</strong></div>
+              <div>• الشريك بـ 1 سهم (7.69%): <strong id="preview-share-one" class="text-teal-700 dark:text-teal-400 font-mono">0 ج.س</strong></div>
+            </div>
+            <p class="text-[9px] text-teal-600 dark:text-teal-400 font-bold mt-1">✓ سيتم توزيع المبلغ آلياً على حسابات جميع الشركاء الـ 9 بحسب أسهمهم (13 سهماً).</p>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -12360,48 +12443,143 @@ function openEditCapitalInjectionModal(injectionId) {
 }
 
 // حفظ قيد ضخ رأس المال
+
+function onCapitalPartnerChange() {
+  updateCapitalSharesPreview();
+}
+
+function updateCapitalSharesPreview() {
+  const partnerSelect = document.getElementById('inj-partner-id');
+  const amountInput = document.getElementById('inj-amount');
+  const previewBox = document.getElementById('capital-shares-preview');
+  const typeRadio = document.querySelector('input[name="inj-capital-type"]:checked');
+  const isNonRefundable = typeRadio ? typeRadio.value === 'non_refundable' : false;
+  const isDistribute = partnerSelect ? partnerSelect.value === 'DISTRIBUTE_ALL_SHARES' : false;
+
+  if (previewBox) {
+    if (isNonRefundable || isDistribute) {
+      previewBox.classList.remove('hidden');
+      const amount = parseFloat(amountInput ? amountInput.value : 0) || 0;
+      const perShare = amount > 0 ? (amount / 13) : 0;
+      const twoShares = perShare * 2;
+      const oneShare = perShare;
+
+      const elUnit = document.getElementById('preview-share-unit');
+      const elTwo = document.getElementById('preview-share-two');
+      const elOne = document.getElementById('preview-share-one');
+
+      if (elUnit) elUnit.innerText = Math.round(perShare).toLocaleString() + ' ج.س/سهم';
+      if (elTwo) elTwo.innerText = Math.round(twoShares).toLocaleString() + ' ج.س';
+      if (elOne) elOne.innerText = Math.round(oneShare).toLocaleString() + ' ج.س';
+    } else {
+      previewBox.classList.add('hidden');
+    }
+  }
+}
+
 function saveCapitalInjection(e, injectionId = null) {
   e.preventDefault();
 
-  const partnerId = document.getElementById('inj-partner-id').value;
-  const partner = state.partners.find(p => p.id === partnerId);
-  const partnerName = partner ? partner.name : '';
+  const partnerSelect = document.getElementById('inj-partner-id');
+  const partnerId = partnerSelect ? partnerSelect.value : '';
   const date = document.getElementById('inj-date').value;
-  const amount = parseFloat(document.getElementById('inj-amount').value) || 0;
+  const totalAmount = parseFloat(document.getElementById('inj-amount').value) || 0;
   const method = document.getElementById('inj-method').value;
   const loggedBy = document.getElementById('inj-logged-by').value.trim();
   const purpose = document.getElementById('inj-purpose').value.trim();
   let notes = document.getElementById('inj-notes').value.trim();
 
-  // الحصول على نوع رأس المال (مسترد / غير مسترد)
   const typeRadio = injectionId ? 
     document.querySelector('input[name="inj-edit-capital-type"]:checked') : 
     document.querySelector('input[name="inj-capital-type"]:checked');
   const capitalType = typeRadio ? typeRadio.value : 'refundable';
 
-  // تضمين النوع داخل حقل الملاحظات ليتم مزامنته تلقائياً في السحابة
   const typeTag = capitalType === 'non_refundable' ? '[نوع: غير مسترد]' : '[نوع: مسترد]';
   notes = notes.replace(/\[نوع:\s*(غير مسترد|مسترد)\]/g, '').trim();
   notes = notes ? `${notes} ${typeTag}` : typeTag;
 
   if (!state.capitalInjections) state.capitalInjections = [];
+  if (!state.partners) state.partners = DEFAULT_DATA.partners || [];
+
+  // إذا تم اختيار التوزيع التلقائي على الأسهم (أو رأس مال غير مسترد عام يوزع على الـ 13 سهماً)
+  if (partnerId === 'DISTRIBUTE_ALL_SHARES') {
+    const perShareAmount = totalAmount / 13;
+    const nowTs = Date.now();
+
+    state.partners.forEach((p, pIdx) => {
+      const pShares = p.shares || 1;
+      const pAmount = Math.round(perShareAmount * pShares);
+
+      // تحديث رصيد الشريك
+      if (capitalType === 'non_refundable') {
+        p.nonRefundableCapital = (parseFloat(p.nonRefundableCapital) || 0) + pAmount;
+      } else {
+        p.refundableCapital = (parseFloat(p.refundableCapital) || 0) + pAmount;
+      }
+      p.paidCapital = (parseFloat(p.nonRefundableCapital) || 0) + (parseFloat(p.refundableCapital) || 0);
+
+      // إنشاء قيد توريد لكل شريك
+      const injRecord = {
+        id: `inj-${nowTs}-${p.id}`,
+        partnerId: p.id,
+        partnerName: p.name,
+        date: date,
+        amount: pAmount,
+        method: method,
+        loggedBy: loggedBy,
+        purpose: `${purpose} (توزيع حصة ${pShares} أسهم من 13)`,
+        notes: `${notes} [حصة أسهم: ${pShares}/13]`,
+        capitalType: capitalType
+      };
+      state.capitalInjections.unshift(injRecord);
+
+      // مزامنة سحابية مع جدول capital_injections و partners
+      if (window.AgroAPI && window.AgroAPI.client) {
+        window.AgroAPI.client.from('capital_injections').insert({
+          id: injRecord.id,
+          partner_id: p.id,
+          partner_name: p.name,
+          date: date,
+          amount: pAmount,
+          payment_method: method,
+          logged_by: loggedBy,
+          purpose: injRecord.purpose,
+          notes: injRecord.notes
+        }).catch(err => console.warn('Cloud injection sync err:', err));
+
+        window.AgroAPI.client.from('partners').update({
+          paid_capital: p.paidCapital,
+          notes: `نسبة ربح ثابتة ${pShares} من 13 [غير مسترد: ${p.nonRefundableCapital || 0}] [مسترد: ${p.refundableCapital || 0}]`
+        }).eq('id', p.id).catch(err => console.warn('Cloud partner sync err:', err));
+      }
+    });
+
+    logAudit("توزيع رأس مال على الأسهم", `توزيع رأس مال (${capitalType === 'non_refundable' ? 'غير مسترد' : 'مسترد'}) بمبلغ إجمالي ${totalAmount.toLocaleString()} ج.س على الـ 13 سهماً بواقع ${Math.round(perShareAmount).toLocaleString()} ج.س للسهم`, "رأس المال");
+    saveData(`✓ تم توزيع رأس المال (${totalAmount.toLocaleString()} ج.س) بنجاح على جميع الأسهم (13 سهماً)!`);
+    closeModal();
+    return;
+  }
+
+  // إضافة عادية لشريك محدد
+  const partner = state.partners.find(p => p.id === partnerId);
+  const partnerName = partner ? partner.name : '';
 
   if (injectionId) {
     const idx = state.capitalInjections.findIndex(x => x.id === injectionId);
     if (idx !== -1) {
       state.capitalInjections[idx] = {
         ...state.capitalInjections[idx],
-        partnerId, partnerName, date, amount, method, loggedBy, purpose, notes, capitalType, capitalType
+        partnerId, partnerName, date, amount: totalAmount, method, loggedBy, purpose, notes, capitalType
       };
-      logAudit("تعديل قيد ضخ رأس مال", `تعديل قيد ضخ للشريك (${partnerName}) بمبلغ ${amount.toLocaleString()} ج.س (${method})`, "رأس المال");
+      logAudit("تعديل قيد ضخ رأس مال", `تعديل قيد ضخ للشريك (${partnerName}) بمبلغ ${totalAmount.toLocaleString()} ج.س (${method})`, "رأس المال");
     }
   } else {
     const newInj = {
       id: `inj-${Date.now()}`,
-      partnerId, partnerName, date, amount, method, loggedBy, purpose, notes
+      partnerId, partnerName, date, amount: totalAmount, method, loggedBy, purpose, notes, capitalType
     };
     state.capitalInjections.unshift(newInj);
-    logAudit("ضخ رأس مال جديد", `تسجيل ضخ وتوريد رأس مال من الشريك (${partnerName}) بمبلغ ${amount.toLocaleString()} ج.س (${method}) - ${purpose}`, "رأس المال");
+    logAudit("ضخ رأس مال جديد", `تسجيل ضخ وتوريد رأس مال من الشريك (${partnerName}) بمبلغ ${totalAmount.toLocaleString()} ج.س (${method}) - ${purpose}`, "رأس المال");
   }
 
   saveData("✓ تم تسجيل حركة ضخ رأس المال وتحديث رصيد الشريك بنجاح");
@@ -14587,8 +14765,35 @@ function saveLaborRecord(e, workerId, isEdit) {
     logAudit("إضافة عامل جديد", `إضافة (${name} - ${role} - ${workerType === 'permanent' ? 'دائم' : 'مؤقت'}) براتب شهري ${monthlySalary.toLocaleString()} ج.س`, "مسير الرواتب");
   }
 
-  saveData("✓ تم حفظ بيانات مسير الراتب بنجاح");
+  saveData("✓ تم حفظ بيانات مسير الراتب وتثبيت تاريخ الانتهاء بنجاح");
   closeModal();
+
+  // مزامنة فورية مع قاعدة بيانات السحابة Supabase
+  if (window.AgroAPI && window.AgroAPI.client) {
+    const workerToSync = state.labor.find(x => x.id === workerId);
+    if (workerToSync) {
+      window.AgroAPI.client.from('labor').upsert({
+        id: workerToSync.id,
+        name: workerToSync.name,
+        role: workerToSync.role,
+        worker_type: workerToSync.workerType || 'permanent',
+        start_date: workerToSync.startDate || null,
+        end_date: workerToSync.endDate || null,
+        monthly_salary: workerToSync.monthlySalary || 0,
+        days_worked: workerToSync.daysWorked || 0,
+        months_worked: workerToSync.monthsWorked || 0,
+        deductions_amount: workerToSync.deductionsAmount || 0,
+        overtime: workerToSync.overtime || 0,
+        total_due: workerToSync.totalDue || 0,
+        total_paid: workerToSync.totalPaid || 0,
+        status: workerToSync.status || 'pending',
+        last_updated_by: workerToSync.lastUpdatedBy || 'المدير المالي'
+      }).then(({ error }) => {
+        if (error) console.warn('Supabase labor sync warning:', error);
+        else console.log('✓ تم تحديث وحفظ مسير الراتب في السحابة بنجاح:', workerToSync.name);
+      }).catch(err => console.warn('Labor sync error:', err));
+    }
+  }
 }
 
 // ==========================================
@@ -18137,6 +18342,10 @@ async function initCloudSyncOnStartup() {
         state = {
           ...state,
           ...cloudState,
+          // الحفاظ على قيود وسحوبات البقالة المسجلة محلياً
+          groceryTransactions: (state.groceryTransactions && state.groceryTransactions.length > 0) 
+            ? state.groceryTransactions 
+            : (cloudState.groceryTransactions || DEFAULT_DATA.groceryTransactions || []),
           farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
           forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
         };
