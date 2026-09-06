@@ -619,6 +619,47 @@ table tbody tr:hover {
     opacity: 0.85 !important;
   }
     
+
+/* ======================================================== */
+/* Internationalization & Direction Support (LTR / RTL)     */
+/* ======================================================== */
+html[dir="ltr"] {
+  direction: ltr !important;
+  text-align: left !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+html[dir="ltr"] .text-right:not(.keep-rtl) {
+  text-align: left !important;
+}
+html[dir="ltr"] .text-left:not(.keep-ltr) {
+  text-align: right !important;
+}
+html[dir="ltr"] input:not(.font-mono),
+html[dir="ltr"] select,
+html[dir="ltr"] textarea {
+  direction: ltr !important;
+  text-align: left !important;
+}
+html[dir="ltr"] #mobile-menu-drawer {
+  justify-content: flex-start !important;
+}
+html[dir="ltr"] #mobile-menu-drawer > div {
+  border-left: none !important;
+  border-right: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+html[dir="ltr"] #more-sections-dropdown {
+  left: auto !important;
+  right: 0 !important;
+  text-align: left !important;
+}
+html[dir="ltr"] #more-sections-dropdown button {
+  text-align: left !important;
+}
+html[dir="ltr"] .font-mono {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
@@ -838,6 +879,12 @@ table tbody tr:hover {
           </button>
 
           <!-- 4. تبديل الوضع الليلي (Dark Mode Toggle) -->
+          <!-- 4.1 زر تبديل لغة التطبيق (Language Switcher: Arabic / English) -->
+          <button id="lang-toggle-btn" onclick="toggleAppLanguage()" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-700 dark:text-slate-200 rounded-xl transition border border-slate-200 dark:border-slate-700 active:scale-95 flex items-center gap-1.5 text-xs font-bold shadow-sm" title="Change Language / تغيير لغة التطبيق">
+            <span id="lang-toggle-flag">🇬🇧</span>
+            <span id="lang-toggle-text">English</span>
+          </button>
+
           <button id="theme-toggle" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-slate-600 dark:text-slate-300 transition border border-slate-200 dark:border-slate-700 active:scale-95" title="تبديل الوضع">
             <i data-lucide="moon" class="w-4 h-4"></i>
           </button>
@@ -2571,6 +2618,10 @@ table tbody tr:hover {
 
       <!-- أزرار أدوات إضافية -->
       <div class="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+        <button id="mobile-lang-toggle-btn" onclick="toggleAppLanguage()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition" title="Language / تغيير لغة المنظومة">
+          <span class="text-base" id="mobile-lang-flag">🇬🇧</span>
+          <span id="mobile-lang-text">English (الانتقال للإنجليزية)</span>
+        </button>
         <button onclick="toggleMobileMenuDrawer(); openExecutiveSeasonReportModal()" class="w-full py-2.5 bg-gradient-to-r from-emerald-800 to-teal-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm">
           <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
           <span>التقرير التنفيذي الشامل للموسم</span>
@@ -8626,6 +8677,550 @@ let currentUser = loadCurrentSession();
 
 let lastSaveTime = new Date();
 
+
+// =========================================================================
+// محرك تعدد اللغات والترجمة الفورية (Mustagro Bilingual i18n Engine)
+// =========================================================================
+
+const AppI18N = window.AppI18N = {
+  currentLang: localStorage.getItem('MUSTAGRO_LANGUAGE') || 'ar',
+
+  dictArToEn: {
+    // Navigation & Menus
+    "لوحة القيادة": "Dashboard",
+    "المصروفات": "Expenses",
+    "المبيعات": "Sales",
+    "الشركاء ورأس المال": "Partners & Capital",
+    "الوقود": "Fuel",
+    "الحصاد": "Harvest",
+    "المستودع": "Inventory",
+    "باقي الأقسام": "More Sections",
+    "سجل رصد الأمطار والطقس": "Weather & Rainfall",
+    "الآليات والأسطول": "Machinery & Fleet",
+    "العمالة والأجور": "Labor & Wages",
+    "بقالة المشروع": "Farm Store",
+    "حاسبة الأرباح التقديرية": "Profit Estimator",
+    "سجل التعديلات والتدقيق": "Audit & Change Logs",
+    "فريق الإدارة والمستخدمين": "Management & Users",
+
+    // Top Header & Branding
+    "مشروع أبناء مصطفى حسن الزراعي": "Mustafa Hassan Sons Agricultural Project",
+    "مشروع أبناء مصطفى حسن": "Mustafa Hassan Sons Project",
+    "الموسم الزراعي 2026": "Agricultural Season 2026",
+    "القضارف، كسمور الشرقي": "Gedarif, East Kasamor",
+    "القضارف - كسمور الشرقي": "Gedarif - East Kasamor",
+    "المساحة الإجمالية: 1,450 فدان": "Total Area: 1,450 Feddans",
+    "المساحة الإجمالية": "Total Area",
+    "مركز الإشعارات والتنبيهات": "Notifications & Alerts",
+    "نسخة احتياطية سحابية": "Cloud Backup",
+    "تبديل الوضع": "Toggle Theme",
+    "تسجيل خروج": "Logout",
+    "مركز إشعارات التطبيق": "App Notifications Center",
+    "تنبيهات فورية عند إضافة أي إدخالات جديدة": "Instant notifications on new entries",
+    "تحديد الكل كمقروء": "Mark All as Read",
+    "قفل التطبيق": "Lock App",
+    "تسجيل الخروج": "Logout",
+
+    // Dashboard KPIs
+    "إجمالي رأس المال المضخوخ": "Total Capital Injected",
+    "مبيعات المحاصيل المحققة": "Crop Sales Revenue",
+    "إجمالي المنصرفات الفعلية": "Total Actual Expenses",
+    "الرصيد المتبقي (السيولة بالخزينة)": "Remaining Treasury Balance",
+    "رصيد وقود الجازولين": "Diesel Fuel Stock",
+    "المساحة الكلية للمزرعة": "Total Farm Area",
+    "المساحة الكلية": "Total Area",
+    "المساحة المزروعة": "Planted Area",
+    "المساحة المجهزة": "Prepared Area",
+    "نسبة الإنجاز الكلية": "Overall Completion",
+    "المتبقي في مستودع المزرعة": "Remaining in Farm Storage",
+    "المتبقي بالمخزن": "Remaining in Storage",
+    "شامل التأسيس والعمليات والرواتب": "Inc. Setup, Operations & Wages",
+    "صافي السيولة المتاحة بعد المصروفات والأرباح": "Net Liquidity After Expenses & Dividends",
+    "مضافة لرأس المال وتوزع على الأسهم": "Added to Capital & Distributed to Shares",
+    "غير مسترد: 69,618,003 • مسترد: 66,500,000": "Non-Ref: 69,618,003 • Ref: 66,500,000",
+    "الوارد": "Inflows",
+    "الصادر": "Outflows",
+    "المنصرف والأرباح": "Expenses & Dividends",
+    "المنصرفات والأرباح": "Expenses & Dividends",
+
+    // Visual Map & Operations
+    "المخطط التوزيعي الجغرافي للمقطوعيات (1,450 فدان)": "Geographic Field Layout (1,450 Feddans)",
+    "تم الحراثة والزراعة": "Ploughed & Planted",
+    "تجهيز / كسرة أولى": "Preparation / First Pass",
+    "أرض بكر / جاهزة": "Virgin Land / Ready",
+    "نمرة ال500 (ذرة فتريتة)": "Plot 500 (Faterita Sorghum)",
+    "نمرة ال450 (ذرة فتريتة)": "Plot 450 (Faterita Sorghum)",
+    "نمرة ال500 (تسالي بلدي)": "Plot 500 (Baladi Watermelon Seeds)",
+    "حالة الأرض والعمليات": "Land & Operations Status",
+    "حالة الأرض": "Land Status",
+    "العمليات الميدانية": "Field Operations",
+    "إضافة عملية ميدانية": "Add Field Operation",
+    "سجل العمليات": "Operations Log",
+    "نوع العملية": "Operation Type",
+    "عدد الساعات": "Hours Count",
+    "ساعات العمل": "Operating Hours",
+
+    // Quick Actions
+    "⚡ الإجراءات السريعة اليومية": "⚡ Daily Quick Actions",
+    "وصول مباشر للعمليات المتكررة الأكثر استخداماً": "Direct access to frequently used operations",
+    "تسجيل منصرف": "New Expense",
+    "قيد فاتورة أو سحب": "Record Bill or Withdrawal",
+    "تسجيل مبيعات": "Record Sale",
+    "بيع ذرة أو تسالي": "Sell Sorghum or Seeds",
+    "صرف وقود": "Issue Fuel",
+    "صرف جازولين للمعدات": "Fuel Equipment",
+    "دخولية حصاد": "Harvest Intake",
+    "توريد للمخزن/الشونة": "Intake to Silo",
+    "صرف أجر": "Disburse Wage",
+    "راتب أو دفعة لعامل": "Worker Wage Payment",
+    "توريد رأس مال": "Inject Capital",
+    "ضخ وتعديل الأنصبة": "Capital Inflow & Shares",
+
+    // Partners & Capital
+    "هيكل الشركاء وتوزيع الأنصبة وضخ رأس المال": "Partner Structure, Capital & Shares",
+    "توزيع رأس المال ومتابعة ضخ وتوريد المبالغ من الشركاء ونظام الـ 13 سهماً المعتمد لتوزيع الأرباح": "Capital tracking, partner injections & 13-share profit distribution system",
+    "💰 توزيع أرباح للشركاء (13 سهماً)": "💰 Distribute Profits (13 Shares)",
+    "تسجيل ضخ رأس مال": "Inject Capital",
+    "تسجيل ضخ رأس مال جديد": "Record Capital Injection",
+    "إجمالي الأسهم: 13 سهم (100%)": "Total Shares: 13 Shares (100%)",
+    "جدول توزيع الحصص ورأس المال المدفوع للشركاء (13 سهم)": "Partner Share Allocation & Paid Capital Table (13 Shares)",
+    "جدول تفصيل أنصبة الشركاء والمصروفات والأرباح": "Partner Shares, Expenses & Profits Table",
+    "استرداد 100% لرأس المال المدفوع والمضخوخ وتوزيع الأرباح الصافية بنظام الـ 13 سهماً": "100% Capital Recovery & Net Profit Distribution via 13 Shares",
+    "رأس المال المستهدف: 300 مليون ج.س (200م زراعة + 100م حصاد)": "Target Capital: 300M SDG (200M Farming + 100M Harvest)",
+    "إجمالي رأس المال المدفوع": "Total Paid Capital",
+    "🌾 إيرادات مبيعات المحاصيل": "🌾 Crop Sales Revenue",
+    "💰 إجمالي الأرباح الموزعة": "💰 Total Profits Distributed",
+    "الرصيد المتبقي (السيولة بالخزينة)": "Remaining Treasury Balance",
+    "السيولة المتبقية بالخزينة": "Treasury Remaining Liquidity",
+    "متبقي كاش جاهز بعد المصروفات": "Available cash after expenses",
+    "حصة تأسيسية ثابتة في أصول المشروع": "Fixed foundation share in project assets",
+    "يُرد 100% للشركاء عند التصفية والبيع": "100% Refunded to partners upon harvest sale",
+    "اسم الشريك": "Partner Name",
+    "الأنصبة الثابتة للأرباح": "Fixed Profit Shares",
+    "نسبة توزيع الأرباح": "Profit Distribution %",
+    "نسبة ربح ثابتة": "Fixed Profit Ratio",
+    "الأنصبة والنسبة": "Shares & Ratio",
+    "غير مسترد (أصل دائم)": "Non-Refundable (Permanent Asset)",
+    "مسترد (سلفة)": "Refundable (Advance)",
+    "مسترد (سلفة تشغيلية)": "Refundable (Operating Advance)",
+    "رأس المال المدفوع": "Paid Capital",
+    "حصة المبيعات المضافة": "Sales Share Added",
+    "حصة مبيعات المحاصيل المضافة": "Crop Sales Share Added",
+    "حصة المبيعات المضافة لرأس المال": "Sales Share Added to Capital",
+    "إجمالي رأس المال مع المبيعات": "Total Capital with Sales",
+    "إجمالي رأس المال بعد المبيعات": "Total Capital after Sales",
+    "إجمالي رأس المال + المبيعات:": "Total Capital + Sales:",
+    "إجمالي رأس المال المدفوع:": "Total Paid Capital:",
+    "إجمالي رأس المال الكلي": "Total Overall Capital",
+    "إجمالي رأس المال": "Total Capital",
+    "أرباح مستلمة": "Profits Received",
+    "أرباح مستلمة:": "Profits Received:",
+    "إجراءات": "Actions",
+    "ضخ مبلغ": "Inject Funds",
+    "كشف المستحقات": "Statement",
+    "كشف الحساب": "Statement",
+    "تعديل": "Edit",
+    "حذف": "Delete",
+    "سجل حركات ضخ وتوريد رأس المال للمشروع": "Project Capital Injections Log",
+    "سجل توزيعات الأرباح على الشركاء (نظام الـ 13 سهماً)": "Partner Profit Distributions Log (13 Shares)",
+    "متابعة مبالغ الأرباح الموزعة والمخصومة مباشرة من الرصيد المتبقي بالخزينة": "Track distributed profits directly deducted from remaining treasury balance",
+    "توزيع دفعة أرباح جديدة": "Distribute New Profit Batch",
+    "توزيع أرباح": "Distribute Profits",
+    "تاريخ التوزيع": "Distribution Date",
+    "إجمالي المبلغ الموزع": "Total Distributed Amount",
+    "نصيب السهم الواحد (1/13)": "Per Share Amount (1/13)",
+    "طريقة التحويل / الصرف": "Payment Method",
+    "البيان والملاحظات": "Notes & Description",
+    "الموثق": "Logged By",
+    "التفصيل": "Details",
+    "شريك مؤسس": "Founding Partner",
+    "أسهم": "Shares",
+    "سهم": "Share",
+    "سهمين": "2 Shares",
+    "أصل دائم": "Permanent Asset",
+    "يُرد 100%": "100% Refunded",
+    "رأس مال معتمد": "Approved Capital",
+    "توزيع أرباح للشركاء (نظام الـ 13 سهماً)": "Distribute Partner Profits (13 Shares System)",
+    "نصيب السهم الواحد (1 من 13):": "Per Share Amount (1 of 13):",
+    "نصيب صاحب السهمين (عمرو، حسن، ابوبكر، هاجر):": "Share of 2-Share Partners (Amr, Hassan, Abubakr, Hagar):",
+    "نصيب صاحب السهم الواحد (الجعلي، هديل، ايناس، رزاز، عناب):": "Share of 1-Share Partners (Jaali, Hadeel, Enas, Razaz, Annab):",
+    "الرصيد المتبقي بالخزينة بعد التوزيع:": "Remaining Treasury Balance After Distribution:",
+    "إجمالي مبلغ الأرباح المراد توزيعه (ج.س):": "Total Profit Amount to Distribute (SDG):",
+    "تاريخ توزيع الأرباح:": "Profit Distribution Date:",
+    "طريقة التحويل / الصرف:": "Payment / Transfer Method:",
+    "البيان / ملاحظات التوزيع:": "Description / Distribution Notes:",
+    "تأكيد واعتماد توزيع الأرباح": "Confirm & Approve Profit Distribution",
+    "تفصيل توزيع الأرباح للشركاء": "Partner Profit Distribution Breakdown",
+
+    // Expenses Section
+    "إدارة وتتبع المصروفات التشغيلية والتأسيسية": "Operational & Setup Expenses Management",
+    "تسجيل وتدقيق كافة الفواتير والمنصرفات بدقة مع إمكانية إرفاق الإيصالات والفرز المتقدم": "Record and audit all invoices with receipt attachments and filtering",
+    "تسجيل منصرف جديد": "Add New Expense",
+    "تصدير إكسل (CSV)": "Export to CSV",
+    "تصدير Excel": "Export to Excel",
+    "طباعة تقرير": "Print Report",
+    "التاريخ": "Date",
+    "البند / التصنيف": "Category",
+    "التصنيف": "Category",
+    "المبلغ": "Amount",
+    "المقطوعية / النمرة": "Plot / Field",
+    "المحصول": "Crop",
+    "البيان والملاحظات": "Description & Notes",
+    "حالة الاعتماد": "Audit Status",
+    "معتمد": "Approved",
+    "للمراجعة": "Under Review",
+    "رواتب وأجور": "Wages & Salaries",
+    "وقود وزيوت": "Fuel & Oils",
+    "تقاوي وبذور": "Seeds",
+    "سماد ومبيدات": "Fertilizers & Pesticides",
+    "صيانة وقطع غيار": "Maintenance & Parts",
+    "إعاشة ونثريات": "Catering & Sundries",
+    "ترحيل ونقل": "Transportation",
+    "البيت": "Farm House",
+    "مشترك": "Shared",
+    "كامل المشروع": "Entire Project",
+    "مصروفات البيت": "Farm House Expenses",
+    "مصروفات المزرعة": "Farm Operating Expenses",
+    "تكلفة الفدان": "Cost per Feddan",
+
+    // Harvest Section
+    "إدارة عمليات الحصاد ودخوليات المحاصيل": "Harvest Management & Crop Intakes",
+    "تسجيل وتوثيق كميات المحاصيل المحصودة، الوارد للمخازن، وتتبع إنتاجية الفدان": "Record harvested crops, storage intakes and per-feddan yields",
+    "تسجيل دخولية حصاد جديدة": "Record Harvest Intake",
+    "إجمالي إنتاج الذرة": "Total Sorghum Production",
+    "إجمالي إنتاج التسالي": "Total Watermelon Seeds Production",
+    "متوسط إنتاجية الفدان": "Average Yield per Feddan",
+    "دخوليات الحصاد المسجلة": "Recorded Harvest Intakes",
+    "نمرة الحصاد": "Harvest Plot",
+    "مكان التخزين": "Storage Location",
+    "سوق المحاصيل (القضارف)": "Gedarif Crop Market",
+    "صومعة القضارف": "Gedarif Silo",
+    "عدد الجوالات": "Bags Count",
+    "الوزن (طن)": "Weight (Tons)",
+
+    // Sales Section
+    "تسويق ومبيعات المحاصيل الزراعية": "Crop Marketing & Sales",
+    "تسجيل ومتابعة صفقات بيع المحصول (الذرة والتسالي)، المدفوعات النقدية، والمتبقي طرف المشترين": "Track crop sales deals (sorghum & seeds), cash payments, and customer balances",
+    "تسجيل صفقة بيع جديدة": "Record New Sale",
+    "إجمالي مبيعات المحاصيل": "Total Crop Sales",
+    "المبالغ المحصلة فعلياً": "Collected Cash",
+    "المبالغ المتبقية طرف المشترين": "Remaining Receivables",
+    "صفقات البيع المسجلة": "Recorded Sales Deals",
+    "اسم المشتري / الشركة": "Buyer / Company Name",
+    "المشتري": "Buyer",
+    "المحصول المباع": "Crop Sold",
+    "سعر الجوال": "Price per Bag",
+    "إجمالي قيمة الصفقة": "Total Deal Amount",
+    "المبلغ المستلم": "Paid Amount",
+    "المتبقي طرف المشتري": "Remaining Balance",
+    "مكتملة ومستلمة": "Completed & Received",
+    "مسدد جزئياً": "Partially Paid",
+    "تسالي (بلدي)": "Baladi Watermelon Seeds",
+    "ذرة (فتريتة)": "Faterita Sorghum",
+
+    // Fuel Section
+    "إدارة وتتبع مخزون وقود الجازولين": "Diesel Fuel Inventory & Tracking",
+    "إضافة وتوريد براميل الجازولين للمخزن، وصرفها للسائقين والتركتورات مع تتبع الرصيد المتبقي لحظياً": "Manage diesel fuel deliveries, machine dispensing, and real-time stock balance",
+    "توريد جازولين للمخزن": "Deliver Fuel",
+    "صرف وقود لآلية/مركبة": "Issue Fuel to Machine",
+    "الرصيد المتبقي بالمخزن": "Remaining Fuel Stock",
+    "إجمالي المستلم": "Total Received",
+    "إجمالي المصروف": "Total Consumed",
+    "سجل حركات الوقود (توريد وصرف)": "Fuel Transactions Log",
+    "نوع الحركة": "Transaction Type",
+    "الكمية (برميل)": "Quantity (Barrels)",
+    "المستلم / السائق": "Receiver / Driver",
+    "الآلية المستلمة": "Machine / Vehicle",
+    "توريد للمخزن": "Stock Intake",
+    "صرف لآلية": "Issue to Machine",
+
+    // Labor Section
+    "مسيرات الرواتب وسجل العمالة الميدانية": "Payroll & Field Labor Registry",
+    "متابعة عقود العمال والرواتب الشهرية والمسحوبات وسلفيات البقالة مع صرف الأجور": "Track contracts, salaries, store withdrawals and wage disbursements",
+    "إضافة عامل جديد": "Add New Worker",
+    "صرف أجر لعامل": "Disburse Wage",
+    "صرف أجر / دفعة راتب لعامل": "Disburse Wage / Salary Payment to Worker",
+    "اسم العامل": "Worker Name",
+    "المسمى الوظيفي": "Job Title",
+    "الراتب الشهري": "Monthly Salary",
+    "تاريخ البداية": "Start Date",
+    "تاريخ الانتهاء": "End Date",
+    "صافي المستحق": "Total Due",
+    "المدفوع": "Paid",
+    "المتبقي": "Balance",
+    "خالص بالكامل": "Fully Settled",
+    "متبقي": "Remaining",
+    "صرف دفعة راتب": "Pay Salary Batch",
+    "كشف حساب العامل": "Worker Statement",
+    "الرصيد المتبقي المتاح بالخزينة حالياً:": "Remaining Treasury Balance Currently:",
+    "المتبقي بالخزينة بعد صرف هذا الأجر:": "Remaining Treasury Balance After Payment:",
+
+    // Grocery Section
+    "بقالة وتعيينات المزرعة": "Farm Store & Supplies",
+    "متابعة التعيينات والمواد الغذائية وسلفيات العمال المخصومة من الرواتب": "Manage rations, grocery supplies, and salary-deducted worker advances",
+    "إضافة فاتورة مشتريات للبقالة": "Add Store Purchase",
+    "تسجيل مسحوبات / سلفة لعامل": "Record Worker Grocery Advance",
+    "إجمالي مشتريات البقالة": "Total Store Purchases",
+    "إجمالي مسحوبات العمال": "Total Worker Advances",
+    "المتبقي في عهدة البقالة": "Store Stock Balance",
+
+    // Weather & Rainfall
+    "سجل رصد معدلات هطول الأمطار": "Rainfall & Weather Monitoring",
+    "توثيق أوقات وكميات وشدة الأمطار في منطقة كسمور الشرقي وتأثيرها على الموسم": "Document rain times, intensity, and impact on the season in Kasamor",
+    "تسجيل هطول أمطار جديد": "Record Rainfall Event",
+    "تسجيل هطول جديد": "Record Rain",
+    "إجمالي مرات الهطول": "Total Rain Events",
+    "آخر هطول مسجل": "Last Recorded Rain",
+    "أعلى شدة مسجلة": "Peak Intensity",
+    "سجل الهطول التراكمي": "Cumulative Rain History",
+    "يوم الهطول": "Rain Day",
+    "بداية الهطول": "Start Time",
+    "نهاية الهطول": "End Time",
+    "مدة الهطول": "Duration",
+    "شدة الأمطار": "Rain Intensity",
+    "قوية": "Heavy",
+    "وسط": "Moderate",
+    "خفيفة": "Light",
+
+    // Machinery
+    "أسطول الآليات والمعدات الزراعية": "Machinery & Equipment Fleet",
+    "إضافة آلية جديدة": "Add New Machine",
+    "تسجيل صيانة جديدة": "Record Maintenance",
+    "اسم الآلية / التركتور": "Machine / Tractor Name",
+    "النوع / الموديل": "Type / Model",
+    "الحالة التشغيلية": "Operating Status",
+    "ساعات العمل التراكمية": "Cumulative Operating Hours",
+    "ممتازة / يعمل بكفاءة": "Excellent / Working",
+    "تحت الصيانة": "Under Maintenance",
+    "ساعات": "Hours",
+    "ساعة": "Hour",
+
+    // Forecasts & Simulator
+    "محاكاة وتوقعات نهاية الموسم وتوزيع الأرباح": "End-of-Season Simulation & Profit Forecasts",
+    "سيناريو الفائض العالي": "High Surplus Scenario",
+    "سيناريو الفائض المتوسط": "Moderate Surplus Scenario",
+    "تأمين تمويل الموسم الجديد": "Securing New Season Financing",
+    "ما يستلمه الشريك نقداً الآن": "Cash Payout to Partner Now",
+
+    // Modals & General Actions
+    "حفظ": "Save",
+    "إلغاء": "Cancel",
+    "إغلاق": "Close",
+    "تأكيد": "Confirm",
+    "تأكيد الحفظ": "Confirm & Save",
+    "تأكيد واعتماد": "Confirm & Approve",
+    "طباعة A4": "Print A4",
+    "مشاركة عبر WhatsApp": "Share via WhatsApp",
+    "تحميل": "Download",
+    "تحميل صورة": "Upload Image",
+    "عرض": "View",
+    "تفاصيل": "Details",
+    "ملاحظات": "Notes",
+    "مكتمل": "Completed",
+    "نشط": "Active",
+    "متاح": "Available",
+    "تحويل بنكك": "Bankak Transfer",
+    "نقداً كاش": "Cash",
+    "شيك مصرفي": "Bank Check",
+    "فوري (بنك فيصل)": "Fawry (Faisal Bank)",
+    "أوكاش": "O-Kash",
+    "أخرى": "Other",
+
+    // Common Units & Terms
+    "ج.س": "SDG",
+    "فدان": "Feddans",
+    "برميل": "Barrels",
+    "براميل": "Barrels",
+    "جوال": "Bags",
+    "طن": "Tons",
+    "ذرة": "Sorghum",
+    "تسالي": "Watermelon Seeds"
+  },
+
+  dictEnToAr: {},
+
+  init() {
+    // Populate reverse mapping
+    for (const [ar, en] of Object.entries(this.dictArToEn)) {
+      this.dictEnToAr[en] = ar;
+    }
+
+    // Apply stored language
+    if (this.currentLang === 'en') {
+      this.applyLanguage('en', false);
+    }
+  },
+
+  t(arText, enText) {
+    if (this.currentLang === 'en') {
+      return enText || this.dictArToEn[arText.trim()] || arText;
+    }
+    return arText;
+  },
+
+  applyLanguage(lang, triggerUpdate = true) {
+    this.currentLang = lang;
+    localStorage.setItem('MUSTAGRO_LANGUAGE', lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = (lang === 'ar' ? 'rtl' : 'ltr');
+
+    // Update Header Button & Mobile Drawer Button
+    const btnText = document.getElementById('lang-toggle-text');
+    const btnFlag = document.getElementById('lang-toggle-flag');
+    if (btnText && btnFlag) {
+      if (lang === 'en') {
+        btnFlag.innerText = '🇸🇩';
+        btnText.innerText = 'العربية';
+      } else {
+        btnFlag.innerText = '🇬🇧';
+        btnText.innerText = 'English';
+      }
+    }
+    const mBtnText = document.getElementById('mobile-lang-text');
+    const mBtnFlag = document.getElementById('mobile-lang-flag');
+    if (mBtnText && mBtnFlag) {
+      if (lang === 'en') {
+        mBtnFlag.innerText = '🇸🇩';
+        mBtnText.innerText = 'العربية (Switch to Arabic)';
+      } else {
+        mBtnFlag.innerText = '🇬🇧';
+        mBtnText.innerText = 'English (الانتقال للإنجليزية)';
+      }
+    }
+
+    // Update Drawer Button
+    const drawerBtnText = document.getElementById('drawer-lang-toggle-text');
+    const drawerBtnFlag = document.getElementById('drawer-lang-toggle-flag');
+    if (drawerBtnText && drawerBtnFlag) {
+      if (lang === 'en') {
+        drawerBtnFlag.innerText = '🇸🇩';
+        drawerBtnText.innerText = 'العربية (Arabic)';
+      } else {
+        drawerBtnFlag.innerText = '🇬🇧';
+        drawerBtnText.innerText = 'English (الإنجليزية)';
+      }
+    }
+
+    // Translate DOM nodes
+    this.translateElement(document.body, lang);
+
+    if (triggerUpdate && typeof updateActiveViews === 'function') {
+      updateActiveViews();
+    }
+  },
+
+  translateElement(rootEl, lang) {
+    if (!rootEl) return;
+
+    const elements = rootEl.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, button, a, label, th, td, option, li, strong, small');
+    elements.forEach(el => {
+      // Elements with no child elements, or only one <i> icon child
+      if (el.children.length === 0 || (el.children.length === 1 && el.children[0].tagName === 'I')) {
+        let text = '';
+        let targetTextNode = null;
+
+        if (el.children.length === 1 && el.children[0].tagName === 'I') {
+          for (let i = 0; i < el.childNodes.length; i++) {
+            if (el.childNodes[i].nodeType === 3 && el.childNodes[i].nodeValue.trim()) {
+              targetTextNode = el.childNodes[i];
+              text = targetTextNode.nodeValue.trim();
+              break;
+            }
+          }
+        } else {
+          text = (el.innerText || el.textContent || '').trim();
+        }
+
+        if (!text) return;
+
+        if (lang === 'en') {
+          if (!el.getAttribute('data-ar-orig')) {
+            el.setAttribute('data-ar-orig', text);
+          }
+          if (this.dictArToEn[text]) {
+            if (targetTextNode) targetTextNode.nodeValue = ' ' + this.dictArToEn[text];
+            else el.innerText = this.dictArToEn[text];
+          } else {
+            let replaced = text
+              .replace(/ج.س/g, 'SDG')
+              .replace(/فدان/g, 'Feddans')
+              .replace(/برميل/g, 'Barrels')
+              .replace(/براميل/g, 'Barrels')
+              .replace(/جوال/g, 'Bags')
+              .replace(/طن/g, 'Tons');
+            if (replaced !== text) {
+              if (targetTextNode) targetTextNode.nodeValue = ' ' + replaced;
+              else el.innerText = replaced;
+            }
+          }
+        } else {
+          // Restore Arabic
+          const orig = el.getAttribute('data-ar-orig');
+          if (orig) {
+            if (targetTextNode) targetTextNode.nodeValue = ' ' + orig;
+            else el.innerText = orig;
+          } else if (this.dictEnToAr[text]) {
+            if (targetTextNode) targetTextNode.nodeValue = ' ' + this.dictEnToAr[text];
+            else el.innerText = this.dictEnToAr[text];
+          }
+        }
+      }
+    });
+
+    // Translate input placeholders
+    const inputs = rootEl.querySelectorAll('input[placeholder], textarea[placeholder]');
+    inputs.forEach(input => {
+      const ph = input.getAttribute('placeholder');
+      if (!ph) return;
+      if (lang === 'en') {
+        if (!input.getAttribute('data-ar-ph')) {
+          input.setAttribute('data-ar-ph', ph);
+        }
+        if (this.dictArToEn[ph.trim()]) {
+          input.setAttribute('placeholder', this.dictArToEn[ph.trim()]);
+        }
+      } else {
+        if (input.getAttribute('data-ar-ph')) {
+          input.setAttribute('placeholder', input.getAttribute('data-ar-ph'));
+        }
+      }
+    });
+
+    // Translate titles
+    const titled = rootEl.querySelectorAll('[title]');
+    titled.forEach(el => {
+      const t = el.getAttribute('title');
+      if (!t) return;
+      if (lang === 'en') {
+        if (!el.getAttribute('data-ar-title')) {
+          el.setAttribute('data-ar-title', t);
+        }
+        if (this.dictArToEn[t.trim()]) {
+          el.setAttribute('title', this.dictArToEn[t.trim()]);
+        }
+      } else {
+        if (el.getAttribute('data-ar-title')) {
+          el.setAttribute('title', el.getAttribute('data-ar-title'));
+        }
+      }
+    });
+  }
+};
+
+function toggleAppLanguage() {
+  const newLang = AppI18N.currentLang === 'ar' ? 'en' : 'ar';
+  AppI18N.applyLanguage(newLang);
+  if (typeof showToast === 'function') {
+    showToast(newLang === 'en' ? '✓ Language switched to English' : '✓ تم تغيير لغة التطبيق إلى العربية بنجاح');
+  }
+}
+
+function initLanguage() {
+  if (typeof AppI18N !== 'undefined') {
+    AppI18N.init();
+  }
+}
+
 function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -9393,6 +9988,7 @@ document.addEventListener('DOMContentLoaded', () => {
     autoUpdateLaborWages();
     initNavigation();
     initTheme();
+    initLanguage();
     updateUserInterface();
     updateActiveViews();
     initModals();
@@ -9681,6 +10277,10 @@ function updateActiveViews() {
     renderCharts();
     checkBudgetAlerts();
     safeCreateIcons();
+
+    if (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en') {
+      AppI18N.translateElement(document.body, 'en');
+    }
   } catch (err) {
     console.error("updateActiveViews error:", err);
   }
@@ -15140,6 +15740,9 @@ function openModal(htmlContent) {
   if (overlay && container) {
     container.innerHTML = htmlContent;
     overlay.classList.remove('hidden');
+    if (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en') {
+      AppI18N.translateElement(container, 'en');
+    }
     safeCreateIcons();
   }
 }
