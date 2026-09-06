@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v20.0-ultra-simple-and-calm-ui
-const CACHE_NAME = 'mustagro-v20.0-ultra-simple-and-calm-ui';
+// Cache Version: mustagro-v21.0-accurate-labor-balance
+const CACHE_NAME = 'mustagro-v21.0-accurate-labor-balance';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

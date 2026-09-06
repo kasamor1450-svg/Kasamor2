@@ -1642,7 +1642,7 @@ html[dir="ltr"] .font-mono {
         <div class="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-right">
           <p class="text-[11px] font-bold text-amber-700 dark:text-amber-400">صافي المتبقي للعمالة</p>
           <h3 id="labor-total-balance-stat" class="text-base sm:text-lg font-black text-amber-700 dark:text-amber-300 font-mono mt-0.5">0 ج.س</h3>
-          <p class="text-[10px] text-amber-600/70 mt-0.5">متبقي مستحق الدفع للعمالة</p>
+          <p id="labor-total-balance-sub" class="text-[10px] text-amber-600/70 mt-0.5">متبقي مستحق الدفع للعمالة</p>
         </div>
 
         <div class="p-4 bg-blue-50 dark:bg-blue-950/40 rounded-2xl border border-blue-200 dark:border-blue-800 text-right">
@@ -6253,20 +6253,20 @@ const DEFAULT_DATA = {
       "id": "lab-1788077268220",
       "name": "زيات حبشي",
       "role": "زيات",
-      "startDate": "2026-08-07",
-      "monthsWorked": 0.1,
+      "startDate": "2026-07-01",
+      "monthsWorked": 1,
       "monthlySalary": 400000,
       "deductionsAmount": 303000,
       "overtime": 0,
-      "totalDue": -263000,
-      "totalPaid": 970000,
+      "totalDue": 97000,
+      "totalPaid": 97000,
       "status": "paid",
-      "task": "عمليات موسمية",
+      "task": "عمليات موسمية وتزييت وتشحيم الآليات",
       "plot": "مشترك",
       "crop": "مشترك",
       "areaFeddan": 0,
       "lastUpdatedBy": "محمد مصطفى",
-      "daysWorked": 1,
+      "daysWorked": 31,
       "workerType": "temporary",
       "endDate": "2026-07-31",
       "groceryTotal": 0,
@@ -10073,7 +10073,26 @@ function loadData() {
     zakatDeliveries: Array.isArray(loaded.zakatDeliveries) ? loaded.zakatDeliveries : (def.zakatDeliveries || []),
     machinery: Array.isArray(loaded.machinery) ? loaded.machinery : (def.machinery || []),
     machineryMaintenance: Array.isArray(loaded.machineryMaintenance) ? loaded.machineryMaintenance : (def.machineryMaintenance || []),
-    labor: Array.isArray(loaded.labor) ? loaded.labor : def.labor,
+    labor: (() => {
+      let lList = Array.isArray(loaded.labor) ? loaded.labor : def.labor;
+      lList.forEach(w => {
+        if (w.id === 'lab-1788077268220' || w.name === 'زيات حبشي') {
+          if (w.totalPaid === 970000 || w.totalDue < 0 || (w.startDate === '2026-08-07' && w.endDate === '2026-07-31')) {
+            w.startDate = '2026-07-01';
+            w.endDate = '2026-07-31';
+            w.daysWorked = 31;
+            w.monthsWorked = 1;
+            w.monthlySalary = 400000;
+            w.deductionsAmount = 303000;
+            w.totalDeductions = 303000;
+            w.totalDue = 97000;
+            w.totalPaid = 97000;
+            w.status = 'paid';
+          }
+        }
+      });
+      return lList;
+    })(),
     expenses: Array.isArray(loaded.expenses) ? loaded.expenses : def.expenses,
     rainfallLogs: Array.isArray(loaded.rainfallLogs) ? loaded.rainfallLogs : (def.rainfallLogs || []),
     capitalPlan: loaded.capitalPlan || def.capitalPlan,
@@ -10671,6 +10690,17 @@ function autoUpdateLaborWages() {
     // احتساب إجمالي مسحوبات البقالة الآجلة للعامل
     const workerGroc = groceryTxList.filter(t => t.workerId === w.id || t.workerName === w.name);
     w.groceryTotal = workerGroc.reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+
+    // معالجة تصحيحية لأي تاريخ بداية ونهاية غير متناسقين
+    if (w.startDate && w.endDate && w.endDate.trim() !== '') {
+      const sDate = new Date(w.startDate);
+      const eDate = new Date(w.endDate);
+      if (!isNaN(sDate.getTime()) && !isNaN(eDate.getTime()) && eDate < sDate) {
+        const temp = w.startDate;
+        w.startDate = w.endDate;
+        w.endDate = temp;
+      }
+    }
 
     // إذا كان الموظف لديه تاريخ مباشرة وراتب شهري
     if (w.startDate && w.monthlySalary > 0) {
@@ -12842,28 +12872,60 @@ function renderLaborSection() {
   // تحديث بطاقات المؤشرات الأربعة أعلى مسير الرواتب
   const totalDueSum = state.labor.reduce((sum, w) => sum + (parseFloat(w.totalDue) || 0), 0);
   const totalPaidSum = state.labor.reduce((sum, w) => sum + (parseFloat(w.totalPaid) || 0), 0);
-  const totalBalanceSum = Math.max(0, totalDueSum - totalPaidSum);
+  
+  // الاحتساب المحاسبي الصحيح: صافي المتبقي للعمالة هو مجموع التزامات ومستحقات المزرعة المتبقية لكل عامل
+  const totalBalanceSum = state.labor.reduce((sum, w) => {
+    const due = parseFloat(w.totalDue) || 0;
+    const paid = parseFloat(w.totalPaid) || 0;
+    return sum + Math.max(0, due - paid);
+  }, 0);
+
+  // إجمالي السلفيات والمبالغ المسددة مقدماً فوق المستحق
+  const totalAdvancesSum = state.labor.reduce((sum, w) => {
+    const due = parseFloat(w.totalDue) || 0;
+    const paid = parseFloat(w.totalPaid) || 0;
+    return sum + Math.max(0, paid - due);
+  }, 0);
+
   const activeCount = state.labor.length;
 
   const dueStat = document.getElementById('labor-total-due-stat');
   const paidStat = document.getElementById('labor-total-paid-stat');
   const balStat = document.getElementById('labor-total-balance-stat');
+  const balSub = document.getElementById('labor-total-balance-sub');
   const cntStat = document.getElementById('labor-total-count-stat');
 
-  if (dueStat) dueStat.textContent = Math.round(totalDueSum).toLocaleString() + ' ' + (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en' ? 'SDG' : 'ج.س');
-  if (paidStat) paidStat.textContent = Math.round(totalPaidSum).toLocaleString() + ' ' + (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en' ? 'SDG' : 'ج.س');
-  if (balStat) balStat.textContent = Math.round(totalBalanceSum).toLocaleString() + ' ' + (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en' ? 'SDG' : 'ج.س');
+  const currSymbol = (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en' ? 'SDG' : 'ج.س');
+  if (dueStat) dueStat.textContent = Math.round(totalDueSum).toLocaleString() + ' ' + currSymbol;
+  if (paidStat) paidStat.textContent = Math.round(totalPaidSum).toLocaleString() + ' ' + currSymbol;
+  if (balStat) balStat.textContent = Math.round(totalBalanceSum).toLocaleString() + ' ' + currSymbol;
+  if (balSub) {
+    if (totalAdvancesSum > 0) {
+      balSub.textContent = (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en')
+        ? 'Outstanding liabilities (Advances: ' + Math.round(totalAdvancesSum).toLocaleString() + ' SDG)'
+        : 'مستحقات واجبة السداد (سلفيات مقدمة: ' + Math.round(totalAdvancesSum).toLocaleString() + ' ج.س)';
+    } else {
+      balSub.textContent = (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en')
+        ? 'Outstanding balance due to workers'
+        : 'متبقي مستحق الدفع للعمالة';
+    }
+  }
   if (cntStat) cntStat.textContent = activeCount;
 
   laborTable.innerHTML = state.labor.map(w => {
-    const balance = (w.totalDue || 0) - (w.totalPaid || 0);
+    const due = parseFloat(w.totalDue) || 0;
+    const paid = parseFloat(w.totalPaid) || 0;
+    const balance = due - paid;
     let statusHtml = '';
-    if (balance <= 0) {
+    if (balance === 0) {
       statusHtml = '<span class="badge-completed text-[11px] px-2.5 py-1 rounded-full font-bold">خالص بالكامل</span>';
-    } else if (w.totalPaid > 0) {
-      statusHtml = `<span class="badge-progress text-[11px] px-2.5 py-1 rounded-full font-bold">متبقي ${balance.toLocaleString()} ج.س</span>`;
+    } else if (balance < 0) {
+      const adv = Math.abs(balance);
+      statusHtml = '<span class="badge-completed text-[11px] px-2.5 py-1 rounded-full font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300" title="تم صرف سلفة إضافية على الحساب">خالص بالكامل (سلفة: ' + adv.toLocaleString() + ' ج.س)</span>';
+    } else if (paid > 0) {
+      statusHtml = '<span class="badge-progress text-[11px] px-2.5 py-1 rounded-full font-bold">متبقي ' + balance.toLocaleString() + ' ج.س</span>';
     } else {
-      statusHtml = `<span class="bg-rose-100 text-rose-800 text-[11px] px-2.5 py-1 rounded-full font-bold">غير مدفوع</span>`;
+      statusHtml = '<span class="bg-rose-100 text-rose-800 text-[11px] px-2.5 py-1 rounded-full font-bold">غير مدفوع (متبقي ' + balance.toLocaleString() + ' ج.س)</span>';
     }
 
     const isPermanent = (w.workerType !== 'temporary');
@@ -15726,10 +15788,12 @@ function generateSmartAnswer(q) {
   if (query.includes('عمال') || query.includes('عمالة') || query.includes('راتب') || query.includes('أجور') || query.includes('عبدالقادر') || query.includes('مخالصة')) {
     const totalLaborDue = state.labor.reduce((sum, w) => sum + (parseFloat(w.totalDue) || 0), 0);
     const totalLaborPaid = state.labor.reduce((sum, w) => sum + (parseFloat(w.totalPaid) || 0), 0);
+    const totalLaborBal = state.labor.reduce((sum, w) => sum + Math.max(0, (parseFloat(w.totalDue) || 0) - (parseFloat(w.totalPaid) || 0)), 0);
+    const totalLaborAdv = state.labor.reduce((sum, w) => sum + Math.max(0, (parseFloat(w.totalPaid) || 0) - (parseFloat(w.totalDue) || 0)), 0);
     return `👥 <strong>مسير العمالة والمشرفين:</strong><br>
     • عدد العمال والوكلاء المسجلين: <strong>${state.labor.length} أفراد</strong> (بإشراف الوكيل عبدالقادر).<br>
     • إجمالي المستحقات بعد خصم البقالة: <strong>${totalLaborDue.toLocaleString()} ج.س</strong>.<br>
-    • المدفوع: <strong>${totalLaborPaid.toLocaleString()} ج.س</strong> | المتبقي: <strong>${(totalLaborDue - totalLaborPaid).toLocaleString()} ج.س</strong>.<br>
+    • المدفوع: <strong>${totalLaborPaid.toLocaleString()} ج.س</strong> | صافي المتبقي للعمالة: <strong>${totalLaborBal.toLocaleString()} ج.س</strong>${totalLaborAdv > 0 ? ' (سلفيات مقدمة: ' + totalLaborAdv.toLocaleString() + ' ج.س)' : ''}.<br>
     • يمكنك طباعة سند مخالصة رسمية لأي عامل بضغطة زر.`;
   }
 
@@ -16926,8 +16990,14 @@ function onLaborStartDateChange() {
     let calcEnd = new Date();
     if (endDateVal) {
       const parsedEnd = new Date(endDateVal);
-      if (!isNaN(parsedEnd.getTime())) {
-        calcEnd = parsedEnd;
+      const parsedStart = new Date(startDateVal);
+      if (!isNaN(parsedEnd.getTime()) && !isNaN(parsedStart.getTime())) {
+        if (parsedEnd < parsedStart) {
+          showToast('⚠️ تنبيه: تاريخ الانتهاء يجب أن يكون لاحقاً لتاريخ المباشرة', 'warning');
+          calcEnd = parsedStart;
+        } else {
+          calcEnd = parsedEnd;
+        }
       }
     }
     const days = Math.max(1, getDaysDiff(startDateVal, calcEnd));
@@ -16947,14 +17017,25 @@ function recalculateModalTotals() {
   const deductions = parseFloat(document.getElementById('lab-deductions')?.value) || 0;
   const paid = parseFloat(document.getElementById('lab-paid')?.value) || 0;
 
-  const totalDue = Math.round(months * salary) + overtime - deductions;
+  const totalDue = Math.max(0, Math.round(months * salary) + overtime - deductions);
   const balance = totalDue - paid;
 
   const elDue = document.getElementById('modal-lab-due');
   const elBal = document.getElementById('modal-lab-balance');
 
   if (elDue) elDue.innerText = totalDue.toLocaleString();
-  if (elBal) elBal.innerText = balance.toLocaleString();
+  if (elBal) {
+    if (balance > 0) {
+      elBal.className = "text-amber-600 font-mono text-sm";
+      elBal.innerText = balance.toLocaleString() + ' ج.س (متبقي مستحق)';
+    } else if (balance === 0) {
+      elBal.className = "text-emerald-600 font-mono text-sm";
+      elBal.innerText = '0 ج.س (خالص بالكامل)';
+    } else {
+      elBal.className = "text-blue-600 font-mono text-sm";
+      elBal.innerText = Math.abs(balance).toLocaleString() + ' ج.س (سلفة مقدمة)';
+    }
+  }
 }
 
 function saveLaborRecord(e, workerId, isEdit) {
@@ -16965,13 +17046,17 @@ function saveLaborRecord(e, workerId, isEdit) {
   const workerType = document.getElementById('lab-worker-type').value;
   const startDate = document.getElementById('lab-start-date')?.value || '2026-07-01';
   const endDate = document.getElementById('lab-end-date')?.value || '';
+  if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+    showToast('⚠️ تنبيه: تاريخ انتهاء العقد لا يمكن أن يكون قبل تاريخ المباشرة', 'warning');
+    return;
+  }
   const monthsWorked = parseFloat(document.getElementById('lab-months').value) || 1;
   const monthlySalary = parseFloat(document.getElementById('lab-monthly-salary').value) || 0;
   const deductionsAmount = parseFloat(document.getElementById('lab-deductions').value) || 0;
   const overtime = parseFloat(document.getElementById('lab-overtime').value) || 0;
   const totalPaid = parseFloat(document.getElementById('lab-paid').value) || 0;
 
-  const totalDue = Math.round(monthsWorked * monthlySalary) + overtime - deductionsAmount;
+  const totalDue = Math.max(0, Math.round(monthsWorked * monthlySalary) + overtime - deductionsAmount);
   const status = totalPaid >= totalDue ? 'paid' : (totalPaid > 0 ? 'partial' : 'pending');
   const updatedBy = currentUser ? currentUser.name : "حسن مصطفى";
 
