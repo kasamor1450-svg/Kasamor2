@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v22.0-dedicated-crop-sales-section
-const CACHE_NAME = 'mustagro-v22.0-dedicated-crop-sales-section';
+// Cache Version: mustagro-v23.0-crop-sales-edit-delete-save
+const CACHE_NAME = 'mustagro-v23.0-crop-sales-edit-delete-save';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

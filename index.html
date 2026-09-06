@@ -3563,6 +3563,18 @@ html[dir="ltr"] .font-mono {
       return await this.client.from('crop_sales').upsert(row);
     }
 
+    async deleteSale(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('crop_sales').delete().eq('id', id);
+        if (error) console.warn('Supabase delete crop_sale warning:', error);
+        return data;
+      } catch(err) {
+        console.warn('deleteSale error:', err);
+        return null;
+      }
+    }
+
     
     async upsertCapitalInjection(inj) {
       if (!this.client) return null;
@@ -18804,16 +18816,18 @@ function renderSalesSection() {
             <td class="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">${s.paymentMethod || 'تحويل بنكك'}</td>
             <td class="py-3 px-4">${statusBadge}</td>
             <td class="py-3 px-4 text-left">
-              <div class="flex items-center justify-end gap-1.5">
-                <button onclick="openSaleVoucherModal('${s.id}')" class="px-2 py-1 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 rounded-lg text-[10px] font-black transition flex items-center gap-1 border border-amber-200 dark:border-amber-800" title="طباعة فاتورة وسند بيع محصول">
+              <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                <button type="button" onclick="openSaleVoucherModal('${s.id}')" class="px-2.5 py-1.5 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-amber-200 dark:border-amber-800 cursor-pointer shadow-xs" title="طباعة فاتورة وسند بيع محصول">
                   <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-                  <span>سند بيع</span>
+                  <span>سند</span>
                 </button>
-                <button onclick="openAddCropSaleModal('${s.id}')" class="p-1.5 text-slate-600 hover:text-amber-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="تعديل">
+                <button type="button" onclick="openAddCropSaleModal('${s.id}')" class="px-2.5 py-1.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-blue-200 dark:border-blue-800 cursor-pointer shadow-xs" title="تعديل صفقة البيع">
                   <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  <span>تعديل</span>
                 </button>
-                <button onclick="deleteCropSale('${s.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950 transition" title="حذف">
+                <button type="button" onclick="deleteCropSale('${s.id}')" class="px-2.5 py-1.5 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-700 dark:text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-rose-200 dark:border-rose-800 cursor-pointer shadow-xs" title="حذف صفقة البيع واستعادة المخزون">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  <span>حذف</span>
                 </button>
               </div>
             </td>
@@ -18828,6 +18842,8 @@ function renderSalesSection() {
   if (harvestSalesTable && salesTable) {
     harvestSalesTable.innerHTML = salesTable.innerHTML;
   }
+
+  if (typeof safeCreateIcons === 'function') safeCreateIcons();
 }
 
 function openSaleVoucherModal(saleId) {
@@ -19047,35 +19063,47 @@ function renderHarvestSection() {
   const salesBody = document.getElementById('harvest-sales-table-body');
   if (salesBody) {
     if (sales.length === 0) {
-      salesBody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-slate-400">لا توجد صفقات بيع مسجلة حتى الآن.</td></tr>`;
+      salesBody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-slate-400">لا توجد صفقات بيع مسجلة حتى الآن.</td></tr>`;
     } else {
       salesBody.innerHTML = sales.map(s => {
         const total = parseFloat(s.totalAmount) || 0;
-        const paid = parseFloat(s.paidAmount) || 0;
-        const rem = total - paid;
+        const paid = parseFloat(s.paidAmount !== undefined && s.paidAmount !== null && s.paidAmount !== '' ? s.paidAmount : s.totalAmount) || 0;
+        const rem = Math.max(0, total - paid);
+        const perShare = Math.round(paid / 13);
+        const statusBadge = rem <= 0 
+          ? '<span class="badge-completed text-[11px] px-2.5 py-0.5 rounded-full font-bold">✓ مسدد بالكامل</span>'
+          : '<span class="badge-progress text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">⏳ متبقي ' + rem.toLocaleString() + ' ج.س</span>';
+
         return `
           <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition">
             <td class="py-3 px-4 font-mono font-bold text-slate-700 dark:text-slate-300">${s.date}</td>
-            <td class="py-3 px-4 font-black text-slate-900 dark:text-white">🏢 ${s.buyerName}</td>
-            <td class="py-3 px-4 font-semibold">${s.crop}</td>
+            <td class="py-3 px-4 font-black text-slate-900 dark:text-white">
+              <div class="flex items-center gap-1.5">
+                <span>🏢 ${s.buyerName}</span>
+              </div>
+              <div class="text-[10px] text-slate-400 font-normal mt-0.5">${s.deliveryLocation || 'صومعة القضارف'}</div>
+            </td>
+            <td class="py-3 px-4 font-semibold text-amber-700 dark:text-amber-400">${s.crop}</td>
             <td class="py-3 px-4 font-mono font-bold">${(parseFloat(s.bags) || 0).toLocaleString()} جوال</td>
             <td class="py-3 px-4 font-mono">${(parseFloat(s.pricePerBag) || 0).toLocaleString()} ج.س</td>
             <td class="py-3 px-4 font-mono font-black text-slate-900 dark:text-white text-sm">${total.toLocaleString()} ج.س</td>
             <td class="py-3 px-4 font-mono font-bold text-emerald-600">${paid.toLocaleString()} ج.س</td>
             <td class="py-3 px-4 font-mono font-bold text-amber-600">${rem > 0 ? rem.toLocaleString() + ' ج.س' : '0'}</td>
-            <td class="py-3 px-4">${s.paymentMethod || 'تحويل بنكك'}</td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${rem <= 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'}">
-                ${rem <= 0 ? '✓ مسدد بالكامل' : '⏳ متبقي رصيد'}
-              </span>
-            </td>
+            <td class="py-3 px-4 font-medium text-slate-600 dark:text-slate-300">${s.paymentMethod || 'تحويل بنكك'}</td>
+            <td class="py-3 px-4">${statusBadge}</td>
             <td class="py-3 px-4 text-left">
-              <div class="flex items-center justify-end gap-1.5">
-                <button onclick="openAddCropSaleModal('${s.id}')" class="p-1.5 text-slate-600 hover:text-amber-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="تعديل">
-                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+              <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                <button type="button" onclick="openSaleVoucherModal('${s.id}')" class="px-2.5 py-1.5 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-amber-200 dark:border-amber-800 cursor-pointer shadow-xs" title="سند بيع">
+                  <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                  <span>سند</span>
                 </button>
-                <button onclick="deleteCropSale('${s.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950 transition" title="حذف">
+                <button type="button" onclick="openAddCropSaleModal('${s.id}')" class="px-2.5 py-1.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-blue-200 dark:border-blue-800 cursor-pointer shadow-xs" title="تعديل صفقة البيع">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  <span>تعديل</span>
+                </button>
+                <button type="button" onclick="deleteCropSale('${s.id}')" class="px-2.5 py-1.5 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-700 dark:text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1 border border-rose-200 dark:border-rose-800 cursor-pointer shadow-xs" title="حذف صفقة البيع">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  <span>حذف</span>
                 </button>
               </div>
             </td>
@@ -19114,6 +19142,7 @@ function renderHarvestSection() {
       `).join('');
     }
   }
+  if (typeof safeCreateIcons === "function") safeCreateIcons();
 }
 
 function switchHarvestSubTab(tabName) {
@@ -19354,35 +19383,74 @@ function deleteHarvestIntake(intakeId) {
 }
 
 function openAddCropSaleModal(saleId = null) {
-  const item = saleId ? (state.cropSales || []).find(s => s.id === saleId) : null;
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer() && saleId) {
+    if (typeof showToast === 'function') {
+      showToast('عفواً، حسابك بصلاحية اطلاع فقط ولا يملك إذن تعديل بيانات المبيعات.', 'warning');
+    } else {
+      alert('عفواً، حسابك بصلاحية اطلاع فقط ولا يملك إذن تعديل بيانات المبيعات.');
+    }
+    return;
+  }
+
+  const cleanId = (saleId && saleId !== 'null' && saleId !== 'undefined' && saleId !== '') ? String(saleId) : null;
+  const item = cleanId ? (state.cropSales || []).find(s => String(s.id) === cleanId) : null;
   const isEdit = !!item;
 
   const intakes = state.harvestIntakes || [];
   const sales = state.cropSales || [];
   const zakat = state.zakatDeliveries || [];
 
-  const initialCrop = item ? item.crop : 'ذرة (طابت)';
-  const cropCategory = initialCrop.includes('ذرة') ? 'ذرة' : 'تسالي';
+  const initialCrop = item ? (item.crop || 'ذرة (طابت)') : 'ذرة (طابت)';
+  const cropCategory = initialCrop.includes('ذرة') ? 'ذرة' : (initialCrop.includes('تسالي') ? 'تسالي' : initialCrop);
 
   const intakeBagsForCrop = intakes.filter(h => h.crop && h.crop.includes(cropCategory)).reduce((sum, h) => sum + (parseFloat(h.bags) || 0), 0);
-  const soldBagsForCrop = sales.filter(s => s.id !== saleId && s.crop && s.crop.includes(cropCategory)).reduce((sum, s) => sum + (parseFloat(s.bags) || 0), 0);
+  const soldBagsForCrop = sales.filter(s => (cleanId ? String(s.id) !== cleanId : true) && s.crop && s.crop.includes(cropCategory)).reduce((sum, s) => sum + (parseFloat(s.bags) || 0), 0);
   const zakatBagsForCrop = zakat.filter(z => z.crop && z.crop.includes(cropCategory)).reduce((sum, z) => sum + (parseFloat(z.bags) || 0), 0);
   const availStockForCrop = Math.max(0, intakeBagsForCrop - soldBagsForCrop - zakatBagsForCrop);
 
-  const initialBags = item ? item.bags : 100;
-  const initialPrice = item ? item.pricePerBag : 320000;
+  const initialBags = item ? (parseFloat(item.bags) || 100) : 100;
+  const initialPrice = item ? (parseFloat(item.pricePerBag) || 320000) : 320000;
   const initialTotal = initialBags * initialPrice;
-  const initialPaid = item ? item.paidAmount : initialTotal;
+  const initialPaid = item ? (parseFloat(item.paidAmount !== undefined && item.paidAmount !== null && item.paidAmount !== '' ? item.paidAmount : initialTotal) || 0) : initialTotal;
   const initialRemaining = Math.max(0, initialTotal - initialPaid);
+
+  const standardCrops = [
+    'ذرة (طابت)',
+    'ذرة (فتريتة)',
+    'ذرة ارفع قدمك محسن',
+    'ذرة',
+    'تسالي (بلدي)',
+    'تسالي (حُميض)',
+    'تسالي',
+    'سمسم',
+    'فول سوداني'
+  ];
+
+  let cropOptionsHtml = '';
+  let foundSelected = false;
+  standardCrops.forEach(c => {
+    const sel = (item && item.crop === c) ? 'selected' : (!item && c === 'ذرة (طابت)' ? 'selected' : '');
+    if (sel) foundSelected = true;
+    cropOptionsHtml += `<option value="${c}" ${sel}>${c}</option>`;
+  });
+  if (item && item.crop && !foundSelected) {
+    cropOptionsHtml = `<option value="${item.crop}" selected>${item.crop}</option>` + cropOptionsHtml;
+  }
 
   const html = `
     <div class="p-6">
       <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
         <div class="flex items-center gap-2">
-          <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-base">💰</span>
+          <span class="w-8 h-8 rounded-xl ${isEdit ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'} flex items-center justify-center font-bold text-base">
+            ${isEdit ? '✏️' : '💰'}
+          </span>
           <div>
-            <h3 class="text-base font-bold text-slate-900 dark:text-white">${isEdit ? 'تعديل صفقة بيع محاصيل' : 'تسجيل عقد وصفقة بيع جديدة'}</h3>
-            <p class="text-[10px] text-slate-400">تخصم الكمية المباعة تلقائياً من رصيد المخزون فور الحفظ</p>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">
+              ${isEdit ? `تعديل صفقة بيع: ${item.buyerName || 'مشتري'}` : 'تسجيل عقد وصفقة بيع جديدة'}
+            </h3>
+            <p class="text-[10px] text-slate-400">
+              ${isEdit ? 'تحديث بيانات الصفقة وضبط رصيد المخزون وحصص الشركاء فور الحفظ' : 'تخصم الكمية المباعة تلقائياً من رصيد المخزون وتوزع على الشركاء فور الحفظ'}
+            </p>
           </div>
         </div>
         <button onclick="closeModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
@@ -19397,7 +19465,9 @@ function openAddCropSaleModal(saleId = null) {
         <strong id="sale-available-stock-badge" class="font-mono text-blue-900 dark:text-blue-200 font-black text-sm">${availStockForCrop.toLocaleString()} جوال</strong>
       </div>
 
-      <form onsubmit="saveCropSale(event, '${saleId || ''}')" class="space-y-4 text-xs">
+      <form onsubmit="saveCropSale(event, '${cleanId || ''}')" class="space-y-4 text-xs">
+        <input type="hidden" id="sale-id" value="${cleanId || ''}">
+        
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold mb-1">تاريخ الصفقة:</label>
@@ -19405,23 +19475,20 @@ function openAddCropSaleModal(saleId = null) {
           </div>
           <div>
             <label class="block font-bold mb-1">اسم التاجر / الشركة المشترية:</label>
-            <input type="text" id="sale-buyer" value="${item ? item.buyerName : ''}" placeholder="شركة البركة / التاجر أحمد ود النور..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+            <input type="text" id="sale-buyer" value="${item ? (item.buyerName || '') : ''}" placeholder="شركة البركة / التاجر أحمد ود النور..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
           </div>
         </div>
 
         <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block font-bold mb-1">المحصول المباع:</label>
-            <select id="sale-crop" onchange="updateSaleCropStockBadge()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
-              <option value="ذرة (طابت)" ${item && item.crop === 'ذرة (طابت)' ? 'selected' : ''}>ذرة (طابت)</option>
-              <option value="ذرة (فتريتة)" ${item && item.crop === 'ذرة (فتريتة)' ? 'selected' : ''}>ذرة (فتريتة)</option>
-              <option value="تسالي (حُميض)" ${item && item.crop === 'تسالي (حُميض)' ? 'selected' : ''}>تسالي (حُميض)</option>
-              <option value="تسالي (بلدي)" ${item && item.crop === 'تسالي (بلدي)' ? 'selected' : ''}>تسالي (بلدي)</option>
+            <select id="sale-crop" onchange="updateSaleCropStockBadge('${cleanId || ''}')" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+              ${cropOptionsHtml}
             </select>
           </div>
           <div>
             <label class="block font-bold mb-1">الكمية المباعة (جوال):</label>
-            <input type="number" id="sale-bags" value="${initialBags}" min="1" oninput="calcSaleTotalLive()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold" required>
+            <input type="number" id="sale-bags" value="${initialBags}" min="1" step="any" oninput="calcSaleTotalLive()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold" required>
           </div>
           <div>
             <label class="block font-bold mb-1">سعر الجوال (ج.س):</label>
@@ -19441,9 +19508,9 @@ function openAddCropSaleModal(saleId = null) {
             <label class="block font-bold">المبلغ المستلم / المحصل (جنيه سوداني):</label>
             <div class="flex items-center gap-1 text-[10px]">
               <span class="text-slate-400 font-medium">سداد سريع:</span>
-              <button type="button" onclick="setSalePaidPreset(1)" class="px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded font-bold transition">100% كامل</button>
-              <button type="button" onclick="setSalePaidPreset(0.5)" class="px-2 py-0.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded font-bold transition">50% مقدم</button>
-              <button type="button" onclick="setSalePaidPreset(0)" class="px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-bold transition">0% آجل</button>
+              <button type="button" onclick="setSalePaidPreset(1)" class="px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded font-bold transition cursor-pointer">100% كامل</button>
+              <button type="button" onclick="setSalePaidPreset(0.5)" class="px-2 py-0.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded font-bold transition cursor-pointer">50% مقدم</button>
+              <button type="button" onclick="setSalePaidPreset(0)" class="px-2 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-bold transition cursor-pointer">0% آجل</button>
             </div>
           </div>
 
@@ -19475,33 +19542,43 @@ function openAddCropSaleModal(saleId = null) {
           </span>
         </div>
 
-        <div>
-          <label class="block font-bold mb-1">ملاحظات وموقع التسليم:</label>
-          <input type="text" id="sale-notes" value="${item ? item.notes || '' : ''}" placeholder="تسليم صومعة القضارف، الشونة، أو بورصة المحاصيل..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1">موقع التسليم / الشونة:</label>
+            <input type="text" id="sale-location" value="${item ? (item.deliveryLocation || 'صومعة القضارف') : 'صومعة القضارف'}" placeholder="صومعة القضارف، الشونة..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold mb-1">ملاحظات إضافية:</label>
+            <input type="text" id="sale-notes" value="${item ? (item.notes || '') : ''}" placeholder="أي شروط أو تفاصيل إضافية..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
         </div>
 
         <div class="flex justify-between items-center pt-3 border-t border-slate-200 dark:border-slate-800">
           ${isEdit ? `
-            <button type="button" onclick="deleteCropSale('${saleId}')" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 rounded-xl font-bold transition flex items-center gap-1.5 border border-rose-200 dark:border-rose-800">
+            <button type="button" onclick="deleteCropSale('${cleanId}')" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 rounded-xl font-bold transition flex items-center gap-1.5 border border-rose-200 dark:border-rose-800 cursor-pointer">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
               <span>حذف الصفقة</span>
             </button>
           ` : '<div></div>'}
           <div class="flex items-center gap-2">
-            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">إلغاء</button>
-            <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold">حفظ الصفقة وتحديث المخزون</button>
+            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold cursor-pointer">إلغاء</button>
+            <button type="submit" class="px-5 py-2 ${isEdit ? 'bg-blue-600 hover:bg-blue-700' : 'bg-amber-600 hover:bg-amber-700'} text-white rounded-xl font-bold cursor-pointer transition shadow-sm">
+              ${isEdit ? '✓ حفظ التعديلات وتحديث السجلات' : 'حفظ الصفقة وتحديث المخزون'}
+            </button>
           </div>
         </div>
       </form>
     </div>
   `;
   openModal(html);
+  if (typeof safeCreateIcons === 'function') safeCreateIcons();
+  calcSaleTotalLive();
 }
 
 function calcSaleTotalLive() {
   const bags = parseFloat(document.getElementById('sale-bags')?.value) || 0;
   const price = parseFloat(document.getElementById('sale-price')?.value) || 0;
-  const total = bags * price;
+  const total = Math.round(bags * price);
 
   const paidInput = document.getElementById('sale-paid');
   let paid = parseFloat(paidInput?.value);
@@ -19535,7 +19612,7 @@ function calcSaleTotalLive() {
 function setSalePaidPreset(ratio) {
   const bags = parseFloat(document.getElementById('sale-bags')?.value) || 0;
   const price = parseFloat(document.getElementById('sale-price')?.value) || 0;
-  const total = bags * price;
+  const total = Math.round(bags * price);
   const paidInput = document.getElementById('sale-paid');
   if (paidInput) {
     paidInput.value = Math.round(total * ratio);
@@ -19543,15 +19620,16 @@ function setSalePaidPreset(ratio) {
   }
 }
 
-function updateSaleCropStockBadge() {
+function updateSaleCropStockBadge(saleId = null) {
   const crop = document.getElementById('sale-crop')?.value || '';
-  const cropCategory = crop.includes('ذرة') ? 'ذرة' : 'تسالي';
+  const cropCategory = crop.includes('ذرة') ? 'ذرة' : (crop.includes('تسالي') ? 'تسالي' : crop);
   const intakes = state.harvestIntakes || [];
   const sales = state.cropSales || [];
   const zakat = state.zakatDeliveries || [];
 
+  const cleanId = (saleId && saleId !== 'null' && saleId !== 'undefined' && saleId !== '') ? String(saleId) : null;
   const intakeBags = intakes.filter(h => h.crop && h.crop.includes(cropCategory)).reduce((sum, h) => sum + (parseFloat(h.bags) || 0), 0);
-  const soldBags = sales.filter(s => s.crop && s.crop.includes(cropCategory)).reduce((sum, s) => sum + (parseFloat(s.bags) || 0), 0);
+  const soldBags = sales.filter(s => (cleanId ? String(s.id) !== cleanId : true) && s.crop && s.crop.includes(cropCategory)).reduce((sum, s) => sum + (parseFloat(s.bags) || 0), 0);
   const zakatBags = zakat.filter(z => z.crop && z.crop.includes(cropCategory)).reduce((sum, z) => sum + (parseFloat(z.bags) || 0), 0);
   const availStock = Math.max(0, intakeBags - soldBags - zakatBags);
 
@@ -19561,41 +19639,101 @@ function updateSaleCropStockBadge() {
   if (badge) badge.innerText = availStock.toLocaleString() + ' جوال';
 }
 
-function saveCropSale(e, saleId) {
-  e.preventDefault();
-  const date = document.getElementById('sale-date').value;
-  const buyerName = document.getElementById('sale-buyer').value.trim();
-  const crop = document.getElementById('sale-crop').value;
-  const bags = parseFloat(document.getElementById('sale-bags').value) || 0;
-  const pricePerBag = parseFloat(document.getElementById('sale-price').value) || 0;
-  const totalAmount = bags * pricePerBag;
-  const paidAmount = parseFloat(document.getElementById('sale-paid').value) || 0;
+function saveCropSale(e, explicitSaleId = null) {
+  if (e && e.preventDefault) e.preventDefault();
+
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
+    if (typeof showToast === 'function') {
+      showToast('عفواً، حسابك بصلاحية اطلاع فقط ولا يملك إذن تسجيل أو تعديل الصفقات.', 'warning');
+    } else {
+      alert('عفواً، حسابك بصلاحية اطلاع فقط ولا يملك إذن تسجيل أو تعديل الصفقات.');
+    }
+    return;
+  }
+
+  const rawId = document.getElementById('sale-id')?.value || explicitSaleId || '';
+  const saleId = (rawId && rawId !== 'null' && rawId !== 'undefined' && rawId.trim() !== '') ? rawId.trim() : null;
+
+  const date = document.getElementById('sale-date')?.value || new Date().toISOString().split('T')[0];
+  const buyerName = (document.getElementById('sale-buyer')?.value || '').trim();
+  const crop = document.getElementById('sale-crop')?.value || 'ذرة (طابت)';
+  const bags = parseFloat(document.getElementById('sale-bags')?.value) || 0;
+  const pricePerBag = parseFloat(document.getElementById('sale-price')?.value) || 0;
+  const totalAmount = Math.round(bags * pricePerBag);
+  const paidInput = document.getElementById('sale-paid');
+  const paidAmount = paidInput && paidInput.value !== '' ? parseFloat(paidInput.value) || 0 : totalAmount;
   const remainingAmount = Math.max(0, totalAmount - paidAmount);
-  const paymentMethod = document.getElementById('sale-method').value;
-  const notes = document.getElementById('sale-notes').value.trim();
+  const paymentMethod = document.getElementById('sale-method')?.value || 'تحويل بنكك';
+  const deliveryLocation = (document.getElementById('sale-location')?.value || 'صومعة القضارف').trim();
+  const notes = (document.getElementById('sale-notes')?.value || '').trim();
   const status = remainingAmount <= 0 ? "مكتملة ومستلمة" : "مسدد جزئياً";
   const loggedBy = currentUser ? currentUser.name : "مصطفى الجعلي";
+
+  if (!buyerName) {
+    if (typeof showToast === 'function') showToast('يرجى كتابة اسم التاجر أو الشركة المشترية', 'warning');
+    return;
+  }
+  if (bags <= 0) {
+    if (typeof showToast === 'function') showToast('يرجى إدخال عدد جوالات صحيح أكبر من الصفر', 'warning');
+    return;
+  }
+  if (pricePerBag <= 0) {
+    if (typeof showToast === 'function') showToast('يرجى تحديد سعر بيع صحيح للجوال', 'warning');
+    return;
+  }
 
   if (!state.cropSales) state.cropSales = [];
   const targetSaleId = saleId || `sale-${Date.now()}`;
 
+  let isUpdate = false;
   if (saleId) {
-    const idx = state.cropSales.findIndex(s => s.id === saleId);
+    const idx = state.cropSales.findIndex(s => String(s.id) === String(saleId));
     if (idx !== -1) {
+      isUpdate = true;
       state.cropSales[idx] = {
         ...state.cropSales[idx],
-        date, buyerName, crop, bags, pricePerBag, totalAmount, paidAmount, remainingAmount, paymentMethod, status, notes
+        date,
+        buyerName,
+        crop,
+        bags,
+        pricePerBag,
+        totalAmount,
+        paidAmount,
+        remainingAmount,
+        paymentMethod,
+        deliveryLocation: deliveryLocation || state.cropSales[idx].deliveryLocation || "صومعة القضارف",
+        status,
+        notes
       };
       logAudit("تعديل بيع محاصيل", `تحديث صفقة بيع ${buyerName} (${bags} جوال ${crop}) بقيمة ${totalAmount.toLocaleString()} ج.س (المستلم: ${paidAmount.toLocaleString()} ج.س | المتبقي: ${remainingAmount.toLocaleString()} ج.س)`, "تسويق المحاصيل");
+      
+      if (window.AgroAPI && window.AgroAPI.isConnected && typeof window.AgroAPI.insertSale === 'function') {
+        window.AgroAPI.insertSale(state.cropSales[idx]);
+      }
     }
-  } else {
+  }
+
+  if (!isUpdate) {
     const newSale = {
       id: targetSaleId,
-      date, buyerName, crop, bags, pricePerBag, totalAmount, paidAmount, remainingAmount, paymentMethod, deliveryLocation: "صومعة القضارف", status, loggedBy, notes
+      date,
+      buyerName,
+      crop,
+      bags,
+      pricePerBag,
+      totalAmount,
+      paidAmount,
+      remainingAmount,
+      paymentMethod,
+      deliveryLocation: deliveryLocation || "صومعة القضارف",
+      status,
+      loggedBy,
+      notes
     };
     state.cropSales.unshift(newSale);
     logAudit("تسجيل بيع محاصيل", `تسجيل صفقة بيع جديدة للتاجر/الشركة ${buyerName} (${bags} جوال ${crop} بسعر ${pricePerBag.toLocaleString()} ج.س = ${totalAmount.toLocaleString()} ج.س | المستلم: ${paidAmount.toLocaleString()} ج.س | المتبقي: ${remainingAmount.toLocaleString()} ج.س)`, "تسويق المحاصيل");
-    if (window.AgroAPI && window.AgroAPI.isConnected) {
+    
+    if (window.AgroAPI && window.AgroAPI.isConnected && typeof window.AgroAPI.insertSale === 'function') {
       window.AgroAPI.insertSale(newSale);
     }
   }
@@ -19620,7 +19758,7 @@ function saveCropSale(e, saleId) {
   }
 
   const txId = `itx-sale-${targetSaleId}`;
-  const existingTxIdx = state.inventoryTransactions.findIndex(t => t.saleId === targetSaleId || t.id === txId);
+  const existingTxIdx = state.inventoryTransactions.findIndex(t => String(t.saleId) === String(targetSaleId) || String(t.id) === txId);
 
   const invTx = {
     id: txId,
@@ -19634,7 +19772,7 @@ function saveCropSale(e, saleId) {
     unit: "جوال",
     unitPrice: pricePerBag,
     totalCost: totalAmount,
-    plot: notes || "صومعة القضارف / الشونة",
+    plot: deliveryLocation || notes || "صومعة القضارف / الشونة",
     crop: crop.includes("ذرة") ? "ذرة" : "تسالي",
     receiver: buyerName,
     loggedBy: loggedBy,
@@ -19647,33 +19785,55 @@ function saveCropSale(e, saleId) {
     state.inventoryTransactions.unshift(invTx);
   }
 
-  recalculateInventoryTotals();
-  saveData(`✓ تم حفظ صفقة البيع بمبلغ (${totalAmount.toLocaleString()} ج.س) وإضافتها لرأس المال وتوزيعها على 13 سهماً للشركاء بنجاح!`);
+  if (typeof recalculateInventoryTotals === 'function') recalculateInventoryTotals();
+  if (typeof recalculatePartnerCapital === 'function') recalculatePartnerCapital();
+
+  const successMsg = isUpdate 
+    ? `✓ تم حفظ وتحديث تعديلات صفقة بيع (${buyerName}) وتعديل المخزون والشركاء بنجاح!`
+    : `✓ تم حفظ صفقة البيع بمبلغ (${totalAmount.toLocaleString()} ج.س) وإضافتها لرأس المال وتوزيعها على 13 سهماً للشركاء بنجاح!`;
+
+  saveData(successMsg);
   closeModal();
+
   if (typeof renderSalesSection === 'function') renderSalesSection();
-  if (typeof renderHarvestSection === 'function') {
-    renderHarvestSection();
-    switchHarvestSubTab('sales');
-  }
+  if (typeof renderHarvestSection === 'function') renderHarvestSection();
+  if (typeof renderPartnersSection === 'function') renderPartnersSection();
+  if (typeof safeCreateIcons === 'function') safeCreateIcons();
 }
 
 function deleteCropSale(saleId) {
-  const s = (state.cropSales || []).find(x => x.id === saleId);
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
+    if (typeof showToast === 'function') {
+      showToast('عفواً، حسابك بصلاحية اطلاع فقط ولا يملك إذن حذف الصفقات.', 'warning');
+    } else {
+      alert('عفواً، حسابك بصلاحية اطلاع فقط ولا يملك إذن حذف الصفقات.');
+    }
+    return;
+  }
+
+  const cleanId = (saleId && saleId !== 'null' && saleId !== 'undefined' && saleId !== '') ? String(saleId) : null;
+  const s = (state.cropSales || []).find(x => String(x.id) === cleanId);
   if (!s) return;
 
-  if (confirm(`هل أنت متأكد من حذف صفقة البيع للتاجر (${s.buyerName}) واستعادة الكمية المباعة (${s.bags} جوال) إلى المخزون؟`)) {
-    state.cropSales = (state.cropSales || []).filter(x => x.id !== saleId);
-    state.inventoryTransactions = (state.inventoryTransactions || []).filter(t => t.saleId !== saleId && t.id !== (`itx-sale-${saleId}`));
+  if (confirm(`هل أنت متأكد من حذف صفقة البيع للتاجر (${s.buyerName}) واستعادة الكمية المباعة (${s.bags} جوال ${s.crop}) إلى رصيد المخزون؟`)) {
+    state.cropSales = (state.cropSales || []).filter(x => String(x.id) !== cleanId);
+    state.inventoryTransactions = (state.inventoryTransactions || []).filter(t => String(t.saleId) !== cleanId && String(t.id) !== `itx-sale-${cleanId}`);
     
-    recalculateInventoryTotals();
-    logAudit("حذف صفقة بيع", `حذف صفقة بيع التاجر ${s.buyerName} واستعادة ${s.bags} جوال إلى المخزون`, "تسويق المحاصيل");
+    if (window.AgroAPI && window.AgroAPI.isConnected && typeof window.AgroAPI.deleteSale === 'function') {
+      window.AgroAPI.deleteSale(cleanId);
+    }
+
+    if (typeof recalculateInventoryTotals === 'function') recalculateInventoryTotals();
+    if (typeof recalculatePartnerCapital === 'function') recalculatePartnerCapital();
+
+    logAudit("حذف صفقة بيع", `حذف صفقة بيع التاجر ${s.buyerName} (${s.bags} جوال ${s.crop}) واستعادة الكمية إلى المخزون`, "تسويق المحاصيل");
     saveData(`✓ تم حذف صفقة البيع واستعادة ${s.bags} جوال إلى رصيد المخزون بنجاح`);
     closeModal();
+
     if (typeof renderSalesSection === 'function') renderSalesSection();
-    if (typeof renderHarvestSection === 'function') {
-      renderHarvestSection();
-      switchHarvestSubTab('sales');
-    }
+    if (typeof renderHarvestSection === 'function') renderHarvestSection();
+    if (typeof renderPartnersSection === 'function') renderPartnersSection();
+    if (typeof safeCreateIcons === 'function') safeCreateIcons();
   }
 }
 
