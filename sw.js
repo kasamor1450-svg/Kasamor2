@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v26.0-negative-wage-deficit-alerts
-const CACHE_NAME = 'mustagro-v26.0-negative-wage-deficit-alerts';
+// Cache Version: mustagro-v27.0-photo-video-media-system
+const CACHE_NAME = 'mustagro-v27.0-photo-video-media-system';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
