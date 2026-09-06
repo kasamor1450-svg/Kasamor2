@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v21.0-accurate-labor-balance
-const CACHE_NAME = 'mustagro-v21.0-accurate-labor-balance';
+// Cache Version: mustagro-v22.0-dedicated-crop-sales-section
+const CACHE_NAME = 'mustagro-v22.0-dedicated-crop-sales-section';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
