@@ -1030,97 +1030,123 @@ html[dir="ltr"] .font-mono {
 
         <!-- أزرار العمليات السريعة الأربعة الأكثر استخداماً (The 4 Primary Actions) -->
         <div>
-          <p class="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2.5">⚡ الإجراءات السريعة اليومية</p>
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+          <p class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+            <span>⚡ الإجراءات السريعة اليومية (بنقرة واحدة)</span>
+            <span class="text-[10px] text-slate-400 font-normal hidden sm:inline">اختر الإجراء لتوثيقه فوراً</span>
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
             
-            <!-- 0. صرف راتب / أجر -->
-            <button type="button" onclick="openDisburseWageModal()" class="p-3 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="صرف راتب أو دفعة لعامل وخصمها من الخزينة">
-              <span class="text-xl">💵</span>
-              <div>
-                <p class="font-black text-xs">صرف راتب / أجر</p>
-                <p class="text-[9px] text-teal-100">صرف رواتب العمالة</p>
-              </div>
-            </button>
-
             <!-- 1. تسجيل مصروف -->
-            <button type="button" onclick="openEditExpenseModal()" class="p-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="إضافة قيد مالي جديد">
-              <span class="text-xl">💰</span>
+            <button type="button" onclick="openEditExpenseModal()" class="p-3 bg-white dark:bg-slate-800/90 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 rounded-2xl flex items-center gap-2.5 transition shadow-sm active:scale-95 text-right cursor-pointer group">
+              <span class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">💳</span>
               <div>
-                <p class="font-black text-xs">تسجيل مصروف</p>
-                <p class="text-[9px] text-emerald-100">إضافة صرف مالي جديد</p>
+                <p class="font-black text-xs text-slate-800 dark:text-slate-100">تسجيل مصروف</p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-400">وقود، خيش، إعاشة</p>
               </div>
             </button>
 
-            <!-- 2. تسجيل بيع محصول -->
-            <button type="button" onclick="openAddCropSaleModal()" class="p-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="تسجيل مبيعات ذرة أو تسالي">
-              <span class="text-xl">🌾</span>
+            <!-- 2. صرف راتب / أجر -->
+            <button type="button" onclick="openDisburseWageModal()" class="p-3 bg-white dark:bg-slate-800/90 hover:bg-teal-50 dark:hover:bg-teal-950/40 border border-slate-200 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-700 rounded-2xl flex items-center gap-2.5 transition shadow-sm active:scale-95 text-right cursor-pointer group">
+              <span class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/60 text-teal-800 dark:text-teal-200 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">💵</span>
               <div>
-                <p class="font-black text-xs">تسجيل بيع محصول</p>
-                <p class="text-[9px] text-amber-100">بيع ذرة أو تسالي كاش</p>
+                <p class="font-black text-xs text-slate-800 dark:text-slate-100">صرف راتب / أجر</p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-400">رواتب وسند مخالصة</p>
               </div>
             </button>
 
-            <!-- 3. صرف وقود -->
-            <button type="button" onclick="openIssueFuelModal()" class="p-3 bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="صرف جازولين للجرارات وسائقيها">
-              <span class="text-xl">⛽</span>
+            <!-- 3. بيع محصول -->
+            <button type="button" onclick="openAddCropSaleModal()" class="p-3 bg-white dark:bg-slate-800/90 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700 rounded-2xl flex items-center gap-2.5 transition shadow-sm active:scale-95 text-right cursor-pointer group">
+              <span class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">🌾</span>
               <div>
-                <p class="font-black text-xs">صرف وقود</p>
-                <p class="text-[9px] text-sky-100">صرف جازولين للجرارات</p>
+                <p class="font-black text-xs text-slate-800 dark:text-slate-100">بيع محاصيل</p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-400">ذرة أو تسالي كاش</p>
               </div>
             </button>
 
-            <!-- 4. تسجيل هطول أمطار -->
-            <button type="button" onclick="openAddRainfallModal()" class="p-3 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="توثيق موعد وشدة هطول المطر">
-              <span class="text-xl">🌧️</span>
+            <!-- 4. صرف وقود -->
+            <button type="button" onclick="openIssueFuelModal()" class="p-3 bg-white dark:bg-slate-800/90 hover:bg-sky-50 dark:hover:bg-sky-950/40 border border-slate-200 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-700 rounded-2xl flex items-center gap-2.5 transition shadow-sm active:scale-95 text-right cursor-pointer group">
+              <span class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">⛽</span>
               <div>
-                <p class="font-black text-xs">تسجيل أمطار</p>
-                <p class="text-[9px] text-blue-100">رصد هطول أمطار كسمور</p>
+                <p class="font-black text-xs text-slate-800 dark:text-slate-100">صرف وقود</p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-400">جاز للجرارات</p>
               </div>
             </button>
 
-            <!-- 5. رأس المال وتوريدات الشركاء -->
-            <button type="button" onclick="openAddCapitalInjectionModal()" class="p-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="توريد أو تعديل رأس المال للشريك">
-              <span class="text-xl">👥</span>
+            <!-- 5. تسجيل أمطار -->
+            <button type="button" onclick="openAddRainfallModal()" class="p-3 bg-white dark:bg-slate-800/90 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 rounded-2xl flex items-center gap-2.5 transition shadow-sm active:scale-95 text-right cursor-pointer group">
+              <span class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">🌧️</span>
               <div>
-                <p class="font-black text-xs">توريد رأس مال</p>
-                <p class="text-[9px] text-purple-100">ضخ وتعديل الأنصبة</p>
+                <p class="font-black text-xs text-slate-800 dark:text-slate-100">تسجيل أمطار</p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-400">رصد هطول كسمور</p>
+              </div>
+            </button>
+
+            <!-- 6. توريد رأس مال -->
+            <button type="button" onclick="openAddCapitalInjectionModal()" class="p-3 bg-white dark:bg-slate-800/90 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-700 rounded-2xl flex items-center gap-2.5 transition shadow-sm active:scale-95 text-right cursor-pointer group">
+              <span class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">👥</span>
+              <div>
+                <p class="font-black text-xs text-slate-800 dark:text-slate-100">توريد رأس مال</p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-400">ضخ أنصبة الشركاء</p>
               </div>
             </button>
 
           </div>
         </div>
 
-        <!-- موجز أرقام المزرعة والخزينة بلمحة واحدة متكاملة (Calm 5-Metric Integrated Stats Grid) -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-1">
+        <!-- بطاقة الموقف المالي الرئيسي البارزة والهادئة (Hero Financial & Treasury Overview) -->
+        <div class="bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/50 dark:from-emerald-950/40 dark:via-slate-900/60 dark:to-teal-950/30 rounded-3xl p-5 sm:p-6 border border-emerald-200/80 dark:border-emerald-800/80 shadow-sm space-y-4">
           
-          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right">
-            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي رأس المال المضخوخ</p>
-            <h3 id="kpi-total-capital" class="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-400 font-mono mt-0.5">136,118,003 ج.س</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">غير مسترد: 69,618,003 • مسترد: 66,500,000</p>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <p class="text-xs font-bold text-emerald-800 dark:text-emerald-300">الرصيد النقدي الفعلي المتاح بالخزينة</p>
+              </div>
+              <h1 id="kpi-remaining-treasury-balance" class="text-2xl sm:text-4xl font-black text-emerald-700 dark:text-emerald-300 font-mono tracking-tight mt-1">
+                0 ج.س
+              </h1>
+              <p id="kpi-remaining-treasury-sub" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                السيولة الحالية بعد خصم جميع المنصرفات والرواتب والأرباح وإضافة المبيعات
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="openDisburseWageModal()" class="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition">
+                <span>💵 صرف راتب</span>
+              </button>
+              <button type="button" onclick="openEditExpenseModal()" class="px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition">
+                <span>💳 صرف مصروف</span>
+              </button>
+            </div>
           </div>
 
-          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right">
-            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">مبيعات المحاصيل المحققة</p>
-            <h3 id="kpi-total-sales" class="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">0 ج.س</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">مضافة لرأس المال وتوزع على الأسهم</p>
-          </div>
+          <!-- المؤشرات المالية الأربعة المكملة -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-emerald-100 dark:border-emerald-900/50">
+            
+            <div class="p-3 bg-white/80 dark:bg-slate-800/70 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-right">
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">رأس المال المضخوخ</p>
+              <h3 id="kpi-total-capital" class="text-sm sm:text-base font-black text-indigo-700 dark:text-indigo-400 font-mono mt-0.5">136,118,003 ج.س</h3>
+              <p class="text-[10px] text-slate-400">شامل الـ 13 سهماً</p>
+            </div>
 
-          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right">
-            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي المنصرفات الفعلية</p>
-            <h3 id="kpi-total-spent" class="text-base sm:text-lg font-black text-rose-700 dark:text-rose-400 font-mono mt-0.5">0 ج.س</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">شامل التأسيس والعمليات والرواتب</p>
-          </div>
+            <div class="p-3 bg-white/80 dark:bg-slate-800/70 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-right">
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي منصرفات الموسم</p>
+              <h3 id="kpi-total-spent" class="text-sm sm:text-base font-black text-rose-700 dark:text-rose-400 font-mono mt-0.5">0 ج.س</h3>
+              <p class="text-[10px] text-slate-400">تأسيس وعمليات وأجور</p>
+            </div>
 
-          <div class="p-3 bg-emerald-50/70 dark:bg-emerald-950/40 rounded-2xl border border-emerald-300 dark:border-emerald-800 text-right shadow-sm col-span-2 sm:col-span-1">
-            <p class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">الرصيد المتبقي (السيولة بالخزينة)</p>
-            <h3 id="kpi-remaining-treasury-balance" class="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">0 ج.س</h3>
-            <p id="kpi-remaining-treasury-sub" class="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">صافي السيولة المتاحة بعد المصروفات والأرباح</p>
-          </div>
+            <div class="p-3 bg-white/80 dark:bg-slate-800/70 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-right">
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">مبيعات المحاصيل</p>
+              <h3 id="kpi-total-sales" class="text-sm sm:text-base font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">0 ج.س</h3>
+              <p class="text-[10px] text-slate-400">ذرة وتسالي محققة</p>
+            </div>
 
-          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right col-span-2 sm:col-span-1">
-            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">رصيد وقود الجازولين</p>
-            <h3 id="kpi-fuel-stock" class="text-base sm:text-lg font-black text-blue-700 dark:text-blue-400 font-mono mt-0.5">6 براميل</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">المتبقي في مستودع المزرعة</p>
+            <div class="p-3 bg-white/80 dark:bg-slate-800/70 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-right">
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">رصيد وقود الجازولين</p>
+              <h3 id="kpi-fuel-stock" class="text-sm sm:text-base font-black text-blue-700 dark:text-blue-400 font-mono mt-0.5">6 براميل</h3>
+              <p class="text-[10px] text-slate-400">في مستودع كسمور</p>
+            </div>
+
           </div>
 
         </div>
@@ -1267,9 +1293,14 @@ html[dir="ltr"] .font-mono {
       </div>
 
       <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white">قائمة القيود والمصروفات المسجلة</h3>
-          <span class="text-xs text-slate-500">انقر على أيقونة القلم 📝 لتعديل أي مبلغ أو تصحيحه فوراً</span>
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">قائمة القيود والمصروفات المسجلة</h3>
+            <span class="text-xs text-slate-400 hidden sm:inline">• انقر على 📝 للتعديل السريع</span>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="expenses-search-input" onkeyup="filterTableRows('expenses-search-input', 'expenses-table-body')" placeholder="🔍 بحث فوري (بالبيان، البند، النمرة)..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-sm">
+          </div>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
@@ -1534,9 +1565,14 @@ html[dir="ltr"] .font-mono {
       </div>
 
       <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white">سجل توريد وصرف الجازولين التفصيلي</h3>
-          <span class="text-xs text-slate-400">تحديث فوري لأرصدة المخزن</span>
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل توريد وصرف الجازولين التفصيلي</h3>
+            <span class="text-xs text-slate-400 hidden sm:inline">• حركات الجازولين للجرارات والتشغيل</span>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="fuel-search-input" onkeyup="filterTableRows('fuel-search-input', 'fuel-transactions-table')" placeholder="🔍 بحث بالسائق، الجرار، أو العملية..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-sm">
+          </div>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
@@ -1617,6 +1653,15 @@ html[dir="ltr"] .font-mono {
       </div>
 
       <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">جدول مسير العمالة والمشرفين</h3>
+            <span class="text-xs text-slate-400 hidden sm:inline">• كشف المستحقات والمسدد والمتبقي</span>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="labor-search-input" onkeyup="filterTableRows('labor-search-input', 'labor-table-body')" placeholder="🔍 بحث بالاسم، الوظيفة، أو النمرة..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-sm">
+          </div>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
             <thead>
@@ -1687,6 +1732,15 @@ html[dir="ltr"] .font-mono {
 
       <!-- جدول قيود ومسحوبات البقالة -->
       <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل مسحوبات بقالة الكمبو</h3>
+            <span class="text-xs text-slate-400 hidden sm:inline">• سحوبات ومشتريات العمالة بالآجل</span>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="grocery-search-input" onkeyup="filterTableRows('grocery-search-input', 'grocery-transactions-table')" placeholder="🔍 بحث بالعامل، الصنف، أو التاريخ..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-sm">
+          </div>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
             <thead>
@@ -1865,6 +1919,24 @@ html[dir="ltr"] .font-mono {
           </button>
         </div>
 
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل عقود وتوريد مبيعات المحاصيل</h3>
+            <span class="text-xs text-slate-400 hidden sm:inline">• مبيعات الذرة والتسالي المعتمدة</span>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="sales-search-input" onkeyup="filterTableRows('sales-search-input', 'harvest-sales-table-body')" placeholder="🔍 بحث بالمشتري، المحصول، أو التاريخ..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-sm">
+          </div>
+        </div>
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل دخوليات وتشوين المحصول اليومي</h3>
+            <span class="text-xs text-slate-400 hidden sm:inline">• إنتاج النمر وتوريد الجوالات</span>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="harvest-intakes-search-input" onkeyup="filterTableRows('harvest-intakes-search-input', 'harvest-intakes-table-body')" placeholder="🔍 بحث بالنمرة، المحصول، أو التاريخ..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-sm">
+          </div>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
             <thead>
@@ -2410,55 +2482,39 @@ html[dir="ltr"] .font-mono {
   <!-- ======================================================== -->
   <!-- شريط التنقل السفلي للهواتف الذكية (Mobile Bottom Navigation) -->
   <!-- ======================================================== -->
-  <nav id="mobile-bottom-nav" class="no-print md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/90 dark:border-slate-800/90 px-3 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.08)] safe-area-bottom">
+  <nav id="mobile-bottom-nav" class="no-print md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/90 dark:border-slate-800/90 px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.08)] safe-area-bottom">
     
-    <!-- زر الرئيسية -->
-    <button onclick="switchSection('section-dashboard')" data-mobile-target="section-dashboard" class="mobile-nav-btn active flex flex-col items-center justify-center p-1 rounded-2xl transition">
+    <!-- 1. زر الرئيسية -->
+    <button onclick="switchSection('section-dashboard')" data-mobile-target="section-dashboard" class="mobile-nav-btn active flex flex-col items-center justify-center p-1 flex-1 rounded-2xl transition">
       <div class="w-8 h-8 flex items-center justify-center">
         <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
       </div>
       <span class="text-[10px] font-black mt-0.5">الرئيسية</span>
     </button>
 
-    <!-- زر المصروفات -->
-    <button onclick="switchSection('section-expenses')" data-mobile-target="section-expenses" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
+    <!-- 2. زر المصروفات -->
+    <button onclick="switchSection('section-expenses')" data-mobile-target="section-expenses" class="mobile-nav-btn flex flex-col items-center justify-center p-1 flex-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
       <div class="w-8 h-8 flex items-center justify-center">
         <i data-lucide="receipt" class="w-5 h-5"></i>
       </div>
       <span class="text-[10px] font-bold mt-0.5">المصروفات</span>
     </button>
 
-    <!-- زر الرواتب والأجور للموبايل -->
-    <button onclick="switchSection('section-labor')" data-mobile-target="section-labor" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
+    <!-- 3. الزر المركزي البارز للإجراء السريع على الجوال (FAB) -->
+    <button onclick="toggleMobileQuickActions()" class="flex flex-col items-center justify-center -mt-6 bg-gradient-to-tr from-emerald-700 to-emerald-500 text-white w-13 h-13 p-3 rounded-full shadow-lg shadow-emerald-600/40 border-4 border-white dark:border-slate-900 transform active:scale-90 transition" title="إجراء سريع">
+      <i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i>
+    </button>
+
+    <!-- 4. زر الرواتب والأجور -->
+    <button onclick="switchSection('section-labor')" data-mobile-target="section-labor" class="mobile-nav-btn flex flex-col items-center justify-center p-1 flex-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
       <div class="w-8 h-8 flex items-center justify-center">
         <i data-lucide="badge-dollar-sign" class="w-5 h-5 text-teal-600"></i>
       </div>
       <span class="text-[10px] font-bold mt-0.5">الرواتب</span>
     </button>
 
-    <!-- الزر المركزي البارز للإجراء السريع على الجوال (FAB) -->
-    <button onclick="toggleMobileQuickActions()" class="flex flex-col items-center justify-center -mt-6 bg-gradient-to-tr from-emerald-700 to-emerald-500 text-white w-13 h-13 p-3 rounded-full shadow-lg shadow-emerald-600/40 border-4 border-white dark:border-slate-900 transform active:scale-90 transition" title="إضافة سريعة">
-      <i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i>
-    </button>
-
-    <!-- زر المبيعات -->
-    <button onclick="switchSection('section-sales')" data-mobile-target="section-sales" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
-      <div class="w-8 h-8 flex items-center justify-center">
-        <i data-lucide="trending-up" class="w-5 h-5 text-amber-500"></i>
-      </div>
-      <span class="text-[10px] font-bold mt-0.5">المبيعات</span>
-    </button>
-
-    <!-- زر الشركاء ورأس المال -->
-    <button onclick="switchSection('section-partners')" data-mobile-target="section-partners" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
-      <div class="w-8 h-8 flex items-center justify-center">
-        <i data-lucide="users" class="w-5 h-5 text-blue-500"></i>
-      </div>
-      <span class="text-[10px] font-bold mt-0.5">الشركاء</span>
-    </button>
-
-    <!-- زر القائمة الكاملة -->
-    <button onclick="toggleMobileMenuDrawer()" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
+    <!-- 5. زر القائمة الكاملة للأقسام -->
+    <button onclick="toggleMobileMenuDrawer()" class="mobile-nav-btn flex flex-col items-center justify-center p-1 flex-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
       <div class="w-8 h-8 flex items-center justify-center">
         <i data-lucide="grid" class="w-5 h-5"></i>
       </div>
@@ -16423,6 +16479,19 @@ function initModals() {
 function closeModal() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay) overlay.classList.add('hidden');
+}
+
+
+// فلترة فورية سريعة لجداول البيانات (Live Instant Search)
+function filterTableRows(inputId, tableBodyId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const q = (input.value || '').toLowerCase().trim();
+  const rows = document.querySelectorAll('#' + tableBodyId + ' tr');
+  rows.forEach(tr => {
+    const text = (tr.innerText || tr.textContent || '').toLowerCase();
+    tr.style.display = text.includes(q) ? '' : 'none';
+  });
 }
 
 function openModal(htmlContent) {
