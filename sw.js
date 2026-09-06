@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v18.0-bilingual-i18n-language-switcher
-const CACHE_NAME = 'mustagro-v18.0-bilingual-i18n-language-switcher';
+// Cache Version: mustagro-v19.0-labor-salaries-and-full-i18n
+const CACHE_NAME = 'mustagro-v19.0-labor-salaries-and-full-i18n';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

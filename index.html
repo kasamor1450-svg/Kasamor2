@@ -910,6 +910,12 @@ html[dir="ltr"] .font-mono {
           <span>المصروفات</span>
         </button>
 
+        <!-- الرواتب والأجور -->
+        <button data-target="section-labor" class="nav-tab-btn px-3.5 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap active:scale-95">
+          <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-teal-600"></i>
+          <span>الرواتب والأجور</span>
+        </button>
+
         <!-- 3. المبيعات -->
         <button data-target="section-sales" class="nav-tab-btn px-3.5 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap active:scale-95">
           <i data-lucide="trending-up" class="w-4 h-4 text-amber-500"></i>
@@ -1027,6 +1033,15 @@ html[dir="ltr"] .font-mono {
           <p class="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2.5">⚡ الإجراءات السريعة اليومية</p>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
             
+            <!-- 0. صرف راتب / أجر -->
+            <button type="button" onclick="openDisburseWageModal()" class="p-3 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="صرف راتب أو دفعة لعامل وخصمها من الخزينة">
+              <span class="text-xl">💵</span>
+              <div>
+                <p class="font-black text-xs">صرف راتب / أجر</p>
+                <p class="text-[9px] text-teal-100">صرف رواتب العمالة</p>
+              </div>
+            </button>
+
             <!-- 1. تسجيل مصروف -->
             <button type="button" onclick="openEditExpenseModal()" class="p-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-2xl flex items-center gap-2.5 font-bold transition shadow-sm active:scale-95 text-right cursor-pointer" title="إضافة قيد مالي جديد">
               <span class="text-xl">💰</span>
@@ -1571,6 +1586,33 @@ html[dir="ltr"] .font-mono {
             <i data-lucide="user-plus" class="w-4 h-4"></i>
             <span>إضافة عامل / موظف جديد</span>
           </button>
+        </div>
+      </div>
+
+      <!-- بطاقات مؤشرات الرواتب والأجور الأربعة -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 text-right">
+          <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي الرواتب المستحقة</p>
+          <h3 id="labor-total-due-stat" class="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono mt-0.5">0 ج.س</h3>
+          <p class="text-[10px] text-slate-400 mt-0.5">حسب مدة العمل والراتب الشهري</p>
+        </div>
+
+        <div class="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-right">
+          <p class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">إجمالي الرواتب المسددة</p>
+          <h3 id="labor-total-paid-stat" class="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-300 font-mono mt-0.5">0 ج.س</h3>
+          <p class="text-[10px] text-emerald-600/70 mt-0.5">تم صرفها وخصمها من الخزينة</p>
+        </div>
+
+        <div class="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-right">
+          <p class="text-[11px] font-bold text-amber-700 dark:text-amber-400">صافي المتبقي للعمالة</p>
+          <h3 id="labor-total-balance-stat" class="text-base sm:text-lg font-black text-amber-700 dark:text-amber-300 font-mono mt-0.5">0 ج.س</h3>
+          <p class="text-[10px] text-amber-600/70 mt-0.5">متبقي مستحق الدفع للعمالة</p>
+        </div>
+
+        <div class="p-4 bg-blue-50 dark:bg-blue-950/40 rounded-2xl border border-blue-200 dark:border-blue-800 text-right">
+          <p class="text-[11px] font-bold text-blue-700 dark:text-blue-400">فريق العمالة والمشرفين</p>
+          <h3 id="labor-total-count-stat" class="text-base sm:text-lg font-black text-blue-700 dark:text-blue-300 font-mono mt-0.5">0</h3>
+          <p class="text-[10px] text-blue-600/70 mt-0.5">عمال ومشرفين وسائقين</p>
         </div>
       </div>
 
@@ -2386,6 +2428,14 @@ html[dir="ltr"] .font-mono {
       <span class="text-[10px] font-bold mt-0.5">المصروفات</span>
     </button>
 
+    <!-- زر الرواتب والأجور للموبايل -->
+    <button onclick="switchSection('section-labor')" data-mobile-target="section-labor" class="mobile-nav-btn flex flex-col items-center justify-center p-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition">
+      <div class="w-8 h-8 flex items-center justify-center">
+        <i data-lucide="badge-dollar-sign" class="w-5 h-5 text-teal-600"></i>
+      </div>
+      <span class="text-[10px] font-bold mt-0.5">الرواتب</span>
+    </button>
+
     <!-- الزر المركزي البارز للإجراء السريع على الجوال (FAB) -->
     <button onclick="toggleMobileQuickActions()" class="flex flex-col items-center justify-center -mt-6 bg-gradient-to-tr from-emerald-700 to-emerald-500 text-white w-13 h-13 p-3 rounded-full shadow-lg shadow-emerald-600/40 border-4 border-white dark:border-slate-900 transform active:scale-90 transition" title="إضافة سريعة">
       <i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i>
@@ -2432,6 +2482,14 @@ html[dir="ltr"] .font-mono {
       </div>
 
       <div class="grid grid-cols-2 gap-2.5 text-xs">
+        <button onclick="toggleMobileQuickActions(); openDisburseWageModal()" class="p-3.5 bg-teal-50 dark:bg-teal-950/50 hover:bg-teal-100 rounded-2xl border border-teal-200 dark:border-teal-800 text-right flex items-center gap-2.5 transition active:scale-95">
+          <span class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center text-base">💵</span>
+          <div>
+            <p class="font-black text-slate-900 dark:text-white">صرف راتب / أجر</p>
+            <span class="text-[10px] text-slate-500">صرف دفعة وسند مخالصة</span>
+          </div>
+        </button>
+
         <button onclick="toggleMobileQuickActions(); openEditExpenseModal()" class="p-3.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-right flex items-center gap-2.5 transition active:scale-95">
           <span class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-base">💳</span>
           <div>
@@ -8686,374 +8744,1014 @@ const AppI18N = window.AppI18N = {
   currentLang: localStorage.getItem('MUSTAGRO_LANGUAGE') || 'ar',
 
   dictArToEn: {
-    // Navigation & Menus
-    "لوحة القيادة": "Dashboard",
-    "المصروفات": "Expenses",
-    "المبيعات": "Sales",
-    "الشركاء ورأس المال": "Partners & Capital",
-    "الوقود": "Fuel",
-    "الحصاد": "Harvest",
-    "المستودع": "Inventory",
-    "باقي الأقسام": "More Sections",
-    "سجل رصد الأمطار والطقس": "Weather & Rainfall",
-    "الآليات والأسطول": "Machinery & Fleet",
-    "العمالة والأجور": "Labor & Wages",
-    "بقالة المشروع": "Farm Store",
-    "حاسبة الأرباح التقديرية": "Profit Estimator",
-    "سجل التعديلات والتدقيق": "Audit & Change Logs",
-    "فريق الإدارة والمستخدمين": "Management & Users",
-
-    // Top Header & Branding
-    "مشروع أبناء مصطفى حسن الزراعي": "Mustafa Hassan Sons Agricultural Project",
-    "مشروع أبناء مصطفى حسن": "Mustafa Hassan Sons Project",
-    "الموسم الزراعي 2026": "Agricultural Season 2026",
-    "القضارف، كسمور الشرقي": "Gedarif, East Kasamor",
-    "القضارف - كسمور الشرقي": "Gedarif - East Kasamor",
-    "المساحة الإجمالية: 1,450 فدان": "Total Area: 1,450 Feddans",
-    "المساحة الإجمالية": "Total Area",
-    "مركز الإشعارات والتنبيهات": "Notifications & Alerts",
-    "نسخة احتياطية سحابية": "Cloud Backup",
-    "تبديل الوضع": "Toggle Theme",
-    "تسجيل خروج": "Logout",
-    "مركز إشعارات التطبيق": "App Notifications Center",
-    "تنبيهات فورية عند إضافة أي إدخالات جديدة": "Instant notifications on new entries",
-    "تحديد الكل كمقروء": "Mark All as Read",
-    "قفل التطبيق": "Lock App",
-    "تسجيل الخروج": "Logout",
-
-    // Dashboard KPIs
-    "إجمالي رأس المال المضخوخ": "Total Capital Injected",
-    "مبيعات المحاصيل المحققة": "Crop Sales Revenue",
-    "إجمالي المنصرفات الفعلية": "Total Actual Expenses",
-    "الرصيد المتبقي (السيولة بالخزينة)": "Remaining Treasury Balance",
-    "رصيد وقود الجازولين": "Diesel Fuel Stock",
-    "المساحة الكلية للمزرعة": "Total Farm Area",
-    "المساحة الكلية": "Total Area",
-    "المساحة المزروعة": "Planted Area",
-    "المساحة المجهزة": "Prepared Area",
-    "نسبة الإنجاز الكلية": "Overall Completion",
-    "المتبقي في مستودع المزرعة": "Remaining in Farm Storage",
-    "المتبقي بالمخزن": "Remaining in Storage",
-    "شامل التأسيس والعمليات والرواتب": "Inc. Setup, Operations & Wages",
-    "صافي السيولة المتاحة بعد المصروفات والأرباح": "Net Liquidity After Expenses & Dividends",
-    "مضافة لرأس المال وتوزع على الأسهم": "Added to Capital & Distributed to Shares",
-    "غير مسترد: 69,618,003 • مسترد: 66,500,000": "Non-Ref: 69,618,003 • Ref: 66,500,000",
-    "الوارد": "Inflows",
-    "الصادر": "Outflows",
-    "المنصرف والأرباح": "Expenses & Dividends",
-    "المنصرفات والأرباح": "Expenses & Dividends",
-
-    // Visual Map & Operations
-    "المخطط التوزيعي الجغرافي للمقطوعيات (1,450 فدان)": "Geographic Field Layout (1,450 Feddans)",
-    "تم الحراثة والزراعة": "Ploughed & Planted",
-    "تجهيز / كسرة أولى": "Preparation / First Pass",
-    "أرض بكر / جاهزة": "Virgin Land / Ready",
-    "نمرة ال500 (ذرة فتريتة)": "Plot 500 (Faterita Sorghum)",
-    "نمرة ال450 (ذرة فتريتة)": "Plot 450 (Faterita Sorghum)",
-    "نمرة ال500 (تسالي بلدي)": "Plot 500 (Baladi Watermelon Seeds)",
-    "حالة الأرض والعمليات": "Land & Operations Status",
-    "حالة الأرض": "Land Status",
-    "العمليات الميدانية": "Field Operations",
-    "إضافة عملية ميدانية": "Add Field Operation",
-    "سجل العمليات": "Operations Log",
-    "نوع العملية": "Operation Type",
-    "عدد الساعات": "Hours Count",
-    "ساعات العمل": "Operating Hours",
-
-    // Quick Actions
-    "⚡ الإجراءات السريعة اليومية": "⚡ Daily Quick Actions",
-    "وصول مباشر للعمليات المتكررة الأكثر استخداماً": "Direct access to frequently used operations",
-    "تسجيل منصرف": "New Expense",
-    "قيد فاتورة أو سحب": "Record Bill or Withdrawal",
-    "تسجيل مبيعات": "Record Sale",
-    "بيع ذرة أو تسالي": "Sell Sorghum or Seeds",
-    "صرف وقود": "Issue Fuel",
-    "صرف جازولين للمعدات": "Fuel Equipment",
-    "دخولية حصاد": "Harvest Intake",
-    "توريد للمخزن/الشونة": "Intake to Silo",
-    "صرف أجر": "Disburse Wage",
-    "راتب أو دفعة لعامل": "Worker Wage Payment",
-    "توريد رأس مال": "Inject Capital",
-    "ضخ وتعديل الأنصبة": "Capital Inflow & Shares",
-
-    // Partners & Capital
-    "هيكل الشركاء وتوزيع الأنصبة وضخ رأس المال": "Partner Structure, Capital & Shares",
-    "توزيع رأس المال ومتابعة ضخ وتوريد المبالغ من الشركاء ونظام الـ 13 سهماً المعتمد لتوزيع الأرباح": "Capital tracking, partner injections & 13-share profit distribution system",
-    "💰 توزيع أرباح للشركاء (13 سهماً)": "💰 Distribute Profits (13 Shares)",
-    "تسجيل ضخ رأس مال": "Inject Capital",
-    "تسجيل ضخ رأس مال جديد": "Record Capital Injection",
-    "إجمالي الأسهم: 13 سهم (100%)": "Total Shares: 13 Shares (100%)",
-    "جدول توزيع الحصص ورأس المال المدفوع للشركاء (13 سهم)": "Partner Share Allocation & Paid Capital Table (13 Shares)",
-    "جدول تفصيل أنصبة الشركاء والمصروفات والأرباح": "Partner Shares, Expenses & Profits Table",
-    "استرداد 100% لرأس المال المدفوع والمضخوخ وتوزيع الأرباح الصافية بنظام الـ 13 سهماً": "100% Capital Recovery & Net Profit Distribution via 13 Shares",
-    "رأس المال المستهدف: 300 مليون ج.س (200م زراعة + 100م حصاد)": "Target Capital: 300M SDG (200M Farming + 100M Harvest)",
-    "إجمالي رأس المال المدفوع": "Total Paid Capital",
-    "🌾 إيرادات مبيعات المحاصيل": "🌾 Crop Sales Revenue",
-    "💰 إجمالي الأرباح الموزعة": "💰 Total Profits Distributed",
-    "الرصيد المتبقي (السيولة بالخزينة)": "Remaining Treasury Balance",
-    "السيولة المتبقية بالخزينة": "Treasury Remaining Liquidity",
-    "متبقي كاش جاهز بعد المصروفات": "Available cash after expenses",
-    "حصة تأسيسية ثابتة في أصول المشروع": "Fixed foundation share in project assets",
-    "يُرد 100% للشركاء عند التصفية والبيع": "100% Refunded to partners upon harvest sale",
-    "اسم الشريك": "Partner Name",
-    "الأنصبة الثابتة للأرباح": "Fixed Profit Shares",
-    "نسبة توزيع الأرباح": "Profit Distribution %",
-    "نسبة ربح ثابتة": "Fixed Profit Ratio",
-    "الأنصبة والنسبة": "Shares & Ratio",
-    "غير مسترد (أصل دائم)": "Non-Refundable (Permanent Asset)",
-    "مسترد (سلفة)": "Refundable (Advance)",
-    "مسترد (سلفة تشغيلية)": "Refundable (Operating Advance)",
-    "رأس المال المدفوع": "Paid Capital",
-    "حصة المبيعات المضافة": "Sales Share Added",
-    "حصة مبيعات المحاصيل المضافة": "Crop Sales Share Added",
-    "حصة المبيعات المضافة لرأس المال": "Sales Share Added to Capital",
-    "إجمالي رأس المال مع المبيعات": "Total Capital with Sales",
-    "إجمالي رأس المال بعد المبيعات": "Total Capital after Sales",
-    "إجمالي رأس المال + المبيعات:": "Total Capital + Sales:",
-    "إجمالي رأس المال المدفوع:": "Total Paid Capital:",
-    "إجمالي رأس المال الكلي": "Total Overall Capital",
-    "إجمالي رأس المال": "Total Capital",
-    "أرباح مستلمة": "Profits Received",
-    "أرباح مستلمة:": "Profits Received:",
-    "إجراءات": "Actions",
-    "ضخ مبلغ": "Inject Funds",
-    "كشف المستحقات": "Statement",
-    "كشف الحساب": "Statement",
-    "تعديل": "Edit",
-    "حذف": "Delete",
-    "سجل حركات ضخ وتوريد رأس المال للمشروع": "Project Capital Injections Log",
-    "سجل توزيعات الأرباح على الشركاء (نظام الـ 13 سهماً)": "Partner Profit Distributions Log (13 Shares)",
-    "متابعة مبالغ الأرباح الموزعة والمخصومة مباشرة من الرصيد المتبقي بالخزينة": "Track distributed profits directly deducted from remaining treasury balance",
-    "توزيع دفعة أرباح جديدة": "Distribute New Profit Batch",
-    "توزيع أرباح": "Distribute Profits",
-    "تاريخ التوزيع": "Distribution Date",
-    "إجمالي المبلغ الموزع": "Total Distributed Amount",
-    "نصيب السهم الواحد (1/13)": "Per Share Amount (1/13)",
-    "طريقة التحويل / الصرف": "Payment Method",
-    "البيان والملاحظات": "Notes & Description",
-    "الموثق": "Logged By",
-    "التفصيل": "Details",
-    "شريك مؤسس": "Founding Partner",
-    "أسهم": "Shares",
-    "سهم": "Share",
-    "سهمين": "2 Shares",
-    "أصل دائم": "Permanent Asset",
-    "يُرد 100%": "100% Refunded",
-    "رأس مال معتمد": "Approved Capital",
-    "توزيع أرباح للشركاء (نظام الـ 13 سهماً)": "Distribute Partner Profits (13 Shares System)",
-    "نصيب السهم الواحد (1 من 13):": "Per Share Amount (1 of 13):",
-    "نصيب صاحب السهمين (عمرو، حسن، ابوبكر، هاجر):": "Share of 2-Share Partners (Amr, Hassan, Abubakr, Hagar):",
-    "نصيب صاحب السهم الواحد (الجعلي، هديل، ايناس، رزاز، عناب):": "Share of 1-Share Partners (Jaali, Hadeel, Enas, Razaz, Annab):",
-    "الرصيد المتبقي بالخزينة بعد التوزيع:": "Remaining Treasury Balance After Distribution:",
-    "إجمالي مبلغ الأرباح المراد توزيعه (ج.س):": "Total Profit Amount to Distribute (SDG):",
-    "تاريخ توزيع الأرباح:": "Profit Distribution Date:",
-    "طريقة التحويل / الصرف:": "Payment / Transfer Method:",
-    "البيان / ملاحظات التوزيع:": "Description / Distribution Notes:",
-    "تأكيد واعتماد توزيع الأرباح": "Confirm & Approve Profit Distribution",
-    "تفصيل توزيع الأرباح للشركاء": "Partner Profit Distribution Breakdown",
-
-    // Expenses Section
-    "إدارة وتتبع المصروفات التشغيلية والتأسيسية": "Operational & Setup Expenses Management",
-    "تسجيل وتدقيق كافة الفواتير والمنصرفات بدقة مع إمكانية إرفاق الإيصالات والفرز المتقدم": "Record and audit all invoices with receipt attachments and filtering",
-    "تسجيل منصرف جديد": "Add New Expense",
-    "تصدير إكسل (CSV)": "Export to CSV",
-    "تصدير Excel": "Export to Excel",
-    "طباعة تقرير": "Print Report",
-    "التاريخ": "Date",
-    "البند / التصنيف": "Category",
-    "التصنيف": "Category",
-    "المبلغ": "Amount",
-    "المقطوعية / النمرة": "Plot / Field",
-    "المحصول": "Crop",
-    "البيان والملاحظات": "Description & Notes",
-    "حالة الاعتماد": "Audit Status",
-    "معتمد": "Approved",
-    "للمراجعة": "Under Review",
-    "رواتب وأجور": "Wages & Salaries",
-    "وقود وزيوت": "Fuel & Oils",
-    "تقاوي وبذور": "Seeds",
-    "سماد ومبيدات": "Fertilizers & Pesticides",
-    "صيانة وقطع غيار": "Maintenance & Parts",
-    "إعاشة ونثريات": "Catering & Sundries",
-    "ترحيل ونقل": "Transportation",
-    "البيت": "Farm House",
-    "مشترك": "Shared",
-    "كامل المشروع": "Entire Project",
-    "مصروفات البيت": "Farm House Expenses",
-    "مصروفات المزرعة": "Farm Operating Expenses",
-    "تكلفة الفدان": "Cost per Feddan",
-
-    // Harvest Section
-    "إدارة عمليات الحصاد ودخوليات المحاصيل": "Harvest Management & Crop Intakes",
-    "تسجيل وتوثيق كميات المحاصيل المحصودة، الوارد للمخازن، وتتبع إنتاجية الفدان": "Record harvested crops, storage intakes and per-feddan yields",
-    "تسجيل دخولية حصاد جديدة": "Record Harvest Intake",
-    "إجمالي إنتاج الذرة": "Total Sorghum Production",
-    "إجمالي إنتاج التسالي": "Total Watermelon Seeds Production",
-    "متوسط إنتاجية الفدان": "Average Yield per Feddan",
-    "دخوليات الحصاد المسجلة": "Recorded Harvest Intakes",
-    "نمرة الحصاد": "Harvest Plot",
-    "مكان التخزين": "Storage Location",
-    "سوق المحاصيل (القضارف)": "Gedarif Crop Market",
-    "صومعة القضارف": "Gedarif Silo",
-    "عدد الجوالات": "Bags Count",
-    "الوزن (طن)": "Weight (Tons)",
-
-    // Sales Section
-    "تسويق ومبيعات المحاصيل الزراعية": "Crop Marketing & Sales",
-    "تسجيل ومتابعة صفقات بيع المحصول (الذرة والتسالي)، المدفوعات النقدية، والمتبقي طرف المشترين": "Track crop sales deals (sorghum & seeds), cash payments, and customer balances",
-    "تسجيل صفقة بيع جديدة": "Record New Sale",
-    "إجمالي مبيعات المحاصيل": "Total Crop Sales",
-    "المبالغ المحصلة فعلياً": "Collected Cash",
-    "المبالغ المتبقية طرف المشترين": "Remaining Receivables",
-    "صفقات البيع المسجلة": "Recorded Sales Deals",
-    "اسم المشتري / الشركة": "Buyer / Company Name",
-    "المشتري": "Buyer",
-    "المحصول المباع": "Crop Sold",
-    "سعر الجوال": "Price per Bag",
-    "إجمالي قيمة الصفقة": "Total Deal Amount",
-    "المبلغ المستلم": "Paid Amount",
-    "المتبقي طرف المشتري": "Remaining Balance",
-    "مكتملة ومستلمة": "Completed & Received",
-    "مسدد جزئياً": "Partially Paid",
-    "تسالي (بلدي)": "Baladi Watermelon Seeds",
-    "ذرة (فتريتة)": "Faterita Sorghum",
-
-    // Fuel Section
-    "إدارة وتتبع مخزون وقود الجازولين": "Diesel Fuel Inventory & Tracking",
-    "إضافة وتوريد براميل الجازولين للمخزن، وصرفها للسائقين والتركتورات مع تتبع الرصيد المتبقي لحظياً": "Manage diesel fuel deliveries, machine dispensing, and real-time stock balance",
-    "توريد جازولين للمخزن": "Deliver Fuel",
-    "صرف وقود لآلية/مركبة": "Issue Fuel to Machine",
-    "الرصيد المتبقي بالمخزن": "Remaining Fuel Stock",
-    "إجمالي المستلم": "Total Received",
-    "إجمالي المصروف": "Total Consumed",
-    "سجل حركات الوقود (توريد وصرف)": "Fuel Transactions Log",
-    "نوع الحركة": "Transaction Type",
-    "الكمية (برميل)": "Quantity (Barrels)",
-    "المستلم / السائق": "Receiver / Driver",
-    "الآلية المستلمة": "Machine / Vehicle",
-    "توريد للمخزن": "Stock Intake",
-    "صرف لآلية": "Issue to Machine",
-
-    // Labor Section
-    "مسيرات الرواتب وسجل العمالة الميدانية": "Payroll & Field Labor Registry",
-    "متابعة عقود العمال والرواتب الشهرية والمسحوبات وسلفيات البقالة مع صرف الأجور": "Track contracts, salaries, store withdrawals and wage disbursements",
-    "إضافة عامل جديد": "Add New Worker",
-    "صرف أجر لعامل": "Disburse Wage",
-    "صرف أجر / دفعة راتب لعامل": "Disburse Wage / Salary Payment to Worker",
-    "اسم العامل": "Worker Name",
-    "المسمى الوظيفي": "Job Title",
-    "الراتب الشهري": "Monthly Salary",
-    "تاريخ البداية": "Start Date",
-    "تاريخ الانتهاء": "End Date",
-    "صافي المستحق": "Total Due",
-    "المدفوع": "Paid",
-    "المتبقي": "Balance",
-    "خالص بالكامل": "Fully Settled",
-    "متبقي": "Remaining",
-    "صرف دفعة راتب": "Pay Salary Batch",
-    "كشف حساب العامل": "Worker Statement",
-    "الرصيد المتبقي المتاح بالخزينة حالياً:": "Remaining Treasury Balance Currently:",
-    "المتبقي بالخزينة بعد صرف هذا الأجر:": "Remaining Treasury Balance After Payment:",
-
-    // Grocery Section
-    "بقالة وتعيينات المزرعة": "Farm Store & Supplies",
-    "متابعة التعيينات والمواد الغذائية وسلفيات العمال المخصومة من الرواتب": "Manage rations, grocery supplies, and salary-deducted worker advances",
-    "إضافة فاتورة مشتريات للبقالة": "Add Store Purchase",
-    "تسجيل مسحوبات / سلفة لعامل": "Record Worker Grocery Advance",
-    "إجمالي مشتريات البقالة": "Total Store Purchases",
-    "إجمالي مسحوبات العمال": "Total Worker Advances",
-    "المتبقي في عهدة البقالة": "Store Stock Balance",
-
-    // Weather & Rainfall
-    "سجل رصد معدلات هطول الأمطار": "Rainfall & Weather Monitoring",
-    "توثيق أوقات وكميات وشدة الأمطار في منطقة كسمور الشرقي وتأثيرها على الموسم": "Document rain times, intensity, and impact on the season in Kasamor",
-    "تسجيل هطول أمطار جديد": "Record Rainfall Event",
-    "تسجيل هطول جديد": "Record Rain",
-    "إجمالي مرات الهطول": "Total Rain Events",
-    "آخر هطول مسجل": "Last Recorded Rain",
-    "أعلى شدة مسجلة": "Peak Intensity",
-    "سجل الهطول التراكمي": "Cumulative Rain History",
-    "يوم الهطول": "Rain Day",
-    "بداية الهطول": "Start Time",
-    "نهاية الهطول": "End Time",
-    "مدة الهطول": "Duration",
-    "شدة الأمطار": "Rain Intensity",
-    "قوية": "Heavy",
-    "وسط": "Moderate",
-    "خفيفة": "Light",
-
-    // Machinery
-    "أسطول الآليات والمعدات الزراعية": "Machinery & Equipment Fleet",
-    "إضافة آلية جديدة": "Add New Machine",
-    "تسجيل صيانة جديدة": "Record Maintenance",
-    "اسم الآلية / التركتور": "Machine / Tractor Name",
-    "النوع / الموديل": "Type / Model",
-    "الحالة التشغيلية": "Operating Status",
-    "ساعات العمل التراكمية": "Cumulative Operating Hours",
-    "ممتازة / يعمل بكفاءة": "Excellent / Working",
-    "تحت الصيانة": "Under Maintenance",
-    "ساعات": "Hours",
-    "ساعة": "Hour",
-
-    // Forecasts & Simulator
-    "محاكاة وتوقعات نهاية الموسم وتوزيع الأرباح": "End-of-Season Simulation & Profit Forecasts",
-    "سيناريو الفائض العالي": "High Surplus Scenario",
-    "سيناريو الفائض المتوسط": "Moderate Surplus Scenario",
-    "تأمين تمويل الموسم الجديد": "Securing New Season Financing",
-    "ما يستلمه الشريك نقداً الآن": "Cash Payout to Partner Now",
-
-    // Modals & General Actions
-    "حفظ": "Save",
-    "إلغاء": "Cancel",
-    "إغلاق": "Close",
-    "تأكيد": "Confirm",
-    "تأكيد الحفظ": "Confirm & Save",
-    "تأكيد واعتماد": "Confirm & Approve",
-    "طباعة A4": "Print A4",
-    "مشاركة عبر WhatsApp": "Share via WhatsApp",
-    "تحميل": "Download",
-    "تحميل صورة": "Upload Image",
-    "عرض": "View",
-    "تفاصيل": "Details",
-    "ملاحظات": "Notes",
-    "مكتمل": "Completed",
-    "نشط": "Active",
-    "متاح": "Available",
-    "تحويل بنكك": "Bankak Transfer",
-    "نقداً كاش": "Cash",
-    "شيك مصرفي": "Bank Check",
-    "فوري (بنك فيصل)": "Fawry (Faisal Bank)",
-    "أوكاش": "O-Kash",
-    "أخرى": "Other",
-
-    // Common Units & Terms
-    "ج.س": "SDG",
-    "فدان": "Feddans",
-    "برميل": "Barrels",
-    "براميل": "Barrels",
-    "جوال": "Bags",
-    "طن": "Tons",
-    "ذرة": "Sorghum",
-    "تسالي": "Watermelon Seeds"
-  },
-
-  dictEnToAr: {},
+  "لوحة القيادة والمخطط": "Dashboard & Layout",
+  "لوحة القيادة": "Dashboard",
+  "الرئيسية": "Dashboard",
+  "المصروفات وتدقيق التكاليف": "Expenses & Cost Audit",
+  "المصروفات": "Expenses",
+  "الرواتب والأجور": "Salaries & Wages",
+  "مسير الرواتب والأجور": "Labor Payroll & Wages",
+  "مسير العمالة وسندات المخالصة": "Labor Payroll & Clearance",
+  "العمالة والرواتب": "Labor & Payroll",
+  "الرواتب": "Payroll",
+  "العمالة": "Labor",
+  "حركات الوقود والمخزن": "Fuel & Storage",
+  "الوقود": "Fuel",
+  "الآليات والصيانة وكفاءة الوقود": "Machinery & Fuel Efficiency",
+  "الآليات": "Machinery",
+  "الحصاد والمبيعات والزكاة": "Harvest, Sales & Zakat",
+  "الحصاد": "Harvest",
+  "المبيعات": "Sales",
+  "المخزون الزراعي (التقاوي والخيش)": "Agricultural Inventory",
+  "المستودع": "Inventory",
+  "المخزون": "Inventory",
+  "المخزون الزراعي": "Agricultural Inventory",
+  "بقالة المشروع والمسحوبات": "Project Grocery & Credit",
+  "بقالة المشروع": "Project Grocery",
+  "البقالة": "Grocery",
+  "الشركاء والأنصبة وضخ رأس المال": "Partners, Shares & Capital",
+  "الشركاء ورأس المال": "Partners & Capital",
+  "الشركاء": "Partners",
+  "رأس المال": "Capital",
+  "سجل الأمطار والطقس": "Rainfall & Weather Log",
+  "الأمطار والطقس": "Rainfall & Weather",
+  "الأمطار": "Rainfall",
+  "محاكي الأرباح واحتياطي 2027 (500M)": "Profit Simulator & 2027 Reserve (500M)",
+  "محاكي الأرباح": "Profit Simulator",
+  "سجل التعديلات (Audit Log)": "Audit Log",
+  "سجل التعديلات": "Audit Log",
+  "فريق الإدارة والصلاحيات": "Management & Permissions",
+  "فريق الإدارة": "Management Team",
+  "باقي الأقسام": "More Sections",
+  "أقسام المنظومة:": "System Sections:",
+  "إضافة مصروف": "Add Expense",
+  "تسجيل مصروف": "Record Expense",
+  "إضافة قيد مالي جديد": "Add new expense entry",
+  "إضافة صرف مالي جديد": "Add new expense payout",
+  "دخولية حصاد": "Harvest Intake",
+  "تسجيل بيع محصول": "Record Crop Sale",
+  "بيع ذرة أو تسالي كاش": "Sell Sorghum or Watermelon seeds",
+  "سحب بقالة": "Grocery Withdrawal",
+  "تسجيل آجل لعامل": "Record credit for worker",
+  "صرف وقود": "Issue Fuel",
+  "صرف جاز للسائقين": "Issue diesel to drivers",
+  "صرف جازولين للجرارات": "Issue diesel to tractors",
+  "بيع محاصيل": "Crop Sale",
+  "عقد بيع ذرة أو تسالي": "Sorghum or Watermelon sale",
+  "تسجيل أمطار": "Record Rainfall",
+  "رصد هطول كسمور": "Monitor Kasamor precipitation",
+  "رصد هطول أمطار كسمور": "Record Kasamor precipitation",
+  "توريد رأس مال": "Supply Capital",
+  "ضخ مبالغ الشركاء": "Partner capital injection",
+  "ضخ وتعديل الأنصبة": "Inject & adjust shares",
+  "صيانة آليات": "Machinery Maintenance",
+  "صيانة الجرارات والقطع": "Tractor maintenance & spare parts",
+  "صرف راتب / أجر": "Disburse Wage / Salary",
+  "صرف أجر / راتب": "Disburse Wage / Salary",
+  "صرف دفعة وسند مخالصة": "Issue wage payment & clearance",
+  "صرف أجر / دفعة راتب": "Disburse Wage / Salary",
+  "صرف رواتب العمالة": "Disburse labor payroll",
+  "إضافة عامل / موظف جديد": "Add New Worker / Employee",
+  "➕ حاسبة مقاولات الحصاد (الصرامة والدراس)": "➕ Harvest Contract Calculator",
+  "حاسبة مقاولات الحصاد": "Harvest Contract Calculator",
+  "اسم العامل / المشرف": "Worker / Supervisor Name",
+  "اسم العامل / الموظف المستلم": "Recipient Worker / Employee Name",
+  "اسم العامل / الموظف": "Worker / Employee Name",
+  "اسم العامل": "Worker Name",
+  "الوظيفة والمهام": "Job Title & Duties",
+  "الوظيفة / المهمة": "Job Title / Role",
+  "نوع العامل": "Worker Type",
+  "تاريخ المباشرة": "Start Date",
+  "تاريخ الانتهاء": "End Date",
+  "تاريخ الانتهاء (اختياري)": "End Date (Optional)",
+  "الراتب الشهري": "Monthly Salary",
+  "الراتب الشهري (ج.س)": "Monthly Salary (SDG)",
+  "مدة العمل": "Work Duration",
+  "مسحوبات البقالة": "Grocery Withdrawals",
+  "صافي المستحق": "Net Amount Due",
+  "المبلغ المدفوع": "Amount Paid",
+  "حالة السداد والمتبقي": "Payment Status & Balance",
+  "حالة السداد": "Payment Status",
+  "المتبقي": "Balance Remaining",
+  "المستحق": "Total Due",
+  "المبلغ المطلوب صرفه": "Amount to Disburse",
+  "مبلغ الدفعة / الراتب": "Payment / Salary Amount",
+  "مبلغ الدفعة / الراتب (ج.س)": "Payment / Salary Amount (SDG)",
+  "نوع الدفعة": "Payment Type",
+  "تاريخ الصرف": "Disbursement Date",
+  "طريقة الدفع": "Payment Method",
+  "الملاحظات": "Notes",
+  "ملاحظات": "Notes",
+  "ملاحظات السند / العملية": "Voucher / Transaction Notes",
+  "تسجيل تلقائي في المصروفات": "Auto-record as Project Expense",
+  "إجمالي الرواتب المستحقة": "Total Wages Due",
+  "إجمالي الرواتب المسددة": "Total Wages Paid",
+  "صافي المتبقي للعمالة": "Net Remaining for Labor",
+  "فريق العمالة والمشرفين": "Labor Team & Supervisors",
+  "عمال ومشرفين وسائقين": "Workers, supervisors & drivers",
+  "حسب مدة العمل والراتب الشهري": "Based on work duration & monthly wage",
+  "تم صرفها وخصمها من الخزينة": "Disbursed & deducted from treasury",
+  "متبقي مستحق الدفع للعمالة": "Outstanding balance due to workers",
+  "سند صرف أجر ومخالصة": "Wage Disbursement & Clearance Voucher",
+  "طباعة السند": "Print Voucher",
+  "حفظ وطباعة السند": "Save & Print Voucher",
+  "حفظ السند": "Save Voucher",
+  "خالص بالكامل": "Fully Paid",
+  "غير مدفوع": "Unpaid",
+  "متبقي الدفع": "Partially Paid",
+  "دائم": "Permanent",
+  "مؤقت / موسمي": "Temporary / Seasonal",
+  "راتب شهري كامل": "Full Monthly Salary",
+  "سلفة / دفعة مقدمة": "Advance / Upfront Payment",
+  "حافز / مكافأة": "Bonus / Incentive",
+  "مخالصة نهائية": "Final Settlement & Clearance",
+  "أجر مقاولة": "Contract / Task Wage",
+  "مستمر (طوال الموسم)": "Active (Full Season)",
+  "تاريخ المصروف": "Expense Date",
+  "التاريخ": "Date",
+  "بند المصروف": "Expense Category",
+  "البند والتصنيف": "Category & Classification",
+  "التصنيف": "Classification",
+  "المبلغ (ج.س)": "Amount (SDG)",
+  "المبلغ": "Amount",
+  "المقطوعية / النمرة": "Plot / Land Block",
+  "المقطوعية": "Plot",
+  "المحصول": "Crop",
+  "البيان / تفاصيل الصرف": "Description / Purpose",
+  "البيان": "Description",
+  "البيان ومدخل القيد": "Description & Entry By",
+  "حالة التدقيق": "Audit Status",
+  "معتمد": "Approved",
+  "قيد المراجعة": "Under Review",
+  "مرفق الفاتورة / الإيصال": "Invoice / Receipt Attachment",
+  "إضافة مصروف جديد": "Add New Expense",
+  "تعديل وتدقيق مصروف مالي": "Edit & Audit Expense",
+  "حفظ المصروف": "Save Expense",
+  "اسم الشريك": "Partner Name",
+  "مبلغ التوريد": "Injected Capital Amount",
+  "مبلغ التوريد (ج.س)": "Injected Capital Amount (SDG)",
+  "تاريخ التوريد": "Injection Date",
+  "نوع رأس المال": "Capital Type",
+  "مسترد": "Refundable",
+  "غير مسترد": "Non-Refundable (Equity Distribution)",
+  "غير مسترد (يوزع على الـ 13 سهم)": "Non-Refundable (Distributed to 13 shares)",
+  "مسترد (دين على المشروع)": "Refundable (Project Debt)",
+  "طريقة التوريد": "Payment Method",
+  "طريقة الإيداع / السداد": "Deposit / Payment Method",
+  "إجمالي رأس المال المضخوخ": "Total Injected Capital",
+  "الرصيد النقدي الفعلي المتبقي": "Net Cash Balance in Treasury",
+  "الرصيد المتبقي بالخزينة": "Remaining Treasury Balance",
+  "الرصيد المتبقي": "Remaining Balance",
+  "إجمالي منصرفات الموسم": "Total Season Expenses",
+  "رأس المال المدفوع": "Paid Capital",
+  "عدد الأسهم": "Number of Shares",
+  "نسبة الملكية": "Ownership Share %",
+  "توزيع أرباح": "Distribute Profits",
+  "توزيع أرباح نقدية": "Distribute Cash Profits",
+  "المبلغ الإجمالي لتوزيع الأرباح (ج.س)": "Total Profit Distribution Amount (SDG)",
+  "تاريخ التوزيع": "Distribution Date",
+  "حفظ وتوزيع الأرباح": "Save & Distribute Profits",
+  "ضخ رأس مال جديد": "Inject New Capital",
+  "حفظ التوريد": "Save Capital Injection",
+  "المشتري / التاجر": "Buyer / Trader Name",
+  "اسم المشتري": "Buyer Name",
+  "المحصول المباع": "Crop Sold",
+  "الكمية المباعة (جوال)": "Sold Quantity (Bags)",
+  "الكمية المباعة": "Sold Quantity",
+  "الكمية (جوال)": "Quantity (Bags)",
+  "الكمية": "Quantity",
+  "سعر البيع للجوال (ج.س)": "Sale Price per Bag (SDG)",
+  "سعر الجوال": "Price per Bag",
+  "إجمالي قيمة المبيعات": "Total Sale Value",
+  "إجمالي المبلغ": "Total Amount",
+  "المبلغ المدفوع كاش (ج.س)": "Cash Paid Amount (SDG)",
+  "المبلغ المدفوع كاش": "Cash Paid Amount",
+  "المبلغ المتبقي آجل (ج.س)": "Remaining Credit Balance (SDG)",
+  "المبلغ المتبقي آجل": "Remaining Credit Balance",
+  "موقع التسليم": "Delivery Location",
+  "تسجيل صفقة بيع": "Record Sales Deal",
+  "تسجيل عقد وصفقة بيع جديدة": "Record New Sales Contract",
+  "حفظ الصفقة وتوريد الخزينة": "Save Deal & Credit Treasury",
+  "دخوليات الحصاد": "Harvest Intakes",
+  "تسجيل دخولية حصاد": "Record Harvest Intake",
+  "تاريخ الحصاد / الدخولية": "Harvest / Intake Date",
+  "تاريخ الدخولية": "Intake Date",
+  "النمرة / المقطوعية": "Plot / Land Block",
+  "عدد الجوالات": "Number of Bags",
+  "الوزن بالطن": "Weight in Tons",
+  "الوزن التقديري (طن)": "Estimated Weight (Tons)",
+  "مكان التشوين / المستودع": "Storage Location / Warehouse",
+  "مكان التشوين": "Storage Location",
+  "المستودع المستلم": "Receiving Warehouse",
+  "المشرف المستلم": "Receiving Supervisor",
+  "جودة المحصول": "Crop Quality Grade",
+  "رتبة أولى": "Grade 1",
+  "درجة أولى": "Grade 1",
+  "درجة ثانية": "Grade 2",
+  "درجة ثالثة": "Grade 3",
+  "حفظ الدخولية وتحديث المخزون": "Save Intake & Update Stock",
+  "زكاة الزروع": "Crops Zakat",
+  "توريد زكاة الزروع": "Deliver Crops Zakat",
+  "توثيق تسليم زكاة الزروع (10% العُشر)": "Document Crops Zakat Delivery (10%)",
+  "تاريخ التسليم": "Delivery Date",
+  "الجهة المستلمة": "Recipient Entity / Beneficiary",
+  "الجهة / الفقراء": "Recipient / Beneficiaries",
+  "المحصول المخرج للزكاة": "Crop Delivered as Zakat",
+  "عدد جوالات الزكاة": "Number of Zakat Bags",
+  "الوزن بالطن (الزكاة)": "Weight in Tons (Zakat)",
+  "موقع التسليم / المخزن": "Delivery Location / Store",
+  "حفظ توريد الزكاة": "Save Zakat Delivery",
+  "رصيد وقود الجازولين": "Diesel Fuel Stock",
+  "رصيد الوقود": "Fuel Stock",
+  "مخزون الجازولين": "Diesel Stock",
+  "الكمية المشتراة (برميل)": "Purchased Quantity (Barrels)",
+  "الكمية المشتراة": "Purchased Quantity",
+  "سعر شراء البرميل (ج.س)": "Barrel Purchase Price (SDG)",
+  "سعر البرميل": "Barrel Price",
+  "الكمية المصروفة (برميل)": "Issued Quantity (Barrels)",
+  "الكمية المصروفة": "Issued Quantity",
+  "السائق / المستلم": "Driver / Recipient",
+  "السائق / المستلم (بإشراف عبدالقادر)": "Driver / Recipient (Supervised by Abdulkadir)",
+  "السائق المسؤول": "Responsible Driver",
+  "المقطوعية المستفيدة": "Beneficiary Plot",
+  "العملية الزراعية المنفذة": "Agricultural Operation Executed",
+  "العملية الزراعية": "Agricultural Operation",
+  "نوع العملية الفلاحية": "Agricultural Operation Type",
+  "حراثة وتقليب (كسرة أولى/ثانية)": "Tillage & Plowing (1st/2nd pass)",
+  "كديب ونظافة حشائش": "Weeding & Cleaning",
+  "سرولة وتسوية": "Harrowing & Leveling",
+  "رش مبيد حشائش/آفات": "Herbicide / Pest Spraying",
+  "زراعة وبذار": "Sowing & Planting",
+  "حصاد ودراس": "Harvesting & Threshing",
+  "توريد / إضافة وقود للمخزن": "Supply / Add Fuel to Store",
+  "صرف وقود للتشغيل": "Issue Fuel for Operations",
+  "حفظ حركة الوقود": "Save Fuel Transaction",
+  "الآلية / الجرار": "Machinery / Tractor",
+  "الجرار / الآلية": "Tractor / Machine",
+  "الآلية": "Machine",
+  "الجرار": "Tractor",
+  "نوع الآلية": "Machine Type",
+  "رقم اللوحة": "Plate Number",
+  "رقم الآلية / اللوحة": "Machine / Plate Number",
+  "ساعات العمل الميدانية": "Field Operating Hours",
+  "ساعات العمل": "Working Hours",
+  "المساحة المنجزة (فدان)": "Completed Area (Feddans)",
+  "المساحة المنجزة": "Completed Area",
+  "معدل الاستهلاك للفدان (لتر/فدان)": "Consumption per Feddan (L/Feddan)",
+  "معدل الاستهلاك بالساعة (لتر/ساعة)": "Consumption per Hour (L/Hour)",
+  "التقييم الفني": "Technical Evaluation",
+  "تسجيل عملية صيانة": "Record Maintenance",
+  "صيانة جديدة": "New Maintenance",
+  "إضافة آلية/جرار": "Add Machine / Tractor",
+  "إضافة آلية أو جرار جديد للأسطول": "Add New Machine/Tractor to Fleet",
+  "نوع الصيانة": "Maintenance Type",
+  "التكلفة (ج.س)": "Cost (SDG)",
+  "التكلفة الإجمالية": "Total Cost",
+  "التكلفة": "Cost",
+  "قطع الغيار والزيوت المستخدمة": "Spare Parts & Oil Used",
+  "قطع الغيار": "Spare Parts",
+  "الفني / الورشة": "Technician / Workshop",
+  "موعد تغيير الزيت القادم": "Next Oil Change Due",
+  "سعة تانك الوقود": "Fuel Tank Capacity",
+  "سجل هطول الأمطار التراكمي": "Cumulative Rainfall Log",
+  "سجل رصد الأمطار والطقس": "Rainfall & Weather Monitoring Log",
+  "تسجيل هطول أمطار جديد": "Record New Rainfall",
+  "تاريخ الهطول": "Rainfall Date",
+  "بداية الهطول": "Rain Start Time",
+  "نهاية الهطول": "Rain End Time",
+  "وقت البداية": "Start Time",
+  "وقت النهاية": "End Time",
+  "حالة الهطول": "Rain Intensity",
+  "الحالة": "Status",
+  "شدة الهطول": "Intensity",
+  "قوية": "Heavy",
+  "أمطار قوية وغزيرة": "Heavy & Torrential Rain",
+  "وسط": "Moderate",
+  "أمطار متوسطة ومروية": "Moderate & Soaking Rain",
+  "خفيفة": "Light",
+  "أمطار خفيفة / رشاش": "Light Rain / Drizzle",
+  "كمية الهطول التقديرية": "Estimated Rainfall (mm)",
+  "الموقع / النمرة بالهطول": "Location / Plot Rained On",
+  "موقع الهطول بالمشروع": "Rain Location in Project",
+  "منفذ الرصد": "Recorded By",
+  "حفظ تسجيل الهطول": "Save Rainfall Record",
+  "المخزون الزراعي التفصيلي": "Detailed Agricultural Inventory",
+  "سجل حركات المخزون الزراعي": "Agricultural Inventory Movement Log",
+  "توريد / إضافة للمخزون": "Supply / Add to Inventory",
+  "صرف مواد للحقول": "Issue Materials to Fields",
+  "الصنف الزراعي": "Agricultural Item",
+  "اختر الصنف الزراعي المراد توريده": "Select Agricultural Item to Supply",
+  "اختر المادة المراد صرفها": "Select Material to Issue",
+  "سعر شراء الوحدة": "Unit Purchase Price",
+  "سعر شراء الوحدة (ج.س)": "Unit Purchase Price (SDG)",
+  "إجمالي الفاتورة": "Total Invoice",
+  "إجمالي الفاتورة (ج.س)": "Total Invoice (SDG)",
+  "الرصيد الافتتاحي الأولي": "Opening Initial Stock",
+  "سعر الوحدة التقديري (ج.س)": "Estimated Unit Price (SDG)",
+  "وحدة القياس": "Unit of Measurement",
+  "حفظ حركة المخزون": "Save Inventory Movement",
+  "بقالة الكمبو والمسحوبات الآجلة": "Camp Grocery & Credit Withdrawals",
+  "تسجيل سحب بقالة جديد": "Record New Grocery Withdrawal",
+  "تسجيل مشتريات وسحب بقالة جديد بالآجل": "Record New Grocery Credit Purchase",
+  "الأصناف والسلع المسحوبة": "Withdrawn Items & Goods",
+  "إجمالي المبلغ المسحوب (ج.س)": "Total Withdrawn Amount (SDG)",
+  "تاريخ السحب": "Withdrawal Date",
+  "المسؤول / المشرف": "Supervisor / In Charge",
+  "حالة الخصم": "Deduction Status",
+  "تم الخصم من الراتب": "Deducted from Salary",
+  "آجل تحت الحساب": "On Credit / Pending",
+  "حفظ حركة البقالة": "Save Grocery Transaction",
+  "حفظ": "Save",
+  "حفظ التعديلات": "Save Changes",
+  "حفظ البيانات": "Save Data",
+  "إلغاء": "Cancel",
+  "إغلاق": "Close",
+  "تعديل": "Edit",
+  "حذف": "Delete",
+  "تأكيد الحذف": "Confirm Delete",
+  "تأكيد": "Confirm",
+  "عرض": "View",
+  "طباعة": "Print",
+  "تصدير": "Export",
+  "إجراءات": "Actions",
+  "إجراء": "Action",
+  "بحث...": "Search...",
+  "بحث": "Search",
+  "تصفية": "Filter",
+  "الكل": "All",
+  "جميع": "All",
+  "نعم": "Yes",
+  "لا": "No",
+  "مكتمل": "Completed",
+  "جاري العمل": "In Progress",
+  "قيد التنفيذ": "Underway",
+  "الرقم": "#",
+  "الموقع": "Location",
+  "المزرعة": "Farm",
+  "كسمور": "Kasamor",
+  "القضارف": "Gedaref",
+  "مشروع أبناء مصطفى حسن": "Sons of Mustafa Hassan Project",
+  "مشروع أبناء مصطفى حسن الزراعي": "Mustafa Hassan Sons Agricultural Project",
+  "القضارف - كسمور (1,450 فدان)": "Gedaref - Kasamor (1,450 Feddans)",
+  "القضارف - كسمور الشرقي": "Gedaref - East Kasamor",
+  "إدارة النظام": "System Administration",
+  "تسجيل الخروج": "Log Out",
+  "تبديل المستخدم": "Switch User",
+  "كلمة المرور": "Password",
+  "اسم المستخدم": "Username",
+  "دخول إلى المنظومة": "Enter System",
+  "حفظ التغييرات": "Save Changes",
+  "نجاح": "Success",
+  "تحذير": "Warning",
+  "خطأ": "Error",
+  "التقرير التنفيذي الشامل للموسم": "Comprehensive Season Executive Report",
+  "إدارة قاعدة البيانات والنسخ": "Database & Backup Manager",
+  "سجل العمليات": "Operations Log",
+  "محاصيل المزرعة": "Farm Crops",
+  "الذرة": "Sorghum",
+  "التسالي": "Watermelon Seeds",
+  "ذرة": "Sorghum",
+  "تسالي": "Watermelon Seeds",
+  "مشترك": "Shared",
+  "مشترك (المزرعة)": "Shared (Farm)",
+  "ذرة ارفع قدمك": "Arfa'a Gadamak Sorghum",
+  "ذرة (طابت)": "Tabat Sorghum",
+  "ذرة (فتريتة)": "Fatareeta Sorghum",
+  "تسالي (حب بطيخ)": "Watermelon Seeds",
+  "بنكك": "Bankak",
+  "بنكك (بنك الخرطوم)": "Bankak (Bank of Khartoum)",
+  "نقد / كاش": "Cash",
+  "كاش": "Cash",
+  "شيك": "Cheque",
+  "شيك / آجل": "Cheque / Credit",
+  "تحويل بنكي": "Bank Transfer",
+  "تحويل بنكك": "Bankak Transfer",
+  "وقود": "Fuel",
+  "مبيدات": "Pesticides",
+  "عمالة": "Labor",
+  "أجور عمالة": "Labor Wages",
+  "إيجار آليات وصيانة": "Machinery Rent & Repairs",
+  "إعاشة وغذاء": "Catering & Food",
+  "مصاريف إدارية": "Administrative Expenses",
+  "نثريات وطوارئ": "Petty Cash & Emergencies",
+  "البيت (مصاريف خاصة)": "Home (Private Expenses)",
+  "نمرة الـ 500": "The 500 Plot",
+  "نمرة النوبة": "Al-Nuba Plot",
+  "نمرة الويكة": "Al-Waika Plot",
+  "نمرة عباس": "Abbas Plot",
+  "نمرة الرقيقة": "Al-Raqeeqa Plot",
+  "كامل المشروع": "Entire Project",
+  "المشروع كاملاً (1,450 فدان)": "Entire Project (1,450 Feddans)",
+  "محمد مصطفى": "Mohamed Mustafa",
+  "حسن مصطفى": "Hassan Mustafa",
+  "مصطفى الجعلي": "Mustafa Al-Jaali",
+  "أبوبكر مصطفى": "Abubakar Mustafa",
+  "عبدالقادر": "Abdulkadir",
+  "ابستة": "Abusta",
+  "محمد الجعيلي": "Mohamed Al-Jaili",
+  "تشالي الحبشي": "Tchali Al-Habashi",
+  "المدير العام": "General Manager",
+  "المدير الإداري": "Administrative Manager",
+  "المدير المالي": "Financial Manager",
+  "شريك مؤسس": "Founding Partner",
+  "شريك في المشروع": "Project Partner",
+  "الوكيل والمشرف العام الميداني": "Field Agent & General Supervisor",
+  "سائق تركتور أول": "First Tractor Driver",
+  "سائق تركتور ثانٍ": "Second Tractor Driver",
+  "زيات": "Oiler / Mechanic",
+  "13 سهم": "13 Shares",
+  "13 سهماً": "13 Shares",
+  "أسهم": "shares",
+  "سهم": "share",
+  "برميل": "Barrels",
+  "براميل": "Barrels",
+  "فدان": "Feddans",
+  "جوال": "Bags",
+  "طن": "Tons",
+  "لتر": "Liters",
+  "يوم": "days",
+  "شهر": "months",
+  "ساعة": "hours",
+  "المساحة المستهدفة": "Target Area",
+  "سعر شراء البرميل": "Barrel Purchase Price",
+  "عدد الجرارات ووردية اليوم": "Number of Tractors & Shift",
+  "عدد الجرارات": "Number of Tractors",
+  "المقطوعية أو أدخل المساحة": "Select Plot or Enter Area",
+  "اختر المقطوعية أو أدخل المساحة": "Select Plot or Enter Area",
+  "المستلم / السائق (بإشراف عبدالقادر)": "Recipient / Driver (Supervised by Abdulkadir)",
+  "الغرض / العملية الزراعية": "Purpose / Agricultural Operation",
+  "الموقع / المستودع": "Location / Warehouse",
+  "رقم الفاتورة / ملاحظات": "Invoice No. / Notes",
+  "رقم الفاتورة أو المستند": "Invoice or Document Number",
+  "مثال: شراء 20 برميل جازولين": "Example: Purchase 20 barrels diesel",
+  "اسم المستلم": "Recipient Name",
+  "أدخل المبلغ بالجنيه": "Enter amount in SDG",
+  "ملاحظات إضافية": "Additional notes",
+  "اختر حسابك للدخول السريع": "Select your account for quick login",
+  "اسم المستخدم (أو اسمك بالعربي)": "Username (or your name in Arabic)",
+  "تعديل أو تغيير كلمة المرور الخاصة بحسابك الآن": "Change or update your account password now",
+  "دخول إلى المنظومة ⬅️": "Log In to System ⬅️",
+  "تحديد الكل كمقروء": "Mark All as Read",
+  "إشعارات الهاتف": "Mobile Notifications",
+  "السحابة": "Cloud",
+  "تعديل الميزانية ورأس المال": "Edit Budget & Capital",
+  "تعديل الميزانية والسقوف": "Edit Budget & Caps",
+  "سجل الصيانة الدورية وتغيير الزيوت وقطع الغيار": "Periodic Maintenance & Spare Parts Log",
+  "حاسبة ساعات العمل الميدانية والمعيار الفلاحي المعتمد": "Field Hours & Standard Work Calculator",
+  "مؤشر كفاءة استهلاك الوقود وساعات العمل الميداني للسائقين": "Fuel Efficiency & Driver Operating Hours",
+  "سجل حركات وتوريدات ضخ رأس المال للمشروع": "Project Capital Injections Log",
+  "سجل عقود وتوريد مبيعات المحاصيل للتجار": "Crop Sales Contracts & Deliveries Log",
+  "سجل دخوليات وتشوين المحصول اليومي من النمر": "Daily Plot Harvest Intakes Log",
+  "بيان المطرات المسجلة لموسم 2026 (كسمور الشرقي)": "Recorded Rainfall for 2026 Season (East Kasamor)"
+},
+  dictEnToAr: {
+  "Dashboard & Layout": "لوحة القيادة والمخطط",
+  "Dashboard": "الرئيسية",
+  "Expenses & Cost Audit": "المصروفات وتدقيق التكاليف",
+  "Expenses": "المصروفات",
+  "Salaries & Wages": "الرواتب والأجور",
+  "Labor Payroll & Wages": "مسير الرواتب والأجور",
+  "Labor Payroll & Clearance": "مسير العمالة وسندات المخالصة",
+  "Labor & Payroll": "العمالة والرواتب",
+  "Payroll": "الرواتب",
+  "Labor": "عمالة",
+  "Fuel & Storage": "حركات الوقود والمخزن",
+  "Fuel": "وقود",
+  "Machinery & Fuel Efficiency": "الآليات والصيانة وكفاءة الوقود",
+  "Machinery": "الآليات",
+  "Harvest, Sales & Zakat": "الحصاد والمبيعات والزكاة",
+  "Harvest": "الحصاد",
+  "Sales": "المبيعات",
+  "Agricultural Inventory": "المخزون الزراعي",
+  "Inventory": "المخزون",
+  "Project Grocery & Credit": "بقالة المشروع والمسحوبات",
+  "Project Grocery": "بقالة المشروع",
+  "Grocery": "البقالة",
+  "Partners, Shares & Capital": "الشركاء والأنصبة وضخ رأس المال",
+  "Partners & Capital": "الشركاء ورأس المال",
+  "Partners": "الشركاء",
+  "Capital": "رأس المال",
+  "Rainfall & Weather Log": "سجل الأمطار والطقس",
+  "Rainfall & Weather": "الأمطار والطقس",
+  "Rainfall": "الأمطار",
+  "Profit Simulator & 2027 Reserve (500M)": "محاكي الأرباح واحتياطي 2027 (500M)",
+  "Profit Simulator": "محاكي الأرباح",
+  "Audit Log": "سجل التعديلات",
+  "Management & Permissions": "فريق الإدارة والصلاحيات",
+  "Management Team": "فريق الإدارة",
+  "More Sections": "باقي الأقسام",
+  "System Sections:": "أقسام المنظومة:",
+  "Add Expense": "إضافة مصروف",
+  "Record Expense": "تسجيل مصروف",
+  "Add new expense entry": "إضافة قيد مالي جديد",
+  "Add new expense payout": "إضافة صرف مالي جديد",
+  "Harvest Intake": "دخولية حصاد",
+  "Record Crop Sale": "تسجيل بيع محصول",
+  "Sell Sorghum or Watermelon seeds": "بيع ذرة أو تسالي كاش",
+  "Grocery Withdrawal": "سحب بقالة",
+  "Record credit for worker": "تسجيل آجل لعامل",
+  "Issue Fuel": "صرف وقود",
+  "Issue diesel to drivers": "صرف جاز للسائقين",
+  "Issue diesel to tractors": "صرف جازولين للجرارات",
+  "Crop Sale": "بيع محاصيل",
+  "Sorghum or Watermelon sale": "عقد بيع ذرة أو تسالي",
+  "Record Rainfall": "تسجيل أمطار",
+  "Monitor Kasamor precipitation": "رصد هطول كسمور",
+  "Record Kasamor precipitation": "رصد هطول أمطار كسمور",
+  "Supply Capital": "توريد رأس مال",
+  "Partner capital injection": "ضخ مبالغ الشركاء",
+  "Inject & adjust shares": "ضخ وتعديل الأنصبة",
+  "Machinery Maintenance": "صيانة آليات",
+  "Tractor maintenance & spare parts": "صيانة الجرارات والقطع",
+  "Disburse Wage / Salary": "صرف أجر / دفعة راتب",
+  "Issue wage payment & clearance": "صرف دفعة وسند مخالصة",
+  "Disburse labor payroll": "صرف رواتب العمالة",
+  "Add New Worker / Employee": "إضافة عامل / موظف جديد",
+  "➕ Harvest Contract Calculator": "➕ حاسبة مقاولات الحصاد (الصرامة والدراس)",
+  "Harvest Contract Calculator": "حاسبة مقاولات الحصاد",
+  "Worker / Supervisor Name": "اسم العامل / المشرف",
+  "Recipient Worker / Employee Name": "اسم العامل / الموظف المستلم",
+  "Worker / Employee Name": "اسم العامل / الموظف",
+  "Worker Name": "اسم العامل",
+  "Job Title & Duties": "الوظيفة والمهام",
+  "Job Title / Role": "الوظيفة / المهمة",
+  "Worker Type": "نوع العامل",
+  "Start Date": "تاريخ المباشرة",
+  "End Date": "تاريخ الانتهاء",
+  "End Date (Optional)": "تاريخ الانتهاء (اختياري)",
+  "Monthly Salary": "الراتب الشهري",
+  "Monthly Salary (SDG)": "الراتب الشهري (ج.س)",
+  "Work Duration": "مدة العمل",
+  "Grocery Withdrawals": "مسحوبات البقالة",
+  "Net Amount Due": "صافي المستحق",
+  "Amount Paid": "المبلغ المدفوع",
+  "Payment Status & Balance": "حالة السداد والمتبقي",
+  "Payment Status": "حالة السداد",
+  "Balance Remaining": "المتبقي",
+  "Total Due": "المستحق",
+  "Amount to Disburse": "المبلغ المطلوب صرفه",
+  "Payment / Salary Amount": "مبلغ الدفعة / الراتب",
+  "Payment / Salary Amount (SDG)": "مبلغ الدفعة / الراتب (ج.س)",
+  "Payment Type": "نوع الدفعة",
+  "Disbursement Date": "تاريخ الصرف",
+  "Payment Method": "طريقة التوريد",
+  "Notes": "ملاحظات",
+  "Voucher / Transaction Notes": "ملاحظات السند / العملية",
+  "Auto-record as Project Expense": "تسجيل تلقائي في المصروفات",
+  "Total Wages Due": "إجمالي الرواتب المستحقة",
+  "Total Wages Paid": "إجمالي الرواتب المسددة",
+  "Net Remaining for Labor": "صافي المتبقي للعمالة",
+  "Labor Team & Supervisors": "فريق العمالة والمشرفين",
+  "Workers, supervisors & drivers": "عمال ومشرفين وسائقين",
+  "Based on work duration & monthly wage": "حسب مدة العمل والراتب الشهري",
+  "Disbursed & deducted from treasury": "تم صرفها وخصمها من الخزينة",
+  "Outstanding balance due to workers": "متبقي مستحق الدفع للعمالة",
+  "Wage Disbursement & Clearance Voucher": "سند صرف أجر ومخالصة",
+  "Print Voucher": "طباعة السند",
+  "Save & Print Voucher": "حفظ وطباعة السند",
+  "Save Voucher": "حفظ السند",
+  "Fully Paid": "خالص بالكامل",
+  "Unpaid": "غير مدفوع",
+  "Partially Paid": "متبقي الدفع",
+  "Permanent": "دائم",
+  "Temporary / Seasonal": "مؤقت / موسمي",
+  "Full Monthly Salary": "راتب شهري كامل",
+  "Advance / Upfront Payment": "سلفة / دفعة مقدمة",
+  "Bonus / Incentive": "حافز / مكافأة",
+  "Final Settlement & Clearance": "مخالصة نهائية",
+  "Contract / Task Wage": "أجر مقاولة",
+  "Active (Full Season)": "مستمر (طوال الموسم)",
+  "Expense Date": "تاريخ المصروف",
+  "Date": "التاريخ",
+  "Expense Category": "بند المصروف",
+  "Category & Classification": "البند والتصنيف",
+  "Classification": "التصنيف",
+  "Amount (SDG)": "المبلغ (ج.س)",
+  "Amount": "المبلغ",
+  "Plot / Land Block": "النمرة / المقطوعية",
+  "Plot": "المقطوعية",
+  "Crop": "المحصول",
+  "Description / Purpose": "البيان / تفاصيل الصرف",
+  "Description": "البيان",
+  "Description & Entry By": "البيان ومدخل القيد",
+  "Audit Status": "حالة التدقيق",
+  "Approved": "معتمد",
+  "Under Review": "قيد المراجعة",
+  "Invoice / Receipt Attachment": "مرفق الفاتورة / الإيصال",
+  "Add New Expense": "إضافة مصروف جديد",
+  "Edit & Audit Expense": "تعديل وتدقيق مصروف مالي",
+  "Save Expense": "حفظ المصروف",
+  "Partner Name": "اسم الشريك",
+  "Injected Capital Amount": "مبلغ التوريد",
+  "Injected Capital Amount (SDG)": "مبلغ التوريد (ج.س)",
+  "Injection Date": "تاريخ التوريد",
+  "Capital Type": "نوع رأس المال",
+  "Refundable": "مسترد",
+  "Non-Refundable (Equity Distribution)": "غير مسترد",
+  "Non-Refundable (Distributed to 13 shares)": "غير مسترد (يوزع على الـ 13 سهم)",
+  "Refundable (Project Debt)": "مسترد (دين على المشروع)",
+  "Deposit / Payment Method": "طريقة الإيداع / السداد",
+  "Total Injected Capital": "إجمالي رأس المال المضخوخ",
+  "Net Cash Balance in Treasury": "الرصيد النقدي الفعلي المتبقي",
+  "Remaining Treasury Balance": "الرصيد المتبقي بالخزينة",
+  "Remaining Balance": "الرصيد المتبقي",
+  "Total Season Expenses": "إجمالي منصرفات الموسم",
+  "Paid Capital": "رأس المال المدفوع",
+  "Number of Shares": "عدد الأسهم",
+  "Ownership Share %": "نسبة الملكية",
+  "Distribute Profits": "توزيع أرباح",
+  "Distribute Cash Profits": "توزيع أرباح نقدية",
+  "Total Profit Distribution Amount (SDG)": "المبلغ الإجمالي لتوزيع الأرباح (ج.س)",
+  "Distribution Date": "تاريخ التوزيع",
+  "Save & Distribute Profits": "حفظ وتوزيع الأرباح",
+  "Inject New Capital": "ضخ رأس مال جديد",
+  "Save Capital Injection": "حفظ التوريد",
+  "Buyer / Trader Name": "المشتري / التاجر",
+  "Buyer Name": "اسم المشتري",
+  "Crop Sold": "المحصول المباع",
+  "Sold Quantity (Bags)": "الكمية المباعة (جوال)",
+  "Sold Quantity": "الكمية المباعة",
+  "Quantity (Bags)": "الكمية (جوال)",
+  "Quantity": "الكمية",
+  "Sale Price per Bag (SDG)": "سعر البيع للجوال (ج.س)",
+  "Price per Bag": "سعر الجوال",
+  "Total Sale Value": "إجمالي قيمة المبيعات",
+  "Total Amount": "إجمالي المبلغ",
+  "Cash Paid Amount (SDG)": "المبلغ المدفوع كاش (ج.س)",
+  "Cash Paid Amount": "المبلغ المدفوع كاش",
+  "Remaining Credit Balance (SDG)": "المبلغ المتبقي آجل (ج.س)",
+  "Remaining Credit Balance": "المبلغ المتبقي آجل",
+  "Delivery Location": "موقع التسليم",
+  "Record Sales Deal": "تسجيل صفقة بيع",
+  "Record New Sales Contract": "تسجيل عقد وصفقة بيع جديدة",
+  "Save Deal & Credit Treasury": "حفظ الصفقة وتوريد الخزينة",
+  "Harvest Intakes": "دخوليات الحصاد",
+  "Record Harvest Intake": "تسجيل دخولية حصاد",
+  "Harvest / Intake Date": "تاريخ الحصاد / الدخولية",
+  "Intake Date": "تاريخ الدخولية",
+  "Number of Bags": "عدد الجوالات",
+  "Weight in Tons": "الوزن بالطن",
+  "Estimated Weight (Tons)": "الوزن التقديري (طن)",
+  "Storage Location / Warehouse": "مكان التشوين / المستودع",
+  "Storage Location": "مكان التشوين",
+  "Receiving Warehouse": "المستودع المستلم",
+  "Receiving Supervisor": "المشرف المستلم",
+  "Crop Quality Grade": "جودة المحصول",
+  "Grade 1": "درجة أولى",
+  "Grade 2": "درجة ثانية",
+  "Grade 3": "درجة ثالثة",
+  "Save Intake & Update Stock": "حفظ الدخولية وتحديث المخزون",
+  "Crops Zakat": "زكاة الزروع",
+  "Deliver Crops Zakat": "توريد زكاة الزروع",
+  "Document Crops Zakat Delivery (10%)": "توثيق تسليم زكاة الزروع (10% العُشر)",
+  "Delivery Date": "تاريخ التسليم",
+  "Recipient Entity / Beneficiary": "الجهة المستلمة",
+  "Recipient / Beneficiaries": "الجهة / الفقراء",
+  "Crop Delivered as Zakat": "المحصول المخرج للزكاة",
+  "Number of Zakat Bags": "عدد جوالات الزكاة",
+  "Weight in Tons (Zakat)": "الوزن بالطن (الزكاة)",
+  "Delivery Location / Store": "موقع التسليم / المخزن",
+  "Save Zakat Delivery": "حفظ توريد الزكاة",
+  "Diesel Fuel Stock": "رصيد وقود الجازولين",
+  "Fuel Stock": "رصيد الوقود",
+  "Diesel Stock": "مخزون الجازولين",
+  "Purchased Quantity (Barrels)": "الكمية المشتراة (برميل)",
+  "Purchased Quantity": "الكمية المشتراة",
+  "Barrel Purchase Price (SDG)": "سعر شراء البرميل (ج.س)",
+  "Barrel Price": "سعر البرميل",
+  "Issued Quantity (Barrels)": "الكمية المصروفة (برميل)",
+  "Issued Quantity": "الكمية المصروفة",
+  "Driver / Recipient": "السائق / المستلم",
+  "Driver / Recipient (Supervised by Abdulkadir)": "السائق / المستلم (بإشراف عبدالقادر)",
+  "Responsible Driver": "السائق المسؤول",
+  "Beneficiary Plot": "المقطوعية المستفيدة",
+  "Agricultural Operation Executed": "العملية الزراعية المنفذة",
+  "Agricultural Operation": "العملية الزراعية",
+  "Agricultural Operation Type": "نوع العملية الفلاحية",
+  "Tillage & Plowing (1st/2nd pass)": "حراثة وتقليب (كسرة أولى/ثانية)",
+  "Weeding & Cleaning": "كديب ونظافة حشائش",
+  "Harrowing & Leveling": "سرولة وتسوية",
+  "Herbicide / Pest Spraying": "رش مبيد حشائش/آفات",
+  "Sowing & Planting": "زراعة وبذار",
+  "Harvesting & Threshing": "حصاد ودراس",
+  "Supply / Add Fuel to Store": "توريد / إضافة وقود للمخزن",
+  "Issue Fuel for Operations": "صرف وقود للتشغيل",
+  "Save Fuel Transaction": "حفظ حركة الوقود",
+  "Machinery / Tractor": "الآلية / الجرار",
+  "Tractor / Machine": "الجرار / الآلية",
+  "Machine": "الآلية",
+  "Tractor": "الجرار",
+  "Machine Type": "نوع الآلية",
+  "Plate Number": "رقم اللوحة",
+  "Machine / Plate Number": "رقم الآلية / اللوحة",
+  "Field Operating Hours": "ساعات العمل الميدانية",
+  "Working Hours": "ساعات العمل",
+  "Completed Area (Feddans)": "المساحة المنجزة (فدان)",
+  "Completed Area": "المساحة المنجزة",
+  "Consumption per Feddan (L/Feddan)": "معدل الاستهلاك للفدان (لتر/فدان)",
+  "Consumption per Hour (L/Hour)": "معدل الاستهلاك بالساعة (لتر/ساعة)",
+  "Technical Evaluation": "التقييم الفني",
+  "Record Maintenance": "تسجيل عملية صيانة",
+  "New Maintenance": "صيانة جديدة",
+  "Add Machine / Tractor": "إضافة آلية/جرار",
+  "Add New Machine/Tractor to Fleet": "إضافة آلية أو جرار جديد للأسطول",
+  "Maintenance Type": "نوع الصيانة",
+  "Cost (SDG)": "التكلفة (ج.س)",
+  "Total Cost": "التكلفة الإجمالية",
+  "Cost": "التكلفة",
+  "Spare Parts & Oil Used": "قطع الغيار والزيوت المستخدمة",
+  "Spare Parts": "قطع الغيار",
+  "Technician / Workshop": "الفني / الورشة",
+  "Next Oil Change Due": "موعد تغيير الزيت القادم",
+  "Fuel Tank Capacity": "سعة تانك الوقود",
+  "Cumulative Rainfall Log": "سجل هطول الأمطار التراكمي",
+  "Rainfall & Weather Monitoring Log": "سجل رصد الأمطار والطقس",
+  "Record New Rainfall": "تسجيل هطول أمطار جديد",
+  "Rainfall Date": "تاريخ الهطول",
+  "Rain Start Time": "بداية الهطول",
+  "Rain End Time": "نهاية الهطول",
+  "Start Time": "وقت البداية",
+  "End Time": "وقت النهاية",
+  "Rain Intensity": "حالة الهطول",
+  "Status": "الحالة",
+  "Intensity": "شدة الهطول",
+  "Heavy": "قوية",
+  "Heavy & Torrential Rain": "أمطار قوية وغزيرة",
+  "Moderate": "وسط",
+  "Moderate & Soaking Rain": "أمطار متوسطة ومروية",
+  "Light": "خفيفة",
+  "Light Rain / Drizzle": "أمطار خفيفة / رشاش",
+  "Estimated Rainfall (mm)": "كمية الهطول التقديرية",
+  "Location / Plot Rained On": "الموقع / النمرة بالهطول",
+  "Rain Location in Project": "موقع الهطول بالمشروع",
+  "Recorded By": "منفذ الرصد",
+  "Save Rainfall Record": "حفظ تسجيل الهطول",
+  "Detailed Agricultural Inventory": "المخزون الزراعي التفصيلي",
+  "Agricultural Inventory Movement Log": "سجل حركات المخزون الزراعي",
+  "Supply / Add to Inventory": "توريد / إضافة للمخزون",
+  "Issue Materials to Fields": "صرف مواد للحقول",
+  "Agricultural Item": "الصنف الزراعي",
+  "Select Item to Supply": "اختر الصنف الزراعي المراد توريده",
+  "Select Material to Issue": "اختر المادة المراد صرفها",
+  "Unit Purchase Price": "سعر شراء الوحدة",
+  "Unit Purchase Price (SDG)": "سعر شراء الوحدة (ج.س)",
+  "Total Invoice": "إجمالي الفاتورة",
+  "Total Invoice (SDG)": "إجمالي الفاتورة (ج.س)",
+  "Opening Initial Stock": "الرصيد الافتتاحي الأولي",
+  "Estimated Unit Price (SDG)": "سعر الوحدة التقديري (ج.س)",
+  "Unit of Measurement": "وحدة القياس",
+  "Save Inventory Movement": "حفظ حركة المخزون",
+  "Camp Grocery & Credit Withdrawals": "بقالة الكمبو والمسحوبات الآجلة",
+  "Record New Grocery Withdrawal": "تسجيل سحب بقالة جديد",
+  "Record New Grocery Credit Purchase": "تسجيل مشتريات وسحب بقالة جديد بالآجل",
+  "Withdrawn Items & Goods": "الأصناف والسلع المسحوبة",
+  "Total Withdrawn Amount (SDG)": "إجمالي المبلغ المسحوب (ج.س)",
+  "Withdrawal Date": "تاريخ السحب",
+  "Supervisor / In Charge": "المسؤول / المشرف",
+  "Deduction Status": "حالة الخصم",
+  "Deducted from Salary": "تم الخصم من الراتب",
+  "On Credit / Pending": "آجل تحت الحساب",
+  "Save Grocery Transaction": "حفظ حركة البقالة",
+  "Save": "حفظ",
+  "Save Changes": "حفظ التغييرات",
+  "Save Data": "حفظ البيانات",
+  "Cancel": "إلغاء",
+  "Close": "إغلاق",
+  "Edit": "تعديل",
+  "Delete": "حذف",
+  "Confirm Delete": "تأكيد الحذف",
+  "Confirm": "تأكيد",
+  "View": "عرض",
+  "Print": "طباعة",
+  "Export": "تصدير",
+  "Actions": "إجراءات",
+  "Action": "إجراء",
+  "Search...": "بحث...",
+  "Search": "بحث",
+  "Filter": "تصفية",
+  "All": "جميع",
+  "Yes": "نعم",
+  "No": "لا",
+  "Completed": "مكتمل",
+  "In Progress": "جاري العمل",
+  "Underway": "قيد التنفيذ",
+  "#": "الرقم",
+  "Location": "الموقع",
+  "Farm": "المزرعة",
+  "Kasamor": "كسمور",
+  "Gedaref": "القضارف",
+  "Sons of Mustafa Hassan Project": "مشروع أبناء مصطفى حسن",
+  "Mustafa Hassan Sons Agricultural Project": "مشروع أبناء مصطفى حسن الزراعي",
+  "Gedaref - Kasamor (1,450 Feddans)": "القضارف - كسمور (1,450 فدان)",
+  "Gedaref - East Kasamor": "القضارف - كسمور الشرقي",
+  "System Administration": "إدارة النظام",
+  "Log Out": "تسجيل الخروج",
+  "Switch User": "تبديل المستخدم",
+  "Password": "كلمة المرور",
+  "Username": "اسم المستخدم",
+  "Enter System": "دخول إلى المنظومة",
+  "Success": "نجاح",
+  "Warning": "تحذير",
+  "Error": "خطأ",
+  "Comprehensive Season Executive Report": "التقرير التنفيذي الشامل للموسم",
+  "Database & Backup Manager": "إدارة قاعدة البيانات والنسخ",
+  "Operations Log": "سجل العمليات",
+  "Farm Crops": "محاصيل المزرعة",
+  "Sorghum": "ذرة",
+  "Watermelon Seeds": "تسالي (حب بطيخ)",
+  "Shared": "مشترك",
+  "Shared (Farm)": "مشترك (المزرعة)",
+  "Arfa'a Gadamak Sorghum": "ذرة ارفع قدمك",
+  "Tabat Sorghum": "ذرة (طابت)",
+  "Fatareeta Sorghum": "ذرة (فتريتة)",
+  "Bankak": "بنكك",
+  "Bankak (Bank of Khartoum)": "بنكك (بنك الخرطوم)",
+  "Cash": "كاش",
+  "Cheque": "شيك",
+  "Cheque / Credit": "شيك / آجل",
+  "Bank Transfer": "تحويل بنكي",
+  "Bankak Transfer": "تحويل بنكك",
+  "Pesticides": "مبيدات",
+  "Labor Wages": "أجور عمالة",
+  "Machinery Rent & Repairs": "إيجار آليات وصيانة",
+  "Catering & Food": "إعاشة وغذاء",
+  "Administrative Expenses": "مصاريف إدارية",
+  "Petty Cash & Emergencies": "نثريات وطوارئ",
+  "Home (Private Expenses)": "البيت (مصاريف خاصة)",
+  "The 500 Plot": "نمرة الـ 500",
+  "Al-Nuba Plot": "نمرة النوبة",
+  "Al-Waika Plot": "نمرة الويكة",
+  "Abbas Plot": "نمرة عباس",
+  "Al-Raqeeqa Plot": "نمرة الرقيقة",
+  "Entire Project": "كامل المشروع",
+  "Entire Project (1,450 Feddans)": "المشروع كاملاً (1,450 فدان)",
+  "Mohamed Mustafa": "محمد مصطفى",
+  "Hassan Mustafa": "حسن مصطفى",
+  "Mustafa Al-Jaali": "مصطفى الجعلي",
+  "Abubakar Mustafa": "أبوبكر مصطفى",
+  "Abdulkadir": "عبدالقادر",
+  "Abusta": "ابستة",
+  "Mohamed Al-Jaili": "محمد الجعيلي",
+  "Tchali Al-Habashi": "تشالي الحبشي",
+  "General Manager": "المدير العام",
+  "Administrative Manager": "المدير الإداري",
+  "Financial Manager": "المدير المالي",
+  "Founding Partner": "شريك مؤسس",
+  "Project Partner": "شريك في المشروع",
+  "Field Agent & General Supervisor": "الوكيل والمشرف العام الميداني",
+  "First Tractor Driver": "سائق تركتور أول",
+  "Second Tractor Driver": "سائق تركتور ثانٍ",
+  "Oiler / Mechanic": "زيات",
+  "13 Shares": "13 سهماً",
+  "shares": "أسهم",
+  "share": "سهم",
+  "Barrels": "براميل",
+  "Feddans": "فدان",
+  "Bags": "جوال",
+  "Tons": "طن",
+  "Liters": "لتر",
+  "days": "يوم",
+  "months": "شهر",
+  "hours": "ساعة",
+  "Target Area": "المساحة المستهدفة",
+  "Barrel Purchase Price": "سعر شراء البرميل",
+  "Number of Tractors & Shift": "عدد الجرارات ووردية اليوم",
+  "Number of Tractors": "عدد الجرارات",
+  "Select Plot or Enter Area": "اختر المقطوعية أو أدخل المساحة",
+  "Select Agricultural Item to Supply": "اختر الصنف الزراعي المراد توريده",
+  "Recipient / Driver (Supervised by Abdulkadir)": "المستلم / السائق (بإشراف عبدالقادر)",
+  "Purpose / Agricultural Operation": "الغرض / العملية الزراعية",
+  "Location / Warehouse": "الموقع / المستودع",
+  "Invoice No. / Notes": "رقم الفاتورة / ملاحظات",
+  "Invoice or Document Number": "رقم الفاتورة أو المستند",
+  "Example: Purchase 20 barrels diesel": "مثال: شراء 20 برميل جازولين",
+  "Recipient Name": "اسم المستلم",
+  "Enter amount in SDG": "أدخل المبلغ بالجنيه",
+  "Additional notes": "ملاحظات إضافية",
+  "Select your account for quick login": "اختر حسابك للدخول السريع",
+  "Username (or your name in Arabic)": "اسم المستخدم (أو اسمك بالعربي)",
+  "Change or update your account password now": "تعديل أو تغيير كلمة المرور الخاصة بحسابك الآن",
+  "Log In to System ⬅️": "دخول إلى المنظومة ⬅️",
+  "Mark All as Read": "تحديد الكل كمقروء",
+  "Mobile Notifications": "إشعارات الهاتف",
+  "Cloud": "السحابة",
+  "Edit Budget & Capital": "تعديل الميزانية ورأس المال",
+  "Edit Budget & Caps": "تعديل الميزانية والسقوف",
+  "Periodic Maintenance & Spare Parts Log": "سجل الصيانة الدورية وتغيير الزيوت وقطع الغيار",
+  "Field Hours & Standard Work Calculator": "حاسبة ساعات العمل الميدانية والمعيار الفلاحي المعتمد",
+  "Fuel Efficiency & Driver Operating Hours": "مؤشر كفاءة استهلاك الوقود وساعات العمل الميداني للسائقين",
+  "Project Capital Injections Log": "سجل حركات وتوريدات ضخ رأس المال للمشروع",
+  "Crop Sales Contracts & Deliveries Log": "سجل عقود وتوريد مبيعات المحاصيل للتجار",
+  "Daily Plot Harvest Intakes Log": "سجل دخوليات وتشوين المحصول اليومي من النمر",
+  "Recorded Rainfall for 2026 Season (East Kasamor)": "بيان المطرات المسجلة لموسم 2026 (كسمور الشرقي)"
+},
 
   init() {
-    // Populate reverse mapping
-    for (const [ar, en] of Object.entries(this.dictArToEn)) {
-      this.dictEnToAr[en] = ar;
+    this.currentLang = localStorage.getItem('MUSTAGRO_LANGUAGE') || 'ar';
+    this.applyLanguage(this.currentLang, false);
+  },
+
+  translateText(text, targetLang) {
+    if (!text || typeof text !== 'string') return text;
+    const trimmed = text.trim();
+    if (!trimmed) return text;
+
+    if (targetLang === 'ar') {
+      if (this.dictEnToAr[trimmed]) return this.dictEnToAr[trimmed];
+      return text;
     }
 
-    // Apply stored language
-    if (this.currentLang === 'en') {
-      this.applyLanguage('en', false);
+    // 1. Direct match in dictionary
+    if (this.dictArToEn[trimmed]) return this.dictArToEn[trimmed];
+
+    // 2. Extract leading emojis/icons
+    const emojiRegex = /^([\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2300}-\u{23FF}➕➖⚡✓•\-–—]\s*)+/u;
+    let prefix = '';
+    let core = trimmed;
+    const emojiMatch = trimmed.match(emojiRegex);
+    if (emojiMatch) {
+      prefix = emojiMatch[0];
+      core = trimmed.slice(prefix.length).trim();
     }
+
+    // 3. Extract trailing punctuation
+    let suffix = '';
+    if (core.endsWith(':')) {
+      suffix = ':';
+      core = core.slice(0, -1).trim();
+    } else if (core.endsWith('...')) {
+      suffix = '...';
+      core = core.slice(0, -3).trim();
+    } else if (core.endsWith('*')) {
+      suffix = ' *';
+      core = core.slice(0, -1).trim();
+    }
+
+    // 4. Extract unit brackets: e.g. "(ج.س)", "(فدان)", "(برميل)", "(جوال)", "(طن)"
+    let unitSuffix = '';
+    if (core.endsWith('(ج.س)')) {
+      unitSuffix = ' (SDG)';
+      core = core.slice(0, -5).trim();
+    } else if (core.endsWith('(فدان)')) {
+      unitSuffix = ' (Feddans)';
+      core = core.slice(0, -6).trim();
+    } else if (core.endsWith('(برميل)')) {
+      unitSuffix = ' (Barrels)';
+      core = core.slice(0, -7).trim();
+    } else if (core.endsWith('(جوال)')) {
+      unitSuffix = ' (Bags)';
+      core = core.slice(0, -6).trim();
+    } else if (core.endsWith('(طن)')) {
+      unitSuffix = ' (Tons)';
+      core = core.slice(0, -5).trim();
+    }
+
+    // Check dictionary again for core
+    if (this.dictArToEn[core]) {
+      return prefix + this.dictArToEn[core] + unitSuffix + suffix;
+    }
+
+    // 5. Regex replacement for units, common patterns & numbers
+    let replaced = text
+      .replace(/ج\.س\/شهر/g, 'SDG/month')
+      .replace(/ج\.س\/فدان/g, 'SDG/feddan')
+      .replace(/ج\.س/g, 'SDG')
+      .replace(/فدان/g, 'Feddans')
+      .replace(/برميل/g, 'Barrels')
+      .replace(/براميل/g, 'Barrels')
+      .replace(/جوال/g, 'Bags')
+      .replace(/جوالات/g, 'Bags')
+      .replace(/طن/g, 'Tons')
+      .replace(/لتر\/فدان/g, 'L/feddan')
+      .replace(/لتر\/ساعة/g, 'L/hour')
+      .replace(/لتر/g, 'Liters')
+      .replace(/يوم/g, 'days')
+      .replace(/أيام/g, 'days')
+      .replace(/شهر/g, 'months')
+      .replace(/أشهر/g, 'months')
+      .replace(/ساعات/g, 'hours')
+      .replace(/ساعة/g, 'hours')
+      .replace(/أسهم/g, 'shares')
+      .replace(/سهم/g, 'shares')
+      .replace(/مباشر منذ/g, 'Active for')
+      .replace(/مستمر \(طوال الموسم\)/g, 'Active (Full Season)')
+      .replace(/خالص بالكامل/g, 'Fully Paid')
+      .replace(/غير مدفوع/g, 'Unpaid')
+      .replace(/متبقي/g, 'Remaining')
+      .replace(/معتمد/g, 'Approved')
+      .replace(/قيد المراجعة/g, 'Under Review')
+      .replace(/دائم/g, 'Permanent')
+      .replace(/مؤقت \/ موسمي/g, 'Temporary / Seasonal')
+      .replace(/كامل المشروع/g, 'Entire Project')
+      .replace(/كسمور/g, 'Kasamor')
+      .replace(/القضارف/g, 'Gedaref');
+
+    return replaced;
   },
 
   t(arText, enText) {
     if (this.currentLang === 'en') {
-      return enText || this.dictArToEn[arText.trim()] || arText;
+      return enText || this.translateText(arText, 'en');
     }
     return arText;
   },
@@ -9088,20 +9786,6 @@ const AppI18N = window.AppI18N = {
       }
     }
 
-    // Update Drawer Button
-    const drawerBtnText = document.getElementById('drawer-lang-toggle-text');
-    const drawerBtnFlag = document.getElementById('drawer-lang-toggle-flag');
-    if (drawerBtnText && drawerBtnFlag) {
-      if (lang === 'en') {
-        drawerBtnFlag.innerText = '🇸🇩';
-        drawerBtnText.innerText = 'العربية (Arabic)';
-      } else {
-        drawerBtnFlag.innerText = '🇬🇧';
-        drawerBtnText.innerText = 'English (الإنجليزية)';
-      }
-    }
-
-    // Translate DOM nodes
     this.translateElement(document.body, lang);
 
     if (triggerUpdate && typeof updateActiveViews === 'function') {
@@ -9110,64 +9794,53 @@ const AppI18N = window.AppI18N = {
   },
 
   translateElement(rootEl, lang) {
-    if (!rootEl) return;
+    if (!rootEl || typeof rootEl.querySelectorAll !== 'function') return;
 
-    const elements = rootEl.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, button, a, label, th, td, option, li, strong, small');
+    // 1. Process all text-containing elements
+    const elements = rootEl.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, button, a, label, th, td, option, li, strong, small, div');
     elements.forEach(el => {
-      // Elements with no child elements, or only one <i> icon child
-      if (el.children.length === 0 || (el.children.length === 1 && el.children[0].tagName === 'I')) {
-        let text = '';
-        let targetTextNode = null;
+      // Process text nodes directly inside el
+      for (let i = 0; i < el.childNodes.length; i++) {
+        const node = el.childNodes[i];
+        if (node.nodeType === 3) { // Text node
+          const text = node.nodeValue;
+          if (!text || !text.trim()) continue;
 
-        if (el.children.length === 1 && el.children[0].tagName === 'I') {
-          for (let i = 0; i < el.childNodes.length; i++) {
-            if (el.childNodes[i].nodeType === 3 && el.childNodes[i].nodeValue.trim()) {
-              targetTextNode = el.childNodes[i];
-              text = targetTextNode.nodeValue.trim();
-              break;
+          if (lang === 'en') {
+            if (!node._arOrig) {
+              node._arOrig = text;
             }
-          }
-        } else {
-          text = (el.innerText || el.textContent || '').trim();
-        }
-
-        if (!text) return;
-
-        if (lang === 'en') {
-          if (!el.getAttribute('data-ar-orig')) {
-            el.setAttribute('data-ar-orig', text);
-          }
-          if (this.dictArToEn[text]) {
-            if (targetTextNode) targetTextNode.nodeValue = ' ' + this.dictArToEn[text];
-            else el.innerText = this.dictArToEn[text];
+            const translated = this.translateText(node._arOrig, 'en');
+            if (translated !== text) {
+              node.nodeValue = translated;
+            }
           } else {
-            let replaced = text
-              .replace(/ج.س/g, 'SDG')
-              .replace(/فدان/g, 'Feddans')
-              .replace(/برميل/g, 'Barrels')
-              .replace(/براميل/g, 'Barrels')
-              .replace(/جوال/g, 'Bags')
-              .replace(/طن/g, 'Tons');
-            if (replaced !== text) {
-              if (targetTextNode) targetTextNode.nodeValue = ' ' + replaced;
-              else el.innerText = replaced;
+            // Restore Arabic
+            if (node._arOrig) {
+              node.nodeValue = node._arOrig;
             }
           }
-        } else {
-          // Restore Arabic
-          const orig = el.getAttribute('data-ar-orig');
-          if (orig) {
-            if (targetTextNode) targetTextNode.nodeValue = ' ' + orig;
-            else el.innerText = orig;
-          } else if (this.dictEnToAr[text]) {
-            if (targetTextNode) targetTextNode.nodeValue = ' ' + this.dictEnToAr[text];
-            else el.innerText = this.dictEnToAr[text];
+        }
+      }
+
+      // Also handle options (select dropdowns)
+      if (el.tagName === 'OPTION') {
+        const optText = el.text;
+        if (optText && optText.trim()) {
+          if (lang === 'en') {
+            if (!el.getAttribute('data-ar-orig')) {
+              el.setAttribute('data-ar-orig', optText);
+            }
+            el.text = this.translateText(el.getAttribute('data-ar-orig'), 'en');
+          } else {
+            const orig = el.getAttribute('data-ar-orig');
+            if (orig) el.text = orig;
           }
         }
       }
     });
 
-    // Translate input placeholders
+    // 2. Translate input placeholders & titles
     const inputs = rootEl.querySelectorAll('input[placeholder], textarea[placeholder]');
     inputs.forEach(input => {
       const ph = input.getAttribute('placeholder');
@@ -9176,32 +9849,28 @@ const AppI18N = window.AppI18N = {
         if (!input.getAttribute('data-ar-ph')) {
           input.setAttribute('data-ar-ph', ph);
         }
-        if (this.dictArToEn[ph.trim()]) {
-          input.setAttribute('placeholder', this.dictArToEn[ph.trim()]);
-        }
+        const origPh = input.getAttribute('data-ar-ph');
+        input.setAttribute('placeholder', this.translateText(origPh, 'en'));
       } else {
-        if (input.getAttribute('data-ar-ph')) {
-          input.setAttribute('placeholder', input.getAttribute('data-ar-ph'));
-        }
+        const orig = input.getAttribute('data-ar-ph');
+        if (orig) input.setAttribute('placeholder', orig);
       }
     });
 
-    // Translate titles
+    // 3. Translate titles / tooltips
     const titled = rootEl.querySelectorAll('[title]');
     titled.forEach(el => {
-      const t = el.getAttribute('title');
-      if (!t) return;
+      const title = el.getAttribute('title');
+      if (!title) return;
       if (lang === 'en') {
         if (!el.getAttribute('data-ar-title')) {
-          el.setAttribute('data-ar-title', t);
+          el.setAttribute('data-ar-title', title);
         }
-        if (this.dictArToEn[t.trim()]) {
-          el.setAttribute('title', this.dictArToEn[t.trim()]);
-        }
+        const origTitle = el.getAttribute('data-ar-title');
+        el.setAttribute('title', this.translateText(origTitle, 'en'));
       } else {
-        if (el.getAttribute('data-ar-title')) {
-          el.setAttribute('title', el.getAttribute('data-ar-title'));
-        }
+        const orig = el.getAttribute('data-ar-title');
+        if (orig) el.setAttribute('title', orig);
       }
     });
   }
@@ -12106,7 +12775,29 @@ function renderLaborSection() {
   const laborTable = document.getElementById('labor-table-body');
   if (!laborTable) return;
 
+  // الحماية القصوى: ضمان وجود بيانات العمالة دائماً
+  if (!state.labor || !Array.isArray(state.labor) || state.labor.length === 0) {
+    state.labor = (typeof DEFAULT_DATA !== 'undefined' && DEFAULT_DATA.labor) 
+      ? JSON.parse(JSON.stringify(DEFAULT_DATA.labor)) : [];
+  }
+
   autoUpdateLaborWages();
+
+  // تحديث بطاقات المؤشرات الأربعة أعلى مسير الرواتب
+  const totalDueSum = state.labor.reduce((sum, w) => sum + (parseFloat(w.totalDue) || 0), 0);
+  const totalPaidSum = state.labor.reduce((sum, w) => sum + (parseFloat(w.totalPaid) || 0), 0);
+  const totalBalanceSum = Math.max(0, totalDueSum - totalPaidSum);
+  const activeCount = state.labor.length;
+
+  const dueStat = document.getElementById('labor-total-due-stat');
+  const paidStat = document.getElementById('labor-total-paid-stat');
+  const balStat = document.getElementById('labor-total-balance-stat');
+  const cntStat = document.getElementById('labor-total-count-stat');
+
+  if (dueStat) dueStat.textContent = Math.round(totalDueSum).toLocaleString() + ' ' + (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en' ? 'SDG' : 'ج.س');
+  if (paidStat) paidStat.textContent = Math.round(totalPaidSum).toLocaleString() + ' ' + (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en' ? 'SDG' : 'ج.س');
+  if (balStat) balStat.textContent = Math.round(totalBalanceSum).toLocaleString() + ' ' + (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en' ? 'SDG' : 'ج.س');
+  if (cntStat) cntStat.textContent = activeCount;
 
   laborTable.innerHTML = state.labor.map(w => {
     const balance = (w.totalDue || 0) - (w.totalPaid || 0);
