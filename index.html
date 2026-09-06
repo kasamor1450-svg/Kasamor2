@@ -1028,31 +1028,37 @@ table tbody tr:hover {
           </div>
         </div>
 
-        <!-- موجز أرقام المزرعة بلمحة واحدة هادئة (Calm 4-Metric Stats Grid) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+        <!-- موجز أرقام المزرعة والخزينة بلمحة واحدة متكاملة (Calm 5-Metric Integrated Stats Grid) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-1">
           
           <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right">
-            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي المنصرفات الفعلية</p>
-            <h3 id="kpi-total-spent" class="text-base sm:text-lg font-black text-rose-700 dark:text-rose-400 font-mono mt-0.5">0 ج.س</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">شامل التأسيس والعمليات الميدانية</p>
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي رأس المال المضخوخ</p>
+            <h3 id="kpi-total-capital" class="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-400 font-mono mt-0.5">136,118,003 ج.س</h3>
+            <p class="text-[10px] text-slate-400 mt-0.5">غير مسترد: 69,618,003 • مسترد: 66,500,000</p>
           </div>
 
           <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right">
             <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">مبيعات المحاصيل المحققة</p>
             <h3 id="kpi-total-sales" class="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">0 ج.س</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">إجمالي إيرادات بيع الذرة والتسالي</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">مضافة لرأس المال وتوزع على الأسهم</p>
           </div>
 
           <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right">
+            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي المنصرفات الفعلية</p>
+            <h3 id="kpi-total-spent" class="text-base sm:text-lg font-black text-rose-700 dark:text-rose-400 font-mono mt-0.5">0 ج.س</h3>
+            <p class="text-[10px] text-slate-400 mt-0.5">شامل التأسيس والعمليات والرواتب</p>
+          </div>
+
+          <div class="p-3 bg-emerald-50/70 dark:bg-emerald-950/40 rounded-2xl border border-emerald-300 dark:border-emerald-800 text-right shadow-sm col-span-2 sm:col-span-1">
+            <p class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">الرصيد المتبقي (السيولة بالخزينة)</p>
+            <h3 id="kpi-remaining-treasury-balance" class="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400 font-mono mt-0.5">0 ج.س</h3>
+            <p id="kpi-remaining-treasury-sub" class="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">صافي السيولة المتاحة بعد المصروفات والأرباح</p>
+          </div>
+
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right col-span-2 sm:col-span-1">
             <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">رصيد وقود الجازولين</p>
             <h3 id="kpi-fuel-stock" class="text-base sm:text-lg font-black text-blue-700 dark:text-blue-400 font-mono mt-0.5">6 براميل</h3>
             <p class="text-[10px] text-slate-400 mt-0.5">المتبقي في مستودع المزرعة</p>
-          </div>
-
-          <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-right">
-            <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">إجمالي رأس المال المضخوخ</p>
-            <h3 id="kpi-total-capital" class="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-400 font-mono mt-0.5">136,118,003 ج.س</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">غير مسترد: 69,618,003 • مسترد: 66,500,000</p>
           </div>
 
         </div>
@@ -1750,6 +1756,44 @@ table tbody tr:hover {
               </tr>
             </thead>
             <tbody id="rainfall-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- سجل توزيعات الأرباح على الشركاء بنظام الـ 13 سهماً -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-teal-50/50 dark:bg-teal-950/30">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 flex items-center justify-center font-bold text-base shadow-sm">💰</span>
+            <div>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل توزيعات الأرباح على الشركاء (نظام الـ 13 سهماً)</h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">متابعة مبالغ الأرباح الموزعة والمخصومة مباشرة من الرصيد المتبقي بالخزينة</p>
+            </div>
+          </div>
+          <button onclick="openDistributeProfitsModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-sm active:scale-95">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>توزيع دفعة أرباح جديدة</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">تاريخ التوزيع</th>
+                <th class="py-3 px-4">إجمالي المبلغ الموزع</th>
+                <th class="py-3 px-4">نصيب السهم الواحد (1/13)</th>
+                <th class="py-3 px-4">طريقة التحويل / الصرف</th>
+                <th class="py-3 px-4">البيان والملاحظات</th>
+                <th class="py-3 px-4">الموثق</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="profit-distributions-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              <tr>
+                <td colspan="7" class="text-center py-6 text-slate-400 text-xs font-medium">لم يتم تسجيل أي توزيعات أرباح بعد. يمكنك الضغط على "توزيع أرباح للشركاء" لبدء توزيع الأرباح.</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -3436,6 +3480,7 @@ function getDaysDiff(startDateStr, endDateStr = null) {
 
 // البيانات التأسيسية للمشروع متضمنة الـ 182 قيد مالي المعتمد
 const DEFAULT_DATA = {
+  "profitDistributions": [],
   "farmInfo": {
     "name": "مشروع أبناء مصطفى حسن الزراعي",
     "location": "القضارف، كسمور الشرقي",
@@ -9689,6 +9734,17 @@ function calculateMetrics() {
   const costPerFeddanTasali = tasaliArea > 0 ? (effectiveTasaliExpense / tasaliArea) : 0;
   const overallCostPerFeddan = totalArea > 0 ? ((totalExpenses - homeExpenses) / totalArea) : 0;
 
+  // حسابات الخزينة الموحدة والرصيد المتبقي الفعلي
+  const totalPaidCapital = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
+  const totalCropSales = (state.cropSales || []).reduce((sum, s) => {
+    const amt = parseFloat(s.paidAmount !== undefined && s.paidAmount !== null && s.paidAmount !== '' ? s.paidAmount : s.totalAmount) || 0;
+    return sum + amt;
+  }, 0);
+  const totalProfitsDistributed = (state.profitDistributions || []).reduce((sum, d) => sum + (parseFloat(d.totalAmount) || 0), 0);
+  const totalInflows = totalPaidCapital + totalCropSales;
+  const totalOutflows = totalExpenses + totalProfitsDistributed;
+  const remainingTreasuryBalance = Math.max(0, totalInflows - totalOutflows);
+
   return {
     totalArea,
     sorghumArea,
@@ -9705,7 +9761,13 @@ function calculateMetrics() {
     overallCostPerFeddan,
     categoryTotals,
     fuelInStock: state.fuelSummary.inWarehouse,
-    fuelUsed: state.fuelSummary.consumed
+    fuelUsed: state.fuelSummary.consumed,
+    totalPaidCapital,
+    totalCropSales,
+    totalProfitsDistributed,
+    totalInflows,
+    totalOutflows,
+    remainingTreasuryBalance
   };
 }
 
@@ -9743,8 +9805,17 @@ function renderHeaderKPIs() {
   // Dynamic calculation of Total Sales KPI
   const elTotalSales = document.getElementById('kpi-total-sales');
   if (elTotalSales) {
-    const totalSalesAmount = (state.cropSales || []).reduce((sum, s) => sum + (parseFloat(s.totalAmount) || 0), 0);
-    elTotalSales.innerText = `${formatCapitalMoney(totalSalesAmount)} ج.س`;
+    elTotalSales.innerText = `${formatCapitalMoney(m.totalCropSales)} ج.س`;
+  }
+
+  // Dynamic calculation of Remaining Treasury Balance KPI
+  const elRemTreasury = document.getElementById('kpi-remaining-treasury-balance');
+  if (elRemTreasury) {
+    elRemTreasury.innerText = `${formatCapitalMoney(m.remainingTreasuryBalance)} ج.س`;
+    const elRemSub = document.getElementById('kpi-remaining-treasury-sub');
+    if (elRemSub) {
+      elRemSub.innerText = `الوارد: ${formatCapitalMoney(m.totalInflows)} • المنصرف والأرباح: ${formatCapitalMoney(m.totalOutflows)}`;
+    }
   }
   
   const progressPercent = Math.round((m.totalPlanted / m.totalArea) * 100) || 0;
@@ -11185,6 +11256,18 @@ function openDisburseWageModal(preselectedWorkerId = null) {
           </select>
         </div>
 
+        <!-- بطاقة رصيد الخزينة المتبقي والخصم المباشر -->
+        <div class="p-2.5 rounded-xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs space-y-1">
+          <div class="flex justify-between items-center font-bold">
+            <span class="text-purple-900 dark:text-purple-300">الرصيد المتبقي المتاح بالخزينة حالياً:</span>
+            <span class="font-mono text-purple-800 dark:text-purple-200 font-black">${Math.round(calculateMetrics().remainingTreasuryBalance || 0).toLocaleString()} ج.س</span>
+          </div>
+          <div class="flex justify-between items-center text-[11px]">
+            <span class="text-slate-500 dark:text-slate-400">المتبقي بالخزينة بعد صرف هذا الأجر:</span>
+            <span id="disburse-rem-treasury-preview" class="font-mono font-black text-emerald-700 dark:text-emerald-400">${Math.round(Math.max(0, (calculateMetrics().remainingTreasuryBalance || 0) - balance)).toLocaleString()} ج.س</span>
+          </div>
+        </div>
+
         <!-- 2. بطاقة رصيد العامل الحية -->
         <div id="disburse-worker-card" class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-teal-200 dark:border-teal-900 text-[11px] space-y-1.5">
           <div class="flex justify-between items-center font-bold">
@@ -11213,7 +11296,7 @@ function openDisburseWageModal(preselectedWorkerId = null) {
           </div>
           <div>
             <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">المبلغ المصروف (ج.س):</label>
-            <input type="number" id="disburse-amount" min="1" step="any" value="${balance > 0 ? balance : (currentWorker.monthlySalary || '')}" class="w-full p-2.5 rounded-xl border border-teal-400 dark:border-teal-700 bg-white dark:bg-slate-800 font-black font-mono text-teal-800 dark:text-teal-300 text-sm" required>
+            <input type="number" id="disburse-amount" min="1" step="any" oninput="onDisburseAmountInput()" value="${balance > 0 ? balance : (currentWorker.monthlySalary || '')}" class="w-full p-2.5 rounded-xl border border-teal-400 dark:border-teal-700 bg-white dark:bg-slate-800 font-black font-mono text-teal-800 dark:text-teal-300 text-sm" required>
           </div>
         </div>
 
@@ -11327,6 +11410,21 @@ function setDisburseAmountQuick(mode) {
   }
 }
 
+function onDisburseAmountInput() {
+  const amtInput = document.getElementById('disburse-amount');
+  const elPreview = document.getElementById('disburse-rem-treasury-preview');
+  if (!amtInput || !elPreview) return;
+  const amt = parseFloat(amtInput.value) || 0;
+  const m = calculateMetrics();
+  const rem = (m.remainingTreasuryBalance || 0) - amt;
+  elPreview.innerText = `${Math.round(rem).toLocaleString()} ج.س`;
+  if (rem < 0) {
+    elPreview.className = 'font-mono font-black text-rose-600';
+  } else {
+    elPreview.className = 'font-mono font-black text-emerald-700 dark:text-emerald-400';
+  }
+}
+
 function handleSaveDisburseWage(event) {
   event.preventDefault();
 
@@ -11381,7 +11479,7 @@ function handleSaveDisburseWage(event) {
   logAudit("صرف أجر", `صرف ${disburseType} للعامل (${worker.name}) بمبلغ ${amount.toLocaleString()} ج.س (${method})`, "الرواتب والأجور");
 
   // 4. حفظ وتحديث الواجهات والمزامنة السحابية
-  saveData(`✓ تم صرف أجر بمبلغ (${amount.toLocaleString()} ج.س) للعامل ${worker.name} بنجاح!`);
+  saveData(`✓ تم صرف أجر بمبلغ (${amount.toLocaleString()} ج.س) للعامل ${worker.name} وخصمه من الرصيد المتبقي بالخزينة بنجاح!`);
   closeModal();
 
   // مزامنة سجل العامل مع جدول labor السحابي
@@ -12137,6 +12235,8 @@ function formatCapitalMoney(val) {
 function recalculatePartnerCapital() {
   if (!state.partners) return;
   if (!state.capitalInjections) state.capitalInjections = [];
+  if (!state.profitDistributions) state.profitDistributions = [];
+  if (!state.cropSales) state.cropSales = [];
 
   const AUTHORITATIVE_PARTNERS = {
     'prt-1': { name: 'عمرو', shares: 2, nonRef: 10710462, ref: 66500000, paid: 77210462 },
@@ -12149,6 +12249,20 @@ function recalculatePartnerCapital() {
     'prt-8': { name: 'رزاز', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
     'prt-9': { name: 'عناب', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 }
   };
+
+  // 1. حساب إجمالي مبيعات المحاصيل وتوزيعها على 13 سهماً
+  const totalCropSales = (state.cropSales || []).reduce((sum, s) => {
+    const amt = parseFloat(s.paidAmount !== undefined && s.paidAmount !== null && s.paidAmount !== '' ? s.paidAmount : s.totalAmount) || 0;
+    return sum + amt;
+  }, 0);
+
+  // 2. تتبع الأرباح الموزعة المستلمة لكل شريك
+  const partnerProfitsMap = {};
+  (state.profitDistributions || []).forEach(dist => {
+    (dist.allocations || []).forEach(alloc => {
+      partnerProfitsMap[alloc.partnerId] = (partnerProfitsMap[alloc.partnerId] || 0) + (parseFloat(alloc.amount) || 0);
+    });
+  });
 
   state.partners.forEach(p => {
     const auth = AUTHORITATIVE_PARTNERS[p.id];
@@ -12175,7 +12289,16 @@ function recalculatePartnerCapital() {
     }
 
     p.paidCapital = p.nonRefundableCapital + p.refundableCapital;
-    p.notes = `نسبة ربح ثابتة ${p.shares} من 13 (${((p.shares/13)*100).toFixed(2)}%) [غير مسترد: ${p.nonRefundableCapital}] [مسترد: ${p.refundableCapital}]`;
+
+    // توزيع مبيعات المحاصيل على الأسهم (13 سهماً)
+    const partnerShares = parseFloat(p.shares) || 1;
+    p.cropSalesShare = Math.round((totalCropSales / 13) * partnerShares);
+    p.totalCapitalWithSales = p.paidCapital + p.cropSalesShare;
+
+    // إجمالي الأرباح الموزعة المستلمة
+    p.totalProfitsReceived = partnerProfitsMap[p.id] || 0;
+
+    p.notes = `نسبة ربح ثابتة ${p.shares} من 13 (${((partnerShares/13)*100).toFixed(2)}%) [غير مسترد: ${p.nonRefundableCapital}] [مسترد: ${p.refundableCapital}] [مبيعات مضافة: ${p.cropSalesShare}] [أرباح مستلمة: ${p.totalProfitsReceived}]`;
   });
 }
 
@@ -12209,6 +12332,7 @@ function setPartnersViewMode(mode) {
 function renderPartnersSection() {
   const tableBody = document.getElementById('partners-table-body');
   const injectionsTableBody = document.getElementById('capital-injections-table-body');
+  const profitDistTableBody = document.getElementById('profit-distributions-table-body');
   const kpiContainer = document.getElementById('partners-kpi-container');
   if (!tableBody) return;
 
@@ -12218,29 +12342,40 @@ function renderPartnersSection() {
   if (!state.capitalInjections) {
     state.capitalInjections = DEFAULT_DATA.capitalInjections ? JSON.parse(JSON.stringify(DEFAULT_DATA.capitalInjections)) : [];
   }
+  if (!state.profitDistributions) {
+    state.profitDistributions = [];
+  }
+  if (!state.cropSales) {
+    state.cropSales = [];
+  }
 
   recalculatePartnerCapital();
 
-  const totalCapitalTarget = state.farmInfo ? (parseFloat(state.farmInfo.capital) || 300000000) : 300000000;
   const totalPaidCapital = state.partners.reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
-  const totalSpent = (state.expenses || []).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-  const remainingCash = Math.max(0, totalPaidCapital - totalSpent);
-  const totalShares = 13;
-  const totalInjectionsCount = (state.capitalInjections || []).length;
+  const totalNonRefundable = state.partners.reduce((sum, p) => sum + (parseFloat(p.nonRefundableCapital) || 0), 0);
+  const totalRefundable = state.partners.reduce((sum, p) => sum + (parseFloat(p.refundableCapital) || 0), 0);
 
-  // Calculate Non-refundable & Refundable totals
-  const totalNonRefundable = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.nonRefundableCapital) || 0), 0);
-  const totalRefundable = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.refundableCapital) || 0), 0);
+  const totalCropSales = (state.cropSales || []).reduce((sum, s) => {
+    const amt = parseFloat(s.paidAmount !== undefined && s.paidAmount !== null && s.paidAmount !== '' ? s.paidAmount : s.totalAmount) || 0;
+    return sum + amt;
+  }, 0);
+
+  const totalSpent = (state.expenses || []).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  const totalProfitsDistributed = (state.profitDistributions || []).reduce((sum, d) => sum + (parseFloat(d.totalAmount) || 0), 0);
+
+  const totalInflows = totalPaidCapital + totalCropSales;
+  const totalOutflows = totalSpent + totalProfitsDistributed;
+  const remainingCash = Math.max(0, totalInflows - totalOutflows);
 
   // Render KPI cards
   if (kpiContainer) {
     kpiContainer.innerHTML = `
-      <div class="glass-card p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/30">
+      <div class="glass-card p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/30 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs font-bold text-emerald-800 dark:text-emerald-300">إجمالي رأس المال الكلي</p>
+            <p class="text-xs font-bold text-emerald-800 dark:text-emerald-300">إجمالي رأس المال المدفوع</p>
             <h3 class="text-xl font-black text-emerald-900 dark:text-emerald-100 font-mono mt-1">${formatCapitalMoney(totalPaidCapital)} ج.س</h3>
-            <p class="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5">شامل غير المسترد + المسترد</p>
+            <p class="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5">غير مسترد: ${formatCapitalMoney(totalNonRefundable)} • مسترد: ${formatCapitalMoney(totalRefundable)}</p>
           </div>
           <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-emerald-600/20">
             💵
@@ -12248,40 +12383,40 @@ function renderPartnersSection() {
         </div>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/30">
+      <div class="glass-card p-4 rounded-2xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/30 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs font-bold text-teal-800 dark:text-teal-300">🟢 رأس مال غير مسترد (دائم)</p>
-            <h3 class="text-xl font-black text-teal-900 dark:text-teal-100 font-mono mt-1">${formatCapitalMoney(totalNonRefundable)} ج.س</h3>
-            <p class="text-[10px] text-teal-700 dark:text-teal-400 mt-0.5">حصة تأسيسية ثابتة في أصول المشروع</p>
+            <p class="text-xs font-bold text-teal-800 dark:text-teal-300">🌾 إيرادات مبيعات المحاصيل</p>
+            <h3 class="text-xl font-black text-teal-900 dark:text-teal-100 font-mono mt-1">${formatCapitalMoney(totalCropSales)} ج.س</h3>
+            <p class="text-[10px] text-teal-700 dark:text-teal-400 mt-0.5">مضافة لرأس المال وموزعة على 13 سهماً</p>
           </div>
           <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-teal-600/20">
-            🏛️
+            🌾
           </div>
         </div>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/30">
+      <div class="glass-card p-4 rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/30 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs font-bold text-blue-800 dark:text-blue-300">🔵 رأس مال مسترد (مستحق الرد)</p>
-            <h3 class="text-xl font-black text-blue-900 dark:text-blue-100 font-mono mt-1">${formatCapitalMoney(totalRefundable)} ج.س</h3>
-            <p class="text-[10px] text-blue-700 dark:text-blue-400 mt-0.5">يُرد 100% للشركاء عند التصفية والبيع</p>
+            <p class="text-xs font-bold text-amber-800 dark:text-amber-300">💰 إجمالي الأرباح الموزعة</p>
+            <h3 class="text-xl font-black text-amber-900 dark:text-amber-100 font-mono mt-1">${formatCapitalMoney(totalProfitsDistributed)} ج.س</h3>
+            <p class="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5">مخصومة من الرصيد المتبقي بالخزينة</p>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-blue-600/20">
-            🔄
+          <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-amber-600/20">
+            💰
           </div>
         </div>
       </div>
 
-      <div class="glass-card p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <div class="glass-card p-4 rounded-2xl border border-purple-300 dark:border-purple-800 bg-purple-50/60 dark:bg-purple-950/40 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs font-bold text-slate-500 dark:text-slate-400">السيولة المتبقية بالخزينة</p>
+            <p class="text-xs font-bold text-purple-900 dark:text-purple-200">الرصيد المتبقي (السيولة بالخزينة)</p>
             <h3 class="text-xl font-black text-purple-700 dark:text-purple-300 font-mono mt-1">${Math.round(remainingCash).toLocaleString()} ج.س</h3>
-            <p class="text-[10px] text-slate-500 mt-0.5">متبقي كاش جاهز بعد المصروفات</p>
+            <p class="text-[10px] text-purple-600 dark:text-purple-400 mt-0.5">المقبوضات: ${formatCapitalMoney(totalInflows)} • الصادر: ${formatCapitalMoney(totalOutflows)}</p>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-lg">
+          <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-purple-600/20">
             🏦
           </div>
         </div>
@@ -12289,8 +12424,7 @@ function renderPartnersSection() {
     `;
   }
 
-  
-  // رسم كروت الشركاء المنظمة سهلة الاستخدام (Modern Partner Cards)
+  // Modern Partner Cards
   const cardsContainer = document.getElementById('partners-modern-cards-container');
   if (cardsContainer) {
     cardsContainer.innerHTML = state.partners.map(p => {
@@ -12298,13 +12432,16 @@ function renderPartnersSection() {
       const percent = ((sharesCount / 13) * 100).toFixed(2);
       const nonRef = parseFloat(p.nonRefundableCapital) || 0;
       const ref = parseFloat(p.refundableCapital) || 0;
-      const total = nonRef + ref;
+      const paid = nonRef + ref;
+      const cropSalesShare = parseFloat(p.cropSalesShare) || 0;
+      const totalWithSales = parseFloat(p.totalCapitalWithSales) || (paid + cropSalesShare);
+      const profitsReceived = parseFloat(p.totalProfitsReceived) || 0;
       const isDoubleShare = sharesCount === 2;
 
       return `
         <div class="glass-card p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 transition shadow-sm flex flex-col justify-between bg-white/70 dark:bg-slate-900/70">
           <div>
-            <!-- رأس الكارت: اسم الشريك والأسهم -->
+            <!-- رأس الكارت -->
             <div class="flex justify-between items-start mb-3">
               <div class="flex items-center gap-2.5">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr ${isDoubleShare ? 'from-emerald-700 to-emerald-500 text-white' : 'from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-700 text-slate-800 dark:text-slate-200'} font-black text-sm flex items-center justify-center shadow-sm">
@@ -12323,7 +12460,7 @@ function renderPartnersSection() {
               </div>
             </div>
 
-            <!-- تفاصيل رأس المال (النوعين بوضوح تام) -->
+            <!-- تفاصيل رأس المال والمبيعات والأرباح -->
             <div class="space-y-2 my-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 text-xs">
               <!-- غير مسترد -->
               <div class="flex justify-between items-center">
@@ -12343,41 +12480,71 @@ function renderPartnersSection() {
                 <strong class="font-mono text-blue-900 dark:text-blue-200 text-xs">${formatCapitalMoney(ref)} ج.س</strong>
               </div>
 
-              <!-- المجموع الكلي -->
-              <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                <span class="text-slate-900 dark:text-white font-black">💰 إجمالي رأس المال:</span>
-                <strong class="font-mono font-black text-emerald-700 dark:text-emerald-400 text-sm">${formatCapitalMoney(total)} ج.س</strong>
+              <!-- إجمالي رأس المال المدفوع -->
+              <div class="flex justify-between items-center pt-1 border-t border-slate-200 dark:border-slate-700">
+                <span class="text-slate-600 dark:text-slate-400 font-bold">إجمالي رأس المال المدفوع:</span>
+                <strong class="font-mono text-slate-900 dark:text-white text-xs">${formatCapitalMoney(paid)} ج.س</strong>
+              </div>
+
+              <!-- حصة مبيعات المحاصيل المضافة -->
+              <div class="flex justify-between items-center bg-emerald-50/60 dark:bg-emerald-950/30 p-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                <span class="text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1">
+                  <span>🌾</span>
+                  <span>حصة المبيعات المضافة:</span>
+                </span>
+                <strong class="font-mono text-emerald-700 dark:text-emerald-400 text-xs">+${formatCapitalMoney(cropSalesShare)} ج.س</strong>
+              </div>
+
+              <!-- إجمالي رأس المال بعد المبيعات -->
+              <div class="flex justify-between items-center font-black">
+                <span class="text-purple-800 dark:text-purple-300">إجمالي رأس المال + المبيعات:</span>
+                <strong class="font-mono text-purple-900 dark:text-purple-200 text-xs">${formatCapitalMoney(totalWithSales)} ج.س</strong>
+              </div>
+
+              <!-- الأرباح المستلمة -->
+              <div class="flex justify-between items-center pt-1 border-t border-slate-200 dark:border-slate-700">
+                <span class="text-amber-700 dark:text-amber-400 font-bold flex items-center gap-1">
+                  <span>💰</span>
+                  <span>أرباح مستلمة:</span>
+                </span>
+                <strong class="font-mono text-amber-700 dark:text-amber-400 text-xs">${formatCapitalMoney(profitsReceived)} ج.س</strong>
               </div>
             </div>
           </div>
 
           <!-- أزرار الإجراءات السريعة -->
           <div class="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <button onclick="openEditPartnerModal('${p.id}')" class="flex-1 py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-xl font-black text-xs transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
-              <span>✏️</span>
-              <span>تعديل رأس المال</span>
+            <button onclick="openDistributeProfitsModal()" class="flex-1 py-1.5 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 border border-teal-300 text-teal-800 dark:text-teal-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+              <i data-lucide="coins" class="w-3.5 h-3.5"></i>
+              <span>توزيع أرباح</span>
             </button>
-            <button onclick="openPartnerStatementModal('${p.id}')" class="py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-xs transition flex items-center gap-1" title="كشف المستحقات">
-              <span>📄</span>
-              <span>الكشف</span>
+            <button onclick="openAddCapitalInjectionModal('${p.id}')" class="flex-1 py-1.5 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 border border-purple-300 text-purple-800 dark:text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>ضخ مبلغ</span>
+            </button>
+            <button onclick="openPartnerStatementModal('${p.id}')" class="py-1.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-xl text-slate-600 transition" title="كشف الحساب">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
             </button>
           </div>
         </div>
       `;
     }).join('');
   }
-  
-  // Render Partners Table
+
+  // Render Partners Table Rows
   tableBody.innerHTML = state.partners.map(p => {
     const sharesCount = parseFloat(p.shares) || 1;
-    const ratio = sharesCount / totalShares;
-    const percent = (ratio * 100).toFixed(2);
-    const paidCap = parseFloat(p.paidCapital) || 0;
+    const percent = ((sharesCount / 13) * 100).toFixed(2);
+    const nonRef = parseFloat(p.nonRefundableCapital) || 0;
+    const ref = parseFloat(p.refundableCapital) || 0;
+    const paidCap = nonRef + ref;
+    const cropSalesShare = parseFloat(p.cropSalesShare) || 0;
+    const totalWithSales = parseFloat(p.totalCapitalWithSales) || (paidCap + cropSalesShare);
+    const profitsReceived = parseFloat(p.totalProfitsReceived) || 0;
     const isDoubleShare = sharesCount === 2;
-    const pInjections = (state.capitalInjections || []).filter(inj => inj.partnerId === p.id || inj.partnerName === p.name || inj.partnerName === p.fullName);
 
     return `
-      <tr class="border-b border-slate-100 dark:border-slate-800 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/40">
+      <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition text-xs">
         <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
           <div class="flex items-center gap-2">
             <span class="w-7 h-7 rounded-lg ${isDoubleShare ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'} flex items-center justify-center font-bold text-xs">
@@ -12390,55 +12557,52 @@ function renderPartnersSection() {
           </div>
         </td>
 
-        <!-- الأسهم والنسب الثابتة -->
         <td class="py-3.5 px-4">
           <span class="px-2.5 py-1 rounded-full text-xs font-black ${isDoubleShare ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300'} inline-flex items-center gap-1">
             <span>${sharesCount} سهم</span>
-            <span class="text-[10px] opacity-75">من أصل 13</span>
+            <span class="text-[10px] opacity-75">(${percent}%)</span>
           </span>
         </td>
 
-        <td class="py-3.5 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">
-          <div class="font-black text-sm text-emerald-700 dark:text-emerald-400">${percent}%</div>
-          <span class="text-[10px] text-slate-400 font-medium">نسبة ربح ثابتة</span>
-        </td>
-
-        <!-- رأس مال غير مسترد -->
         <td class="py-3.5 px-4 font-mono font-bold text-teal-700 dark:text-teal-400 text-xs">
-          <div>${formatCapitalMoney(p.nonRefundableCapital || 0)} ج.س</div>
-          <span class="text-[9px] text-teal-600 dark:text-teal-500 font-normal block mt-0.5">🟢 أصل دائم</span>
+          ${formatCapitalMoney(nonRef)} ج.س
         </td>
 
-        <!-- رأس مال مسترد -->
         <td class="py-3.5 px-4 font-mono font-bold text-blue-700 dark:text-blue-400 text-xs">
-          <div>${formatCapitalMoney(p.refundableCapital || 0)} ج.س</div>
-          <span class="text-[9px] text-blue-600 dark:text-blue-400 font-normal block mt-0.5">🔵 يُرد 100%</span>
+          ${formatCapitalMoney(ref)} ج.س
         </td>
 
-        <!-- إجمالي رأس المال الكلي -->
-        <td class="py-3.5 px-4 font-mono font-black text-slate-900 dark:text-white text-sm">
-          <div>${formatCapitalMoney(paidCap)} ج.س</div>
-          <span class="text-[9px] text-purple-600 dark:text-purple-400 font-bold block mt-0.5">
-            ${pInjections.length > 0 ? `✓ ${pInjections.length} توريد موثق` : 'رأس مال معتمد'}
-          </span>
+        <td class="py-3.5 px-4 font-mono font-black text-slate-900 dark:text-white text-xs">
+          ${formatCapitalMoney(paidCap)} ج.س
         </td>
 
-        <td class="py-3.5 px-4 text-slate-600 dark:text-slate-300 text-[11px] font-medium">
-          ${p.notes || `نسبة ربح ثابتة ${sharesCount}/13`}
+        <td class="py-3.5 px-4 font-mono font-black text-emerald-700 dark:text-emerald-400 text-xs bg-emerald-50/30 dark:bg-emerald-950/20">
+          +${formatCapitalMoney(cropSalesShare)} ج.س
+        </td>
+
+        <td class="py-3.5 px-4 font-mono font-black text-indigo-700 dark:text-indigo-400 text-xs">
+          ${formatCapitalMoney(totalWithSales)} ج.س
+        </td>
+
+        <td class="py-3.5 px-4 font-mono font-black text-amber-700 dark:text-amber-400 text-xs">
+          ${formatCapitalMoney(profitsReceived)} ج.س
         </td>
 
         <td class="py-3.5 px-4 text-left">
           <div class="flex items-center gap-1.5">
-            <button onclick="openAddCapitalInjectionModal('${p.id}')" class="px-2.5 py-1 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 border border-purple-300 text-purple-800 dark:text-purple-300 rounded-lg text-xs font-bold transition flex items-center gap-1" title="تسجيل ضخ وتوريد رأس مال من هذا الشريك">
-              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-              <span>ضخ مبلغ</span>
+            <button onclick="openDistributeProfitsModal()" class="px-2 py-1 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 border border-teal-300 text-teal-800 dark:text-teal-300 rounded-lg text-[11px] font-bold transition flex items-center gap-1" title="توزيع أرباح">
+              <i data-lucide="coins" class="w-3 h-3"></i>
+              <span>أرباح</span>
             </button>
-            <button onclick="openPartnerStatementModal('${p.id}')" class="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 dark:text-emerald-300 rounded-lg text-xs font-bold transition flex items-center gap-1" title="عرض كشف الحساب وتصفية المستحقات">
+            <button onclick="openAddCapitalInjectionModal('${p.id}')" class="px-2 py-1 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 border border-purple-300 text-purple-800 dark:text-purple-300 rounded-lg text-[11px] font-bold transition flex items-center gap-1" title="ضخ مبلغ">
+              <i data-lucide="plus-circle" class="w-3 h-3"></i>
+              <span>ضخ</span>
+            </button>
+            <button onclick="openPartnerStatementModal('${p.id}')" class="p-1 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-lg transition" title="كشف الحساب">
               <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-              <span>كشف المستحقات</span>
             </button>
-            <button onclick="openEditPartnerModal('${p.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-slate-600 transition" title="تعديل رأس المال المدفوع والبيانات">
-              <i data-lucide="edit-3" class="w-4 h-4"></i>
+            <button onclick="openEditPartnerModal('${p.id}')" class="p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-slate-600 transition" title="تعديل">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
             </button>
           </div>
         </td>
@@ -12451,7 +12615,7 @@ function renderPartnersSection() {
     if (!state.capitalInjections || state.capitalInjections.length === 0) {
       injectionsTableBody.innerHTML = `
         <tr>
-          <td colspan="8" class="text-center py-6 text-slate-400 text-xs font-medium">لا توجد عمليات ضخ رأس مال مسجلة بعد. اضغط "إضافة توريد رأس مال" للأعلى للبدء.</td>
+          <td colspan="8" class="text-center py-6 text-slate-400 text-xs font-medium">لا توجد عمليات ضخ رأس مال مسجلة بعد. اضغط "تسجيل ضخ رأس مال" للبدء.</td>
         </tr>
       `;
     } else {
@@ -12489,9 +12653,6 @@ function renderPartnersSection() {
             <td class="py-3 px-4 text-slate-500">
               ${inj.loggedBy || 'المدير المالي'}
             </td>
-            <td class="py-3 px-4 text-slate-400 text-[11px]">
-              ${inj.notes || '-'}
-            </td>
             <td class="py-3 px-4 text-left">
               <div class="flex items-center gap-1">
                 <button onclick="openEditCapitalInjectionModal('${inj.id}')" class="p-1 text-slate-500 hover:text-emerald-600 transition" title="تعديل التوريد">
@@ -12508,10 +12669,375 @@ function renderPartnersSection() {
     }
   }
 
+  // Render Profit Distributions Table
+  if (profitDistTableBody) {
+    if (!state.profitDistributions || state.profitDistributions.length === 0) {
+      profitDistTableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-6 text-slate-400 text-xs font-medium">لم يتم تسجيل أي توزيعات أرباح بعد. اضغط "توزيع دفعة أرباح جديدة" بالأعلى لتوزيع الأرباح على الشركاء.</td>
+        </tr>
+      `;
+    } else {
+      const sortedDists = [...state.profitDistributions].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+      profitDistTableBody.innerHTML = sortedDists.map(dist => {
+        const amt = parseFloat(dist.totalAmount) || 0;
+        const perShare = parseFloat(dist.perShareAmount) || Math.round(amt / 13);
+
+        return `
+          <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-3 px-4 font-mono font-bold text-slate-700 dark:text-slate-300">${dist.date || '-'}</td>
+            <td class="py-3 px-4 font-mono font-black text-amber-700 dark:text-amber-400 text-sm">
+              ${amt.toLocaleString()} ج.س
+            </td>
+            <td class="py-3 px-4 font-mono font-bold text-teal-700 dark:text-teal-300">
+              ${perShare.toLocaleString()} ج.س/سهم
+            </td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                ${dist.paymentMethod || 'تحويل بنكك'}
+              </span>
+            </td>
+            <td class="py-3 px-4 font-medium text-slate-700 dark:text-slate-300 max-w-xs">
+              ${dist.notes || 'توزيع أرباح للشركاء'}
+            </td>
+            <td class="py-3 px-4 text-slate-500">
+              ${dist.loggedBy || 'المدير المالي'}
+            </td>
+            <td class="py-3 px-4 text-left">
+              <div class="flex items-center gap-1.5">
+                <button onclick="viewProfitDistributionDetails('${dist.id}')" class="px-2 py-1 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 border border-teal-300 text-teal-800 dark:text-teal-300 rounded-lg text-xs font-bold transition flex items-center gap-1" title="عرض تفاصيل التوزيع لكل شريك">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                  <span>التفصيل</span>
+                </button>
+                <button onclick="deleteProfitDistribution('${dist.id}')" class="p-1 text-slate-400 hover:text-rose-600 transition" title="حذف واسترجاع المبلغ للرصيد">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
   if (window.lucide) lucide.createIcons();
 }
 
-// نافذة تسجيل ضخ رأس مال جديد
+// -------------------------------------------------------------
+// محرك ونوافذ توزيع الأرباح للشركاء (Profit Distribution System)
+// -------------------------------------------------------------
+
+function openDistributeProfitsModal() {
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
+    showToast('⚠️ عفواً، حسابك للاطلاع فقط ولا يملك صلاحية توزيع الأرباح.', 'warning');
+    return;
+  }
+
+  recalculatePartnerCapital();
+  const m = calculateMetrics();
+  const availableBalance = m.remainingTreasuryBalance || 0;
+  const today = new Date().toISOString().split('T')[0];
+
+  const html = `
+    <div class="p-6 max-w-lg mx-auto text-right max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 flex items-center justify-center font-black text-xl shadow-sm">
+            💰
+          </span>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">توزيع أرباح للشركاء (نظام الـ 13 سهماً)</h3>
+            <p class="text-xs text-slate-500">يخصم المبلغ فوراً من الرصيد المتبقي بالخزينة ويوزع بالتناسب على الأسهم</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+      </div>
+
+      <!-- بطاقة بيان السيولة المتاحة بالخزينة -->
+      <div class="mb-4 p-3 bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-950/40 dark:to-emerald-950/40 rounded-2xl border border-teal-200 dark:border-teal-800 flex justify-between items-center text-xs">
+        <div>
+          <span class="text-slate-600 dark:text-slate-300 font-bold block">الرصيد المتبقي (السيولة بالخزينة):</span>
+          <span class="text-[10px] text-slate-400">صافي المتاح للصرف وتوزيع الأرباح</span>
+        </div>
+        <div class="text-left">
+          <strong id="dist-modal-avail-balance" class="font-mono text-base font-black text-emerald-700 dark:text-emerald-300">${Math.round(availableBalance).toLocaleString()} ج.س</strong>
+        </div>
+      </div>
+
+      <form onsubmit="handleSaveProfitDistribution(event)" class="space-y-4 text-xs">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">تاريخ توزيع الأرباح:</label>
+            <input type="date" id="dist-date" value="${today}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold font-mono" required>
+          </div>
+
+          <div>
+            <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">طريقة التحويل / الصرف:</label>
+            <select id="dist-method" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="تحويل بنكك">تحويل بنكك (تطبيق بنك الخرطوم)</option>
+              <option value="نقداً كاش">نقداً كاش (من الخزينة)</option>
+              <option value="شيك مصرفي">شيك مصرفي معتمد</option>
+              <option value="فوري (بنك فيصل)">تطبيق فوري (بنك فيصل)</option>
+              <option value="أوكاش">أوكاش (O-Kash)</option>
+              <option value="أخرى">أخرى</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">
+            إجمالي مبلغ الأرباح المراد توزيعه (ج.س):
+          </label>
+          <input type="number" id="dist-amount" min="1" step="any" placeholder="مثال: 13000000" oninput="onDistributeAmountChange()" class="w-full p-3 rounded-xl border border-teal-400 dark:border-teal-700 bg-white dark:bg-slate-800 font-black font-mono text-teal-800 dark:text-teal-300 text-base" required>
+        </div>
+
+        <!-- أزرار سريعة للمبالغ الشائعة -->
+        <div class="flex flex-wrap gap-1.5">
+          <span class="text-[10px] text-slate-400 font-bold py-1">مبالغ سريعة:</span>
+          <button type="button" onclick="setDistributeQuickAmount(13000000)" class="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-teal-50 hover:text-teal-700 rounded-lg text-[11px] font-bold transition">13 مليون</button>
+          <button type="button" onclick="setDistributeQuickAmount(26000000)" class="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-teal-50 hover:text-teal-700 rounded-lg text-[11px] font-bold transition">26 مليون</button>
+          <button type="button" onclick="setDistributeQuickAmount(39000000)" class="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-teal-50 hover:text-teal-700 rounded-lg text-[11px] font-bold transition">39 مليون</button>
+          <button type="button" onclick="setDistributeQuickAmount(52000000)" class="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-teal-50 hover:text-teal-700 rounded-lg text-[11px] font-bold transition">52 مليون</button>
+          <button type="button" onclick="setDistributeQuickAmount(65000000)" class="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-teal-50 hover:text-teal-700 rounded-lg text-[11px] font-bold transition">65 مليون</button>
+        </div>
+
+        <!-- المعاينة الحية لتوزيع الأرباح على الأسهم والشركاء -->
+        <div id="dist-preview-box" class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+          <div class="flex justify-between items-center font-bold">
+            <span class="text-slate-600 dark:text-slate-400">نصيب السهم الواحد (1 من 13):</span>
+            <span id="dist-per-share" class="font-mono font-black text-teal-700 dark:text-teal-300">0 ج.س</span>
+          </div>
+
+          <div class="flex justify-between items-center font-bold">
+            <span class="text-slate-600 dark:text-slate-400">نصيب صاحب السهمين (عمرو، حسن، ابوبكر، هاجر):</span>
+            <span id="dist-two-shares" class="font-mono font-black text-emerald-700 dark:text-emerald-300">0 ج.س (15.38%)</span>
+          </div>
+
+          <div class="flex justify-between items-center font-bold">
+            <span class="text-slate-600 dark:text-slate-400">نصيب صاحب السهم الواحد (الجعلي، هديل، ايناس، رزاز، عناب):</span>
+            <span id="dist-one-share" class="font-mono font-black text-blue-700 dark:text-blue-300">0 ج.س (7.69%)</span>
+          </div>
+
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center font-black">
+            <span class="text-purple-800 dark:text-purple-300">الرصيد المتبقي بالخزينة بعد التوزيع:</span>
+            <span id="dist-remaining-preview" class="font-mono text-purple-700 dark:text-purple-300">${Math.round(availableBalance).toLocaleString()} ج.س</span>
+          </div>
+
+          <div id="dist-warning-box" class="hidden p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 font-bold text-[11px] flex items-center gap-1.5">
+            <span>⚠️ تنبيه: المبلغ المطلوب توزيعه يتجاوز الرصيد المتبقي المتاح بالخزينة!</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">البيان / ملاحظات التوزيع:</label>
+          <input type="text" id="dist-notes" placeholder="مثال: دفعة أولى من أرباح حصاد محصول التسالي" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium">
+        </div>
+
+        <div class="p-3 bg-teal-50/70 dark:bg-teal-950/30 rounded-xl border border-teal-200 dark:border-teal-800 text-[11px] text-teal-900 dark:text-teal-200 flex items-center gap-2">
+          <span>ℹ️</span>
+          <span>سيتم خصم إجمالي المبلغ فوراً من الرصيد المتبقي وتحديث كشف حساب كل شريك ومحفظته بالأرباح المستلمة.</span>
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+          <button type="submit" class="flex-1 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-black text-sm shadow-md shadow-teal-600/20 active:scale-95 transition flex items-center justify-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>تأكيد واعتماد توزيع الأرباح</span>
+          </button>
+          <button type="button" onclick="closeModal()" class="px-5 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-xs transition">
+            إلغاء
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  openModal(html);
+  if (window.lucide) lucide.createIcons();
+}
+
+function setDistributeQuickAmount(amt) {
+  const input = document.getElementById('dist-amount');
+  if (input) {
+    input.value = amt;
+    onDistributeAmountChange();
+  }
+}
+
+function onDistributeAmountChange() {
+  const input = document.getElementById('dist-amount');
+  if (!input) return;
+  const amt = parseFloat(input.value) || 0;
+  const perShare = Math.round(amt / 13);
+  const twoShares = perShare * 2;
+  const oneShare = perShare * 1;
+
+  const m = calculateMetrics();
+  const availableBalance = m.remainingTreasuryBalance || 0;
+  const remAfter = availableBalance - amt;
+
+  const elPerShare = document.getElementById('dist-per-share');
+  const elTwoShares = document.getElementById('dist-two-shares');
+  const elOneShare = document.getElementById('dist-one-share');
+  const elRem = document.getElementById('dist-remaining-preview');
+  const elWarning = document.getElementById('dist-warning-box');
+
+  if (elPerShare) elPerShare.innerText = `${perShare.toLocaleString()} ج.س`;
+  if (elTwoShares) elTwoShares.innerText = `${twoShares.toLocaleString()} ج.س (15.38%)`;
+  if (elOneShare) elOneShare.innerText = `${oneShare.toLocaleString()} ج.س (7.69%)`;
+  if (elRem) {
+    elRem.innerText = `${Math.round(remAfter).toLocaleString()} ج.س`;
+    if (remAfter < 0) {
+      elRem.className = 'font-mono font-black text-rose-600';
+    } else {
+      elRem.className = 'font-mono text-purple-700 dark:text-purple-300 font-black';
+    }
+  }
+  if (elWarning) {
+    if (amt > availableBalance) {
+      elWarning.classList.remove('hidden');
+    } else {
+      elWarning.classList.add('hidden');
+    }
+  }
+}
+
+function handleSaveProfitDistribution(event) {
+  event.preventDefault();
+
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
+    showToast('⚠️ عفواً، حسابك للاطلاع فقط ولا يملك صلاحية توزيع الأرباح.', 'warning');
+    return;
+  }
+
+  const amtInput = document.getElementById('dist-amount');
+  const totalAmount = parseFloat(amtInput ? amtInput.value : 0) || 0;
+  if (totalAmount <= 0) {
+    showToast('⚠️ يرجى إدخال مبلغ صحيح أكبر من الصفر', 'warning');
+    return;
+  }
+
+  const date = document.getElementById('dist-date').value;
+  const paymentMethod = document.getElementById('dist-method').value;
+  const notes = document.getElementById('dist-notes').value.trim();
+  const perShareAmount = Math.round(totalAmount / 13);
+  const loggedBy = currentUser ? currentUser.name : "مصطفى الجعلي";
+
+  if (!state.profitDistributions) state.profitDistributions = [];
+  if (!state.partners) state.partners = DEFAULT_DATA.partners ? JSON.parse(JSON.stringify(DEFAULT_DATA.partners)) : [];
+
+  const newDist = {
+    id: `pdist-${Date.now()}`,
+    date: date,
+    totalAmount: totalAmount,
+    perShareAmount: perShareAmount,
+    paymentMethod: paymentMethod,
+    notes: notes || 'توزيع أرباح للشركاء (13 سهماً)',
+    loggedBy: loggedBy,
+    createdAt: new Date().toISOString(),
+    allocations: state.partners.map(p => {
+      const sh = parseFloat(p.shares) || 1;
+      return {
+        partnerId: p.id,
+        partnerName: p.fullName || p.name,
+        shares: sh,
+        amount: Math.round(perShareAmount * sh)
+      };
+    })
+  };
+
+  state.profitDistributions.unshift(newDist);
+
+  logAudit("توزيع أرباح", `توزيع أرباح للشركاء بمبلغ ${totalAmount.toLocaleString()} ج.س (${paymentMethod}) بنظام الـ 13 سهماً بواقع ${perShareAmount.toLocaleString()} ج.س لكل سهم [خصم من الرصيد المتبقي]`, "الشركاء والأسهم");
+
+  saveData(`✓ تم توزيع أرباح بمبلغ (${totalAmount.toLocaleString()} ج.س) وخصمه من الرصيد المتبقي وتوزيعه على 13 سهماً بنجاح!`);
+  closeModal();
+
+  if (typeof addSystemNotification === 'function') {
+    addSystemNotification({
+      title: '💰 توزيع أرباح للشركاء',
+      desc: `تم توزيع أرباح بمبلغ ${totalAmount.toLocaleString()} ج.س وخصمها من الرصيد المتبقي بنظام الـ 13 سهماً`,
+      category: 'finance',
+      targetSection: 'section-partners'
+    });
+  }
+}
+
+function deleteProfitDistribution(distId) {
+  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
+    showToast('⚠️ عفواً، حسابك للاطلاع فقط ولا يملك صلاحية الحذف.', 'warning');
+    return;
+  }
+
+  const dist = (state.profitDistributions || []).find(d => d.id === distId);
+  if (!dist) return;
+
+  if (confirm(`هل أنت متأكد من حذف قيد توزيع الأرباح بتاريخ (${dist.date}) بمبلغ (${dist.totalAmount.toLocaleString()} ج.س) واستعادة المبلغ إلى الرصيد المتبقي بالخزينة؟`)) {
+    state.profitDistributions = (state.profitDistributions || []).filter(d => d.id !== distId);
+    logAudit("حذف توزيع أرباح", `حذف قيد توزيع أرباح بمبلغ ${dist.totalAmount.toLocaleString()} ج.س واستعادة المبلغ للرصيد المتبقي بالخزينة`, "الشركاء والأسهم");
+    saveData(`✓ تم حذف قيد التوزيع واستعادة (${dist.totalAmount.toLocaleString()} ج.س) إلى الرصيد المتبقي بالخزينة بنجاح!`);
+  }
+}
+
+function viewProfitDistributionDetails(distId) {
+  const dist = (state.profitDistributions || []).find(d => d.id === distId);
+  if (!dist) return;
+
+  const allocationsHtml = (dist.allocations || []).map(a => {
+    const isDouble = a.shares === 2;
+    return `
+      <div class="flex justify-between items-center p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg ${isDouble ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300' : 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300'} font-bold flex items-center justify-center">
+            ${a.partnerName.charAt(0)}
+          </span>
+          <div>
+            <strong class="text-slate-900 dark:text-white">${a.partnerName}</strong>
+            <span class="text-[10px] text-slate-400 block">${a.shares} أسهم (${isDouble ? '15.38%' : '7.69%'})</span>
+          </div>
+        </div>
+        <div class="text-left">
+          <span class="font-mono font-black text-teal-700 dark:text-teal-300 text-sm">${parseFloat(a.amount).toLocaleString()} ج.س</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const html = `
+    <div class="p-6 max-w-md mx-auto text-right">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-9 h-9 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 flex items-center justify-center font-bold text-base shadow-sm">💰</span>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">تفصيل توزيع الأرباح للشركاء</h3>
+            <p class="text-xs text-slate-500">تاريخ: ${dist.date} • الإجمالي: ${parseFloat(dist.totalAmount).toLocaleString()} ج.س</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
+      </div>
+
+      <div class="mb-4 p-3 bg-teal-50 dark:bg-teal-950/40 rounded-xl border border-teal-200 dark:border-teal-800 text-xs space-y-1">
+        <div class="flex justify-between"><span class="text-slate-500">طريقة الصرف:</span><strong class="text-slate-800 dark:text-slate-200">${dist.paymentMethod || 'تحويل بنكك'}</strong></div>
+        <div class="flex justify-between"><span class="text-slate-500">نصيب السهم:</span><strong class="font-mono text-teal-700 dark:text-teal-300">${parseFloat(dist.perShareAmount).toLocaleString()} ج.س</strong></div>
+        <div class="flex justify-between"><span class="text-slate-500">الملاحظات:</span><span class="text-slate-700 dark:text-slate-300">${dist.notes || '-'}</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">الموثق:</span><span class="text-slate-700 dark:text-slate-300">${dist.loggedBy || 'المدير المالي'}</span></div>
+      </div>
+
+      <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+        ${allocationsHtml}
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+        <button onclick="closeModal()" class="px-5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-xs transition">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  `;
+
+  openModal(html);
+}
+
 function openAddCapitalInjectionModal(partnerId = null) {
   if (!state.partners || state.partners.length === 0) {
     state.partners = DEFAULT_DATA.partners ? JSON.parse(JSON.stringify(DEFAULT_DATA.partners)) : [];
@@ -12994,6 +13520,25 @@ function openPartnerStatementModal(partnerId) {
           2. <strong>تخصيص الموسم القادم (500 مليون):</strong> يتم حجز حصة الشريك (${partnerNextSeasonShare.toLocaleString()} ج.س) في رأسمال الموسم الجديد 2027 كتمويل ذاتي.<br>
           3. <strong>الأرباح النقدية الفورية:</strong> يُوزع الفائض الصافي نقداً على الشركاء حسب النسبة الثابتة (${percent}%).
         </p>
+      </div>
+
+      <!-- بطاقات حصة المبيعات والأرباح المستلمة للشريك -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <div class="p-3 bg-teal-50 dark:bg-teal-950/40 rounded-xl border border-teal-200 dark:border-teal-800 flex justify-between items-center text-xs">
+          <div>
+            <span class="text-teal-900 dark:text-teal-200 font-bold block">🌾 حصة مبيعات المحاصيل المضافة لرأس المال:</span>
+            <span class="text-[10px] text-teal-600 dark:text-teal-400">موزعة بنظام الـ 13 سهماً (${sharesCount} أسهم)</span>
+          </div>
+          <strong class="font-mono text-base font-black text-teal-800 dark:text-teal-200">+${formatCapitalMoney(p.cropSalesShare || 0)} ج.س</strong>
+        </div>
+
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 flex justify-between items-center text-xs">
+          <div>
+            <span class="text-amber-900 dark:text-amber-200 font-bold block">💰 أرباح نقدية مستلمة فعلياً حتى تاريخه:</span>
+            <span class="text-[10px] text-amber-600 dark:text-amber-400">مخصومة من الرصيد المتبقي بالخزينة</span>
+          </div>
+          <strong class="font-mono text-base font-black text-amber-800 dark:text-amber-200">${formatCapitalMoney(p.totalProfitsReceived || 0)} ج.س</strong>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
@@ -17341,7 +17886,7 @@ function saveCropSale(e, saleId) {
   }
 
   recalculateInventoryTotals();
-  saveData(`✓ تم حفظ صفقة البيع بنجاح، وخصم (${bags} جوال) من المخزون، وتحديث المتبقي (${remainingAmount.toLocaleString()} ج.س)`);
+  saveData(`✓ تم حفظ صفقة البيع بمبلغ (${totalAmount.toLocaleString()} ج.س) وإضافتها لرأس المال وتوزيعها على 13 سهماً للشركاء بنجاح!`);
   closeModal();
 }
 
