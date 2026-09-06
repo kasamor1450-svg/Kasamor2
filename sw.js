@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v25.0-grocery-cloud-sync-and-items
-const CACHE_NAME = 'mustagro-v25.0-grocery-cloud-sync-and-items';
+// Cache Version: mustagro-v26.0-negative-wage-deficit-alerts
+const CACHE_NAME = 'mustagro-v26.0-negative-wage-deficit-alerts';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

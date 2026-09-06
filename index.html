@@ -11058,9 +11058,27 @@ function autoUpdateLaborWages() {
     const generalDeductions = parseFloat(w.deductionsAmount) || 0;
     const groceryDeductions = parseFloat(w.groceryTotal) || 0;
     
+    // إجمالي الأجر المكتسب
+    w.grossEarnings = Math.round(months * salary) + overtime;
+    // إجمالي الاستقطاعات والمسحوبات الآجلة
     w.totalDeductions = generalDeductions + groceryDeductions;
-    w.totalDue = Math.max(0, Math.round(months * salary) + overtime - w.totalDeductions);
-    w.status = (w.totalPaid || 0) >= w.totalDue ? 'paid' : ((w.totalPaid || 0) > 0 ? 'partial' : 'pending');
+    // صافي المستحق المحاسبي الدقيق: يظهر بالسالب إذا تجاوزت الاستقطاعات والمسحوبات الأجر المكتسب
+    w.totalDue = w.grossEarnings - w.totalDeductions;
+    
+    const paid = parseFloat(w.totalPaid) || 0;
+    // صافي الرصيد المتبقي للعامل (أو الدين عليه بالسالب إذا سحب أو صُرف له أكثر من مستحقاته)
+    w.netBalance = w.totalDue - paid;
+    
+    // تحديد الحالة المحاسبية للعامل مع دعم الرصيد السالب
+    if (w.netBalance < 0) {
+      w.status = 'overdrawn'; // رصيد سالب - تجاوز المستحقات ومدين للمشروع
+    } else if (w.netBalance === 0) {
+      w.status = 'paid'; // خالص بالكامل
+    } else if (paid > 0) {
+      w.status = 'partial'; // مدفوع جزئياً
+    } else {
+      w.status = 'pending'; // مستحق بانتظار الصرف
+    }
   });
 }
 
@@ -12909,8 +12927,11 @@ function openDisburseWageModal(preselectedWorkerId = null) {
   const today = new Date().toISOString().split('T')[0];
 
   const workersOptions = state.labor.map(w => {
-    const wBal = Math.max(0, (w.totalDue || 0) - (w.totalPaid || 0));
-    return `<option value="${w.id}" ${w.id === activeWorkerId ? 'selected' : ''}>${w.name} (${w.role}) - متبقي: ${wBal.toLocaleString()} ج.س</option>`;
+    const rawBal = (w.totalDue || 0) - (w.totalPaid || 0);
+    const balText = rawBal < 0 
+      ? `⚠️ مدين بالسالب: -${Math.abs(rawBal).toLocaleString()} ج.س` 
+      : (rawBal === 0 ? 'خالص (0 ج.س)' : `متبقي: ${rawBal.toLocaleString()} ج.س`);
+    return `<option value="${w.id}" ${w.id === activeWorkerId ? 'selected' : ''}>${w.name} (${w.role}) [${balText}]</option>`;
   }).join('');
 
   const modalHTML = `
@@ -12952,7 +12973,7 @@ function openDisburseWageModal(preselectedWorkerId = null) {
           </div>
         </div>
 
-        <!-- 2. بطاقة رصيد العامل الحية -->
+        <!-- 2. بطاقة رصيد العامل الحية مع توضيح السالب والتنبيه -->
         <div id="disburse-worker-card" class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-teal-200 dark:border-teal-900 text-[11px] space-y-1.5">
           <div class="flex justify-between items-center font-bold">
             <span class="text-slate-500">الراتب الشهري المتفق عليه:</span>
@@ -12960,16 +12981,25 @@ function openDisburseWageModal(preselectedWorkerId = null) {
           </div>
           <div class="flex justify-between items-center font-bold">
             <span class="text-slate-500">صافي المستحق حتى تاريخه:</span>
-            <span class="font-mono text-slate-900 dark:text-white">${(currentWorker.totalDue || 0).toLocaleString()} ج.س</span>
+            <span class="font-mono ${(currentWorker.totalDue || 0) < 0 ? 'text-rose-600 font-black' : 'text-slate-900 dark:text-white'}">${(currentWorker.totalDue || 0) < 0 ? '-' + Math.abs(currentWorker.totalDue).toLocaleString() : (currentWorker.totalDue || 0).toLocaleString()} ج.س</span>
           </div>
           <div class="flex justify-between items-center font-bold">
             <span class="text-slate-500">إجمالي المدفوع سابقاً:</span>
             <span class="font-mono text-emerald-600">${(currentWorker.totalPaid || 0).toLocaleString()} ج.س</span>
           </div>
           <div class="flex justify-between items-center font-black pt-1 border-t border-slate-200 dark:border-slate-700 text-xs">
-            <span class="text-rose-600 dark:text-rose-400">المبلغ المتبقي المستحق:</span>
-            <span id="disburse-balance-badge" class="font-mono text-rose-600 dark:text-rose-400">${balance.toLocaleString()} ج.س</span>
+            <span class="${((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)) < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}">المبلغ المتبقي المستحق:</span>
+            <span id="disburse-balance-badge" class="font-mono font-black ${((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)) < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600'}">
+              ${((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)) < 0 
+                ? `-${Math.abs((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)).toLocaleString()} ج.س (⚠️ مدين للمشروع)` 
+                : `${Math.max(0, (currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)).toLocaleString()} ج.س`}
+            </span>
           </div>
+          ${((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)) < 0 ? `
+            <div class="p-2 bg-rose-50 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-200 text-[10px] font-bold mt-1">
+              ⚠️ تنبيه: مسحوبات أو منصرفات هذا العامل تجاوزت إجمالي مستحقاته. رصيده حالياً سالب (مدين للمشروع). أي صرف إضافي سيزيد من عجز العامل.
+            </div>
+          ` : ''}
         </div>
 
         <!-- 3. تاريخ الصرف والمبلغ المصروف -->
@@ -13048,7 +13078,8 @@ function onDisburseWorkerSelectChange() {
   const worker = (state.labor || []).find(w => w.id === workerId);
   if (!worker) return;
 
-  const balance = Math.max(0, (worker.totalDue || 0) - (worker.totalPaid || 0));
+  const rawBalance = (worker.totalDue || 0) - (worker.totalPaid || 0);
+  const balance = Math.max(0, rawBalance);
   const card = document.getElementById('disburse-worker-card');
   const amountInput = document.getElementById('disburse-amount');
 
@@ -13060,16 +13091,25 @@ function onDisburseWorkerSelectChange() {
       </div>
       <div class="flex justify-between items-center font-bold">
         <span class="text-slate-500">صافي المستحق حتى تاريخه:</span>
-        <span class="font-mono text-slate-900 dark:text-white">${(worker.totalDue || 0).toLocaleString()} ج.س</span>
+        <span class="font-mono ${(worker.totalDue || 0) < 0 ? 'text-rose-600 font-black' : 'text-slate-900 dark:text-white'}">${(worker.totalDue || 0) < 0 ? '-' + Math.abs(worker.totalDue).toLocaleString() : (worker.totalDue || 0).toLocaleString()} ج.س</span>
       </div>
       <div class="flex justify-between items-center font-bold">
         <span class="text-slate-500">إجمالي المدفوع سابقاً:</span>
         <span class="font-mono text-emerald-600">${(worker.totalPaid || 0).toLocaleString()} ج.س</span>
       </div>
       <div class="flex justify-between items-center font-black pt-1 border-t border-slate-200 dark:border-slate-700 text-xs">
-        <span class="text-rose-600 dark:text-rose-400">المبلغ المتبقي المستحق:</span>
-        <span id="disburse-balance-badge" class="font-mono text-rose-600 dark:text-rose-400">${balance.toLocaleString()} ج.س</span>
+        <span class="${rawBalance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}">المبلغ المتبقي المستحق:</span>
+        <span id="disburse-balance-badge" class="font-mono font-black ${rawBalance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600'}">
+          ${rawBalance < 0 
+            ? `-${Math.abs(rawBalance).toLocaleString()} ج.س (⚠️ مدين للمشروع)` 
+            : `${balance.toLocaleString()} ج.س`}
+        </span>
       </div>
+      ${rawBalance < 0 ? `
+        <div class="p-2 bg-rose-50 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-200 text-[10px] font-bold mt-1">
+          ⚠️ تنبيه: مسحوبات أو منصرفات هذا العامل تجاوزت إجمالي مستحقاته. رصيده حالياً سالب (مدين للمشروع). أي صرف إضافي سيزيد من عجز العامل.
+        </div>
+      ` : ''}
     `;
   }
 
@@ -13106,6 +13146,29 @@ function onDisburseAmountInput() {
     elPreview.className = 'font-mono font-black text-rose-600';
   } else {
     elPreview.className = 'font-mono font-black text-emerald-700 dark:text-emerald-400';
+  }
+
+  // فحص ما إذا كان المبلغ المنصرف سيتجاوز صافي مستحق العامل
+  const workerId = document.getElementById('disburse-worker-id')?.value;
+  const worker = (state.labor || []).find(w => w.id === workerId);
+  let disburseLimitAlert = document.getElementById('disburse-amount-limit-alert');
+  if (worker) {
+    const currentDue = parseFloat(worker.totalDue) || 0;
+    const currentPaid = parseFloat(worker.totalPaid) || 0;
+    const remainingBefore = currentDue - currentPaid;
+    const remainingAfter = remainingBefore - amt;
+    
+    if (remainingAfter < 0) {
+      if (!disburseLimitAlert) {
+        disburseLimitAlert = document.createElement('div');
+        disburseLimitAlert.id = 'disburse-amount-limit-alert';
+        amtInput.parentElement.parentElement.insertAdjacentElement('afterend', disburseLimitAlert);
+      }
+      disburseLimitAlert.className = "p-2.5 bg-rose-50 dark:bg-rose-950/80 border border-rose-300 dark:border-rose-700 rounded-xl text-rose-800 dark:text-rose-200 text-xs font-bold mt-2";
+      disburseLimitAlert.innerHTML = `⚠️ تنبيه: المبلغ المنصرف (${amt.toLocaleString()} ج.س) سيتجاوز صافي مستحقات العامل (${Math.max(0, remainingBefore).toLocaleString()} ج.س)! سيصبح رصيد العامل سالباً: <strong class="text-rose-600 dark:text-rose-300 font-mono font-black">-${Math.abs(remainingAfter).toLocaleString()} ج.س</strong> (مدين للمشروع).`;
+    } else if (disburseLimitAlert) {
+      disburseLimitAlert.remove();
+    }
   }
 }
 
@@ -13198,22 +13261,21 @@ function renderLaborSection() {
 
   autoUpdateLaborWages();
 
+  // فحص العمال الذين تجاوزت مسحوباتهم أو المنصرف لهم إجمالي مستحقاتهم (الأرصدة السالبة)
+  const overdrawnWorkers = state.labor.filter(w => ((parseFloat(w.netBalance) < 0) || (parseFloat(w.totalDue) < 0)));
+  const totalDebtsOwedByWorkers = state.labor.reduce((sum, w) => {
+    const bal = (parseFloat(w.totalDue) || 0) - (parseFloat(w.totalPaid) || 0);
+    return sum + (bal < 0 ? Math.abs(bal) : 0);
+  }, 0);
+
   // تحديث بطاقات المؤشرات الأربعة أعلى مسير الرواتب
   const totalDueSum = state.labor.reduce((sum, w) => sum + (parseFloat(w.totalDue) || 0), 0);
   const totalPaidSum = state.labor.reduce((sum, w) => sum + (parseFloat(w.totalPaid) || 0), 0);
   
-  // الاحتساب المحاسبي الصحيح: صافي المتبقي للعمالة هو مجموع التزامات ومستحقات المزرعة المتبقية لكل عامل
-  const totalBalanceSum = state.labor.reduce((sum, w) => {
-    const due = parseFloat(w.totalDue) || 0;
-    const paid = parseFloat(w.totalPaid) || 0;
-    return sum + Math.max(0, due - paid);
-  }, 0);
-
-  // إجمالي السلفيات والمبالغ المسددة مقدماً فوق المستحق
-  const totalAdvancesSum = state.labor.reduce((sum, w) => {
-    const due = parseFloat(w.totalDue) || 0;
-    const paid = parseFloat(w.totalPaid) || 0;
-    return sum + Math.max(0, paid - due);
+  // الاحتساب المحاسبي: صافي المتبقي مستحق الدفع للعمالة (الموجب فقط)
+  const totalBalanceDueToWorkers = state.labor.reduce((sum, w) => {
+    const bal = (parseFloat(w.totalDue) || 0) - (parseFloat(w.totalPaid) || 0);
+    return sum + Math.max(0, bal);
   }, 0);
 
   const activeCount = state.labor.length;
@@ -13227,12 +13289,10 @@ function renderLaborSection() {
   const currSymbol = (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en' ? 'SDG' : 'ج.س');
   if (dueStat) dueStat.textContent = Math.round(totalDueSum).toLocaleString() + ' ' + currSymbol;
   if (paidStat) paidStat.textContent = Math.round(totalPaidSum).toLocaleString() + ' ' + currSymbol;
-  if (balStat) balStat.textContent = Math.round(totalBalanceSum).toLocaleString() + ' ' + currSymbol;
+  if (balStat) balStat.textContent = Math.round(totalBalanceDueToWorkers).toLocaleString() + ' ' + currSymbol;
   if (balSub) {
-    if (totalAdvancesSum > 0) {
-      balSub.textContent = (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en')
-        ? 'Outstanding liabilities (Advances: ' + Math.round(totalAdvancesSum).toLocaleString() + ' SDG)'
-        : 'مستحقات واجبة السداد (سلفيات مقدمة: ' + Math.round(totalAdvancesSum).toLocaleString() + ' ج.س)';
+    if (totalDebtsOwedByWorkers > 0) {
+      balSub.innerHTML = `<span class="text-rose-600 dark:text-rose-400 font-bold">⚠️ عجز/مسحوبات سالبة على العمال: -${Math.round(totalDebtsOwedByWorkers).toLocaleString()} ${currSymbol}</span>`;
     } else {
       balSub.textContent = (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en')
         ? 'Outstanding balance due to workers'
@@ -13241,16 +13301,60 @@ function renderLaborSection() {
   }
   if (cntStat) cntStat.textContent = activeCount;
 
+  // إظهار أو إخفاء شريط التنبيه البارز في حال وجود أي عامل رصيده بالسالب
+  let overdrawnAlertBanner = document.getElementById('labor-overdrawn-alert-banner');
+  const laborTableWrapper = laborTable.closest('.overflow-x-auto') || laborTable.parentElement;
+  if (laborTableWrapper && laborTableWrapper.parentElement) {
+    if (overdrawnWorkers.length > 0) {
+      if (!overdrawnAlertBanner) {
+        overdrawnAlertBanner = document.createElement('div');
+        overdrawnAlertBanner.id = 'labor-overdrawn-alert-banner';
+        laborTableWrapper.parentElement.insertBefore(overdrawnAlertBanner, laborTableWrapper);
+      }
+      overdrawnAlertBanner.className = "mb-4 p-4 bg-rose-50/90 dark:bg-rose-950/80 border-2 border-rose-400 dark:border-rose-700 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md";
+      overdrawnAlertBanner.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl font-black shrink-0 shadow">⚠️</span>
+          <div>
+            <h4 class="font-black text-rose-900 dark:text-rose-100 text-sm">تنبيه مالي حرج: تجاوز مسحوبات أو منصرفات العمالة لإجمالي مستحقاتهم!</h4>
+            <p class="text-xs text-rose-800 dark:text-rose-200 mt-0.5">
+              يوجد <strong class="font-black text-rose-950 dark:text-rose-100">${overdrawnWorkers.length}</strong> من العمال تجاوزت سحوباتهم من البقالة أو المبالغ المنصرفة لهم رواتبهم المستحقة بإجمالي رصيد سالب قدره: 
+              <span class="font-mono font-black text-rose-700 dark:text-rose-300 text-sm">-${Math.round(totalDebtsOwedByWorkers).toLocaleString()} ${currSymbol}</span> 
+              (ديون مستحقة السداد لإدارة المشروع).
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+          <span class="px-3 py-1 rounded-full text-xs font-black bg-rose-600 text-white shadow-sm">أرصدة سالبة 🔴</span>
+        </div>
+      `;
+    } else if (overdrawnAlertBanner) {
+      overdrawnAlertBanner.remove();
+    }
+  }
+
   laborTable.innerHTML = state.labor.map(w => {
     const due = parseFloat(w.totalDue) || 0;
     const paid = parseFloat(w.totalPaid) || 0;
     const balance = due - paid;
+    const isOverdrawn = balance < 0 || due < 0;
+
     let statusHtml = '';
-    if (balance === 0) {
+    if (balance < 0) {
+      const deficit = Math.abs(balance);
+      statusHtml = `
+        <div class="flex flex-col gap-1 items-start">
+          <span class="bg-rose-600 text-white text-[11px] px-2.5 py-1 rounded-full font-black border border-rose-700 shadow-sm flex items-center gap-1">
+            <span>⚠️ مدين:</span>
+            <span class="font-mono">-${deficit.toLocaleString()} ج.س</span>
+          </span>
+          <span class="text-[9px] text-rose-600 dark:text-rose-400 font-bold">
+            ${w.totalDeductions > (w.grossEarnings || 0) ? 'المسحوبات تجاوزت المستحق' : 'المنصرف تجاوز المستحق'}
+          </span>
+        </div>
+      `;
+    } else if (balance === 0) {
       statusHtml = '<span class="badge-completed text-[11px] px-2.5 py-1 rounded-full font-bold">خالص بالكامل</span>';
-    } else if (balance < 0) {
-      const adv = Math.abs(balance);
-      statusHtml = '<span class="badge-completed text-[11px] px-2.5 py-1 rounded-full font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300" title="تم صرف سلفة إضافية على الحساب">خالص بالكامل (سلفة: ' + adv.toLocaleString() + ' ج.س)</span>';
     } else if (paid > 0) {
       statusHtml = '<span class="badge-progress text-[11px] px-2.5 py-1 rounded-full font-bold">متبقي ' + balance.toLocaleString() + ' ج.س</span>';
     } else {
@@ -13267,11 +13371,16 @@ function renderLaborSection() {
       ? `<div class="font-mono font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg inline-block">${w.endDate}</div>`
       : '<span class="text-slate-400 font-semibold text-[11px]">مستمر (طوال الموسم)</span>';
 
+    const rowBgClass = isOverdrawn 
+      ? 'bg-rose-50/60 dark:bg-rose-950/25 border-rose-200 dark:border-rose-900/50'
+      : 'hover:bg-slate-50 dark:hover:bg-slate-800/40 border-slate-100 dark:border-slate-800';
+
     return `
-      <tr class="border-b border-slate-100 dark:border-slate-800 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/40">
+      <tr class="border-b ${rowBgClass} text-xs transition">
         <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
           <div class="flex items-center gap-2">
             <span>👤 ${w.name}</span>
+            ${isOverdrawn ? '<span class="px-1.5 py-0.5 text-[9px] bg-rose-600 text-white font-black rounded shadow-xs">سالب ⚠️</span>' : ''}
           </div>
           <div class="text-[10px] text-slate-400 font-normal mt-0.5">${w.plot ? `الموقع: ${w.plot}` : ''}</div>
         </td>
@@ -13312,9 +13421,17 @@ function renderLaborSection() {
           `}
         </td>
 
-        <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white font-mono text-sm">
-          <div>${(w.totalDue || 0).toLocaleString()} ج.س</div>
-          <span class="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">⚡ صافي بعد خصم البقالة</span>
+        <!-- صافي المستحق بعد خصم البقالة -->
+        <td class="py-3.5 px-4 font-mono">
+          ${due < 0 ? `
+            <div class="font-black text-rose-600 dark:text-rose-400 text-sm">-${Math.abs(due).toLocaleString()} ج.س</div>
+            <span class="inline-flex items-center gap-1 text-[9px] text-rose-700 dark:text-rose-300 font-black bg-rose-100 dark:bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-300 dark:border-rose-800 mt-0.5">
+              ⚠️ مسحوبات فائضة
+            </span>
+          ` : `
+            <div class="font-bold text-slate-900 dark:text-white text-sm">${due.toLocaleString()} ج.س</div>
+            <span class="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">⚡ صافي بعد خصم البقالة</span>
+          `}
         </td>
         <td class="py-3.5 px-4 font-bold text-emerald-700 dark:text-emerald-400 font-mono">${(w.totalPaid || 0).toLocaleString()} ج.س</td>
         
@@ -13519,7 +13636,7 @@ function openEditGroceryTxModal(txId = null, preselectedWorkerId = null) {
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold mb-1">اسم العامل / الموظف المدين:</label>
-            <select id="groc-worker-id" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+            <select id="groc-worker-id" onchange="checkGroceryWorkerLimit('${tx.id}')" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
               ${(state.labor || []).map(w => `
                 <option value="${w.id}" ${(tx.workerId === w.id || tx.workerName === w.name) ? 'selected' : ''}>
                   ${w.name} (${w.role})
@@ -13553,8 +13670,9 @@ function openEditGroceryTxModal(txId = null, preselectedWorkerId = null) {
 
         <div class="p-3.5 bg-amber-50/70 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-900/50">
           <label class="block font-black text-amber-900 dark:text-amber-200 mb-1">💰 إجمالي مبلغ الفاتورة (جنيه سوداني):</label>
-          <input type="number" id="groc-amount" value="${tx.amount || 0}" min="1" class="w-full p-2.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 font-black font-mono text-amber-800 text-sm" required>
+          <input type="number" id="groc-amount" value="${tx.amount || 0}" min="1" oninput="checkGroceryWorkerLimit('${tx.id}')" class="w-full p-2.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 font-black font-mono text-amber-800 text-sm" required>
           <p class="text-[10px] text-amber-700 dark:text-amber-400 mt-1">يُخصم هذا المبلغ تلقائياً من رصيد مستحقات العامل في مسير الرواتب نهاية الموسم.</p>
+          <div id="groc-limit-warning" class="mt-2.5"></div>
         </div>
 
         <div>
@@ -13570,6 +13688,72 @@ function openEditGroceryTxModal(txId = null, preselectedWorkerId = null) {
     </div>
   `;
   openModal(html);
+  setTimeout(() => checkGroceryWorkerLimit(tx.id), 50);
+}
+
+function checkGroceryWorkerLimit(editingTxId = null) {
+  const workerSelect = document.getElementById('groc-worker-id');
+  const amountInput = document.getElementById('groc-amount');
+  const warningContainer = document.getElementById('groc-limit-warning');
+  if (!workerSelect || !amountInput || !warningContainer) return;
+
+  const workerId = workerSelect.value;
+  const worker = (state.labor || []).find(w => w.id === workerId);
+  if (!worker) return;
+
+  const inputAmount = parseFloat(amountInput.value) || 0;
+  
+  // احتساب استحقاقات وأجر العامل المكتسب
+  const months = parseFloat(worker.monthsWorked) || 1;
+  const salary = parseFloat(worker.monthlySalary) || 0;
+  const overtime = parseFloat(worker.overtime) || 0;
+  const grossEarnings = Math.round(months * salary) + overtime;
+
+  // احتساب مسحوبات البقالة الأخرى المسجلة للعامل (عدا هذا القيد في حال التعديل)
+  const otherGrocery = (state.groceryTransactions || [])
+    .filter(t => (t.workerId === workerId || t.workerName === worker.name) && (!editingTxId || t.id !== editingTxId))
+    .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+
+  const generalDeductions = parseFloat(worker.deductionsAmount) || 0;
+  const paidAmount = parseFloat(worker.totalPaid) || 0;
+
+  // إجمالي ما صُرف وسُحب من العامل مع هذا القيد الجديد
+  const newTotalWithdrawn = otherGrocery + generalDeductions + paidAmount + inputAmount;
+  // صافي الرصيد المتبقي للعامل بعد هذا السحب
+  const netRemaining = grossEarnings - newTotalWithdrawn;
+
+  if (netRemaining < 0) {
+    const deficit = Math.abs(netRemaining);
+    warningContainer.innerHTML = `
+      <div class="p-3 bg-rose-50 dark:bg-rose-950/80 border-2 border-rose-400 dark:border-rose-700 rounded-xl text-rose-900 dark:text-rose-100 text-xs shadow-sm">
+        <div class="flex items-center gap-2 font-black text-rose-700 dark:text-rose-300 text-xs mb-1.5">
+          <span class="text-base">⚠️</span>
+          <span>تنبيه مالي حرج: هذا السحب سيتجاوز إجمالي مستحقات العامل!</span>
+        </div>
+        <div class="space-y-1 text-[11px] text-rose-800 dark:text-rose-200">
+          <div class="flex justify-between">
+            <span>• إجمالي مستحقات وأجر العامل:</span>
+            <span class="font-mono font-bold">${grossEarnings.toLocaleString()} ج.س</span>
+          </div>
+          <div class="flex justify-between">
+            <span>• إجمالي المسحوبات مع هذا القيد:</span>
+            <span class="font-mono font-bold">${newTotalWithdrawn.toLocaleString()} ج.س</span>
+          </div>
+          <div class="flex justify-between pt-1 border-t border-rose-300 dark:border-rose-800 font-black text-xs text-rose-700 dark:text-rose-300">
+            <span>🔴 الرصيد المتبقي بالسالب (مدين للمشروع):</span>
+            <span class="font-mono font-black text-sm">-${deficit.toLocaleString()} ج.س</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    warningContainer.innerHTML = `
+      <div class="p-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-900 dark:text-emerald-200 text-[11px] flex justify-between items-center font-bold">
+        <span>✓ صافي رصيد العامل المتبقي بعد هذا السحب:</span>
+        <span class="font-mono text-emerald-700 dark:text-emerald-300 text-xs">${Math.round(netRemaining).toLocaleString()} ج.س</span>
+      </div>
+    `;
+  }
 }
 
 function appendGroceryItem(itemText) {
@@ -13628,7 +13812,14 @@ function saveGroceryTx(e, txId, isEdit) {
   }
 
   autoUpdateLaborWages();
-  saveData("✓ تم حفظ قيد مشتريات البقالة وخصمها من مستحقات العامل بنجاح");
+  const updatedWorkerCheck = (state.labor || []).find(w => w.id === workerId);
+  const checkBalance = updatedWorkerCheck ? ((updatedWorkerCheck.totalDue || 0) - (updatedWorkerCheck.totalPaid || 0)) : 0;
+  if (checkBalance < 0) {
+    saveData(`⚠️ تم حفظ قيد البقالة للعامل ${workerName}، وتجاوزت مسحوباته مستحقاته برصيد سالب (-${Math.abs(checkBalance).toLocaleString()} ج.س)!`);
+    showToast(`⚠️ تنبيه مالي: تجاوزت مسحوبات العامل (${workerName}) إجمالي مستحقاته بعجز سالب (-${Math.abs(checkBalance).toLocaleString()} ج.س)!`, 'warning');
+  } else {
+    saveData("✓ تم حفظ قيد مشتريات البقالة وخصمها من مستحقات العامل بنجاح");
+  }
   closeModal();
 
   // مزامنة قيد البقالة نفسه مع السحابة فوراً (جدول inventory_transactions)
@@ -13709,6 +13900,16 @@ function openWorkerGroceryStatementModal(workerId) {
         <button onclick="closeModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
       </div>
 
+      ${(worker.totalDue || 0) < 0 ? `
+        <div class="mb-4 p-3 bg-rose-100 dark:bg-rose-950/80 border border-rose-400 dark:border-rose-700 rounded-xl text-rose-900 dark:text-rose-100 text-xs font-bold flex items-center gap-2.5 shadow-sm">
+          <span class="text-lg">⚠️</span>
+          <div>
+            <span>تنبيه مالي: تجاوزت مسحوبات البقالة إجمالي مستحقات وأجر العامل بعجز سالب قدره </span>
+            <strong class="font-mono font-black text-rose-700 dark:text-rose-300">-${Math.abs(worker.totalDue).toLocaleString()} ج.س</strong>.
+            <span> العامل مدين لإدارة المشروع بهذا المبلغ ويجب تسويته.</span>
+          </div>
+        </div>
+      ` : ''}
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <div class="p-3 bg-amber-50 dark:bg-amber-950/50 rounded-xl border border-amber-200 dark:border-amber-800">
           <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300">إجمالي مسحوبات البقالة:</span>
@@ -13718,9 +13919,9 @@ function openWorkerGroceryStatementModal(workerId) {
           <span class="text-[11px] font-bold text-slate-500">الراتب المستحق الإجمالي:</span>
           <p class="text-lg font-black text-slate-800 dark:text-slate-200 font-mono">${(Math.round((worker.monthsWorked || 1) * (worker.monthlySalary || 0))).toLocaleString()} ج.س</p>
         </div>
-        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl border border-emerald-200 dark:border-emerald-800">
-          <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">صافي المستحق بعد الخصم:</span>
-          <p class="text-lg font-black text-emerald-700 dark:text-emerald-400 font-mono">${(worker.totalDue || 0).toLocaleString()} ج.س</p>
+        <div class="p-3 ${(worker.totalDue || 0) < 0 ? 'bg-rose-50 dark:bg-rose-950/70 border-rose-300 dark:border-rose-800' : 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800'} rounded-xl border">
+          <span class="text-[11px] font-bold ${(worker.totalDue || 0) < 0 ? 'text-rose-800 dark:text-rose-300' : 'text-emerald-800 dark:text-emerald-300'}">${(worker.totalDue || 0) < 0 ? 'صافي الرصيد (مدين للمشروع):' : 'صافي المستحق بعد الخصم:'}</span>
+          <p class="text-lg font-black ${(worker.totalDue || 0) < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'} font-mono">${(worker.totalDue || 0) < 0 ? '-' + Math.abs(worker.totalDue).toLocaleString() : (worker.totalDue || 0).toLocaleString()} ج.س</p>
         </div>
       </div>
 
@@ -17381,23 +17582,32 @@ function recalculateModalTotals() {
   const deductions = parseFloat(document.getElementById('lab-deductions')?.value) || 0;
   const paid = parseFloat(document.getElementById('lab-paid')?.value) || 0;
 
-  const totalDue = Math.max(0, Math.round(months * salary) + overtime - deductions);
+  const gross = Math.round(months * salary) + overtime;
+  const totalDue = gross - deductions;
   const balance = totalDue - paid;
 
   const elDue = document.getElementById('modal-lab-due');
   const elBal = document.getElementById('modal-lab-balance');
 
-  if (elDue) elDue.innerText = totalDue.toLocaleString();
+  if (elDue) {
+    if (totalDue < 0) {
+      elDue.className = "text-rose-600 font-mono text-sm font-black";
+      elDue.innerText = '-' + Math.abs(totalDue).toLocaleString() + ' (مسحوبات فائضة)';
+    } else {
+      elDue.className = "text-slate-900 dark:text-white font-mono text-sm font-bold";
+      elDue.innerText = totalDue.toLocaleString();
+    }
+  }
   if (elBal) {
     if (balance > 0) {
-      elBal.className = "text-amber-600 font-mono text-sm";
+      elBal.className = "text-amber-600 font-mono text-sm font-bold";
       elBal.innerText = balance.toLocaleString() + ' ج.س (متبقي مستحق)';
     } else if (balance === 0) {
-      elBal.className = "text-emerald-600 font-mono text-sm";
+      elBal.className = "text-emerald-600 font-mono text-sm font-bold";
       elBal.innerText = '0 ج.س (خالص بالكامل)';
     } else {
-      elBal.className = "text-blue-600 font-mono text-sm";
-      elBal.innerText = Math.abs(balance).toLocaleString() + ' ج.س (سلفة مقدمة)';
+      elBal.className = "text-rose-600 dark:text-rose-400 font-mono text-sm font-black";
+      elBal.innerText = '-' + Math.abs(balance).toLocaleString() + ' ج.س (⚠️ مدين للمشروع - تجاوز المستحقات)';
     }
   }
 }
@@ -20894,15 +21104,15 @@ function openWorkerSettlementVoucherModal(workerId) {
               ` : ''}
               <tr class="bg-slate-100 dark:bg-slate-800 font-black text-sm">
                 <td class="p-2.5">صافي المستحق النهائي بعد الخصومات:</td>
-                <td class="p-2.5 text-left font-mono text-emerald-600">${netDue.toLocaleString()} ج.س</td>
+                <td class="p-2.5 text-left font-mono ${netDue < 0 ? 'text-rose-600 font-black' : 'text-emerald-600'}">${netDue < 0 ? '-' + Math.abs(netDue).toLocaleString() : netDue.toLocaleString()} ج.س</td>
               </tr>
               <tr>
                 <td class="p-2">المبالغ المسددة مسبقاً (دفعات على الحساب):</td>
                 <td class="p-2 text-left font-mono">-${paid.toLocaleString()} ج.س</td>
               </tr>
-              <tr class="bg-slate-900 text-white font-black text-sm">
-                <td class="p-2.5">صافي المبلغ المستحق الصرف فوراً:</td>
-                <td class="p-2.5 text-left font-mono text-amber-400 text-base">${finalBalance.toLocaleString()} ج.س</td>
+              <tr class="${finalBalance < 0 ? 'bg-rose-900 text-white' : 'bg-slate-900 text-white'} font-black text-sm">
+                <td class="p-2.5">${finalBalance < 0 ? '⚠️ صافي الرصيد بالسالب (مدين للمشروع بمبلغ):' : 'صافي المبلغ المستحق الصرف فوراً:'}</td>
+                <td class="p-2.5 text-left font-mono ${finalBalance < 0 ? 'text-rose-300 text-base font-black' : 'text-amber-400 text-base'}">${finalBalance < 0 ? '-' + Math.abs(finalBalance).toLocaleString() : finalBalance.toLocaleString()} ج.س</td>
               </tr>
             </tbody>
           </table>
@@ -20910,7 +21120,9 @@ function openWorkerSettlementVoucherModal(workerId) {
 
         <!-- صيغة الإقرار والمخالصة -->
         <p class="text-[11px] text-slate-600 dark:text-slate-400 italic pt-1 text-justify">
-          "أقر أنا الموقع أدناه <strong>(${w.name})</strong> بأنني استلمت كافة مستحقاتي ورواتبي المالية عن فترة عملي بمشروع أبناء مصطفى حسن الزراعي لموسم 2026 بعد تصفية حساب مشترياتي من بقالة المشروع، وليس لدي أي مطالبات مالية أو عينية طرف إدارة المشروع، وهذا إبراء ذمة تام وشامل."
+          ${finalBalance < 0 
+            ? `"أقر أنا الموقع أدناه <strong>(${w.name})</strong> بأن إجمالي ما سحبته من بقالة المشروع وما صُرف لي قد تجاوز مستحقاتي المالية عن فترة عملي بمشروع أبناء مصطفى حسن الزراعي لموسم 2026 بعجز قدره <strong>(-${Math.abs(finalBalance).toLocaleString()} ج.س)</strong>، وأقر بأن هذا المبلغ دين بذمتي مستحق السداد لصالح إدارة المشروع."`
+            : `"أقر أنا الموقع أدناه <strong>(${w.name})</strong> بأنني استلمت كافة مستحقاتي ورواتبي المالية عن فترة عملي بمشروع أبناء مصطفى حسن الزراعي لموسم 2026 بعد تصفية حساب مشترياتي من بقالة المشروع، وليس لدي أي مطالبات مالية أو عينية طرف إدارة المشروع، وهذا إبراء ذمة تام وشامل."`}
         </p>
 
         <!-- التوقيعات -->
