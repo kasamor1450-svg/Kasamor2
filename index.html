@@ -839,7 +839,7 @@ html[dir="ltr"] .font-mono {
                 </button>
 
                 <div class="flex items-center gap-2">
-                  <button id="btn-request-push-perm" onclick="requestSystemNotificationPermission()" class="text-sky-600 dark:text-sky-400 font-bold hover:underline flex items-center gap-1" title="تفعيل إشعارات الهاتف">
+                  <button id="btn-request-push-perm" onclick="openBackgroundNotificationHelpModal()" class="text-sky-600 dark:text-sky-400 font-bold hover:underline flex items-center gap-1" title="تفعيل إشعارات الهاتف">
                     <span>📲 إشعارات الهاتف</span>
                   </button>
                   <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-rose-600 font-medium transition" title="مسح السجل">
@@ -10340,15 +10340,26 @@ function playNotificationChime() {
 // إشعار النظام والمتصفح الفوري (System Push Notification)
 function showSystemNotification(notif) {
   try {
+    const title = notif.title || 'Mustagro: إدخال جديد';
+    const body = notif.details || 'تم تسجيل عملية جديدة على التطبيق';
+    const targetSection = notif.targetSection || 'section-dashboard';
+
+    // 1. إذا كان التطبيق يعمل داخل بيئة تطبيق أندرويد (Mustagro Android APK)
+    if (window.AndroidBridge && typeof window.AndroidBridge.postNotification === 'function') {
+      window.AndroidBridge.postNotification(title, body, targetSection);
+      return;
+    }
+
+    // 2. إذا كان يعمل في متصفح يدعم ServiceWorker أو إشعارات النظام
     if (typeof Notification === 'undefined') return;
     if (Notification.permission === 'granted') {
-      const title = notif.title || 'Mustagro: إدخال جديد';
       const options = {
-        body: notif.details || 'تم تسجيل عملية جديدة على التطبيق',
+        body: body,
         icon: './assets/icon-192.png',
         badge: './assets/icon-192.png',
         tag: notif.id || ('mustagro-' + Date.now()),
-        renotify: true
+        renotify: true,
+        data: { targetSection: targetSection }
       };
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.ready.then(reg => {
@@ -10367,10 +10378,24 @@ function showSystemNotification(notif) {
 
 // طلب إذن إشعارات النظام
 function requestSystemNotificationPermission() {
+  if (window.AndroidBridge && typeof window.AndroidBridge.requestNotificationPermission === 'function') {
+    window.AndroidBridge.requestNotificationPermission();
+    showToast('✓ تم تفعيل إشعارات نظام أندرويد ومستمع الخلفية بنجاح!', 'success');
+    playNotificationChime();
+    showSystemNotification({
+      id: 'welcome-notif',
+      title: '🌱 تم تفعيل إشعارات Mustagro',
+      details: 'ستصلك تنبيهات فورية في شريط إشعارات الهاتف حتى لو كان التطبيق مغلقاً'
+    });
+    updatePushPermissionUI();
+    return;
+  }
+
   if (typeof Notification === 'undefined') {
     showToast('المتصفح لا يدعم إشعارات النظام، لكن مركز الإشعارات بالتطبيق مفعل 100%', 'info');
     return;
   }
+
   Notification.requestPermission().then(permission => {
     if (permission === 'granted') {
       showToast('✓ تم تفعيل إشعارات الهاتف والمتصفح بنجاح!', 'success');
@@ -10390,14 +10415,127 @@ function requestSystemNotificationPermission() {
 function updatePushPermissionUI() {
   const btn = document.getElementById('btn-request-push-perm');
   if (!btn) return;
-  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+  if (window.AndroidBridge) {
+    btn.innerHTML = '<span>🔔 إشعارات الهاتف نشطة</span>';
+    btn.classList.remove('text-sky-600', 'dark:text-sky-400');
+    btn.classList.add('text-emerald-600', 'dark:text-emerald-400');
+  } else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     btn.innerHTML = '<span>🔔 الإشعارات مفعلة</span>';
     btn.classList.remove('text-sky-600', 'dark:text-sky-400');
     btn.classList.add('text-emerald-600', 'dark:text-emerald-400');
   } else {
-    btn.innerHTML = '<span>📲 تفعيل إشعارات الهاتف</span>';
+    btn.innerHTML = '<span>📲 إشعارات الهاتف</span>';
   }
 }
+
+// نافذة مساعدة وضبط إشعارات الخلفية
+function openBackgroundNotificationHelpModal() {
+  const isAndroid = !!window.AndroidBridge;
+  const permGranted = isAndroid || (typeof Notification !== 'undefined' && Notification.permission === 'granted');
+
+  const html = `
+    <div class="p-6 max-w-lg mx-auto text-right">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-base">📲</span>
+          <div>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">إشعارات الهاتف والعمل في الخلفية</h3>
+            <p class="text-[10px] text-slate-400">تلقي التنبيهات برنين واهتزاز حتى عند إغلاق التطبيق تماماً</p>
+          </div>
+        </div>
+        <button onclick="closeModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+      </div>
+
+      <div class="space-y-4 text-xs leading-relaxed text-slate-700 dark:text-slate-200">
+        <!-- بطاقة الحالة الراهنة -->
+        <div class="p-3.5 rounded-xl border ${permGranted ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800'} flex items-center justify-between">
+          <div>
+            <span class="font-bold text-xs block ${permGranted ? 'text-emerald-800 dark:text-emerald-200' : 'text-amber-800 dark:text-amber-200'}">
+              ${permGranted ? '✓ إشعارات النظام مفعلة بنجاح' : '⚠️ يلزم منح إذن الإشعارات'}
+            </span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400">
+              ${isAndroid ? 'البيئة: تطبيق أندرويد المستقل (Mustagro APK)' : 'البيئة: متصفح الويب / تطبيق PWA'}
+            </span>
+          </div>
+          ${!permGranted ? `
+            <button type="button" onclick="requestSystemNotificationPermission()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs shadow-xs cursor-pointer">
+              منح الإذن الآن
+            </button>
+          ` : '<span class="text-xl">✅</span>'}
+        </div>
+
+        <!-- شرح كيفية عمل الإشعارات عندما يكون التطبيق غير مفتوح -->
+        <div class="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 text-[11px]">
+          <h4 class="font-black text-slate-900 dark:text-white flex items-center gap-1.5 text-xs">
+            <span>⚙️ كيف تعمل الإشعارات والتطبيق مغلق؟</span>
+          </h4>
+          <p>
+            • <strong>مستمع الخلفية المدمج (Background Worker):</strong> يحتوي التطبيق على مستمع خلفي تلقائي يفحص التحديثات السحابية كل 15 دقيقة للبحث عن أي عمليات جديدة أضافها الشركاء (مبيعات، مصاريف، وقود، توريدات).
+          </p>
+          <p>
+            • <strong>رنين واهتزاز فوري:</strong> عند رصد أي قيد جديد، يطلق النظام إشعاراً في شريط التنبيهات بالهاتف برنين واهتزاز.
+          </p>
+          <p>
+            • <strong>النقر المباشر:</strong> الضغط على الإشعار يفتح التطبيق مباشرة على شاشة العملية المعنية.
+          </p>
+        </div>
+
+        <!-- أزرار الإجراءات والاختبار -->
+        <div class="space-y-2 pt-1">
+          <button type="button" onclick="sendTestSystemNotification()" class="w-full py-2.5 px-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-xl font-bold flex items-center justify-center gap-2 border border-blue-200 dark:border-blue-800 transition shadow-xs cursor-pointer">
+            <span>🔔 إرسال إشعار تجريبي فوري للنظام (شريط الهاتف)</span>
+          </button>
+
+          ${isAndroid ? `
+            <button type="button" onclick="openBatteryOptimizationSettings()" class="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl font-bold flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 transition shadow-xs cursor-pointer">
+              <span>🔋 إلغاء قيود توفير الطاقة (لضمان عمل الإشعارات دائماً بالخلفية)</span>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-800 mt-4">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold text-xs cursor-pointer">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  `;
+  openModal(html);
+  if (typeof safeCreateIcons === 'function') safeCreateIcons();
+}
+
+function sendTestSystemNotification() {
+  showSystemNotification({
+    id: 'test-' + Date.now(),
+    title: '🌾 إشعار تجريبي: مشروع أبناء مصطفى حسن',
+    details: 'تم اختبار منظومة الإشعارات بنجاح! الإشعارات تعمل بكفاءة في شريط النظام.',
+    targetSection: 'section-sales'
+  });
+  showToast('✓ تم إرسال الإشعار التجريبي لشريط النظام بنجاح!', 'success');
+}
+
+function openBatteryOptimizationSettings() {
+  if (window.AndroidBridge && typeof window.AndroidBridge.openBatteryOptimizationSettings === 'function') {
+    window.AndroidBridge.openBatteryOptimizationSettings();
+  } else {
+    showToast('يرجى الانتقال لإعدادات الهاتف واختيار "عدم تقييد استهلاك البطارية" للتطبيق.', 'info');
+  }
+}
+
+// استماع لرسائل ServiceWorker للتنقل عند نقر الإشعار
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'NAVIGATE_SECTION' && event.data.targetSection) {
+      if (typeof navigateToSection === 'function') {
+        navigateToSection(event.data.targetSection);
+      } else if (typeof switchTab === 'function') {
+        switchTab(event.data.targetSection);
+      }
+    }
+  });
+}
+
 
 // إطلاق إشعار داخل التطبيق وتخزينه
 function triggerAppNotification(notifData, options = { playSound: true, systemPush: true, showToastMsg: true }) {

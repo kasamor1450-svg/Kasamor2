@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v23.0-crop-sales-edit-delete-save
-const CACHE_NAME = 'mustagro-v23.0-crop-sales-edit-delete-save';
+// Cache Version: mustagro-v24.0-background-notifications-service
+const CACHE_NAME = 'mustagro-v24.0-background-notifications-service';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
@@ -68,5 +68,56 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       });
     })
+  );
+});
+
+// =========================================================================
+// معالجة النقر على الإشعارات وفتح التطبيق حتى لو كان مغلقاً (Notification Click)
+// =========================================================================
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetSection = event.notification.data ? event.notification.data.targetSection : '';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes('index.html') && 'focus' in client) {
+          if (targetSection) {
+            client.postMessage({ action: 'NAVIGATE_SECTION', targetSection: targetSection });
+          }
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('./index.html' + (targetSection ? '#' + targetSection : ''));
+      }
+    })
+  );
+});
+
+// =========================================================================
+// استقبال إشعارات الـ Web Push السحابية الموجهة في الخلفية
+// =========================================================================
+self.addEventListener('push', (event) => {
+  let data = { title: '🌱 إشعار مشروع كسمور (Mustagro)', body: 'تم تسجيل عملية جديدة في بيانات المشروع' };
+  try {
+    if (event.data) {
+      data = event.data.json();
+    }
+  } catch (e) {
+    if (event.data) data.body = event.data.text();
+  }
+
+  const options = {
+    body: data.body || data.details || 'تحديث جديد في مشروع كسمور',
+    icon: './assets/icon-192.png',
+    badge: './assets/icon-192.png',
+    tag: data.tag || ('mustagro-' + Date.now()),
+    renotify: true,
+    data: { targetSection: data.targetSection || 'section-dashboard' }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Mustagro: تنبيه سحابي', options)
   );
 });
