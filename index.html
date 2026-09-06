@@ -3454,13 +3454,27 @@ html[dir="ltr"] .font-mono {
             unit: i.unit, unitPrice: Number(i.unit_price || 0),
             reorderLevel: Number(i.reorder_level || 0)
           })),
-          inventoryTransactions: (inventoryTxRes.data || []).map(itx => ({
-            id: itx.id, date: itx.date, itemId: itx.item_id, itemName: itx.item_name,
-            category: itx.category, type: itx.type, quantity: Number(itx.quantity || 0),
-            unit: itx.unit, unitPrice: Number(itx.unit_price || 0), totalCost: Number(itx.total_cost || 0),
-            plot: itx.plot, crop: itx.crop, receiver: itx.receiver, loggedBy: itx.logged_by,
-            notes: itx.notes, saleId: itx.sale_id
-          })),
+          inventoryTransactions: (inventoryTxRes.data || [])
+            .filter(itx => !(itx.category === 'بقالة' || itx.item_id === 'inv-grocery-camp' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('groc-'))))
+            .map(itx => ({
+              id: itx.id, date: itx.date, itemId: itx.item_id, itemName: itx.item_name,
+              category: itx.category, type: itx.type, quantity: Number(itx.quantity || 0),
+              unit: itx.unit, unitPrice: Number(itx.unit_price || 0), totalCost: Number(itx.total_cost || 0),
+              plot: itx.plot, crop: itx.crop, receiver: itx.receiver, loggedBy: itx.logged_by,
+              notes: itx.notes, saleId: itx.sale_id
+            })),
+          groceryTransactions: (inventoryTxRes.data || [])
+            .filter(itx => itx.category === 'بقالة' || itx.item_id === 'inv-grocery-camp' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('groc-')))
+            .map(gtx => ({
+              id: gtx.id,
+              date: gtx.date,
+              workerId: gtx.crop || gtx.sale_id || '',
+              workerName: gtx.receiver || '',
+              amount: Number(gtx.total_cost || gtx.unit_price || 0),
+              items: gtx.item_name || 'مسحوبات بقالة',
+              notes: gtx.notes || '',
+              loggedBy: gtx.logged_by || 'المشرف'
+            })),
           harvestIntakes: (harvestRes.data || []).map(h => ({
             id: h.id, date: h.date, plot: h.plot, crop: h.crop,
             bags: Number(h.bags || 0), weightTons: Number(h.weight_tons || 0),
@@ -3650,6 +3664,48 @@ html[dir="ltr"] .font-mono {
         operation_name: f.operationName || f.op, logged_by: f.loggedBy, notes: f.notes
       };
       return await this.client.from('fuel_transactions').upsert(row);
+    }
+
+    async upsertGroceryTransaction(tx) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: tx.id,
+          date: tx.date || new Date().toISOString().split('T')[0],
+          item_id: 'inv-grocery-camp',
+          item_name: tx.items || 'مسحوبات بقالة',
+          category: 'بقالة',
+          type: 'issue',
+          quantity: 1,
+          unit: 'سحب',
+          unit_price: parseFloat(tx.amount) || 0,
+          total_cost: parseFloat(tx.amount) || 0,
+          plot: 'بقالة الكمبو',
+          crop: tx.workerId || '',
+          receiver: tx.workerName || '',
+          logged_by: tx.loggedBy || 'المشرف',
+          notes: tx.notes || '',
+          sale_id: tx.workerId || null
+        };
+        const { data, error } = await this.client.from('inventory_transactions').upsert(row);
+        if (error) console.warn('Supabase upsert grocery transaction warning:', error);
+        return data;
+      } catch(err) {
+        console.warn('upsertGroceryTransaction error:', err);
+        return null;
+      }
+    }
+
+    async deleteGroceryTransaction(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('inventory_transactions').delete().eq('id', id);
+        if (error) console.warn('Supabase delete grocery transaction warning:', error);
+        return !error;
+      } catch(err) {
+        console.warn('deleteGroceryTransaction error:', err);
+        return false;
+      }
     }
   }
 
@@ -10804,6 +10860,23 @@ function initNotificationsSystem() {
           details = `تم ضخ ${Number(payload.new.amount || 0).toLocaleString()} ج.س للشريك ${payload.new.partner_name || ''}`;
           target = 'section-partners';
           icon = '👥';
+        } else if (table === 'inventory_transactions') {
+          const isGroc = (payload.new && (payload.new.category === 'بقالة' || payload.new.item_id === 'inv-grocery-camp' || (payload.new.id && String(payload.new.id).startsWith('groc-')))) ||
+                         (payload.old && (payload.old.category === 'بقالة' || payload.old.item_id === 'inv-grocery-camp' || (payload.old.id && String(payload.old.id).startsWith('groc-'))));
+          if (isGroc) {
+            title = '🛒 مسحوبات بقالة جديدة في السحابة';
+            const wName = (payload.new && (payload.new.receiver || 'عامل')) || (payload.old && payload.old.receiver) || 'عامل';
+            const cost = payload.new ? Number(payload.new.total_cost || payload.new.unit_price || 0) : 0;
+            const itemDesc = (payload.new && payload.new.item_name) || '';
+            details = `تم تسجيل سحب بقالة للعامل (${wName}) بمبلغ ${cost.toLocaleString()} ج.س${itemDesc ? ' (' + itemDesc + ')' : ''}`;
+            target = 'section-grocery';
+            icon = '🛒';
+          } else {
+            title = '📦 حركة مخزن ومستودع جديدة';
+            details = `تسجيل حركة في المخزن (${payload.new?.item_name || ''})`;
+            target = 'section-inventory';
+            icon = '📦';
+          }
         }
 
         triggerAppNotification({
@@ -13462,11 +13535,13 @@ function openEditGroceryTxModal(txId = null, preselectedWorkerId = null) {
 
         <div>
           <label class="block font-bold mb-1">تفاصيل الأصناف والمشتريات (مواد إعاشة وسلع):</label>
-          <input type="text" id="groc-items" value="${tx.items || ''}" placeholder="مثال: سكر 10 رطل، شاي، صابون، زيت طعام، دقيق، بسكويت" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold" required>
+          <input type="text" id="groc-items" value="${tx.items || ''}" placeholder="مثال: سكر 10 رطل، شاي، زيت، دخان، تمباك، صابون، دقيق" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold" required>
           
           <!-- أزرار سريعة لإضافة أصناف شائعة -->
           <div class="flex flex-wrap gap-1.5 mt-2">
             <span class="text-[10px] text-slate-400 font-bold ml-1">أصناف شائعة:</span>
+            <button type="button" onclick="appendGroceryItem('دخان (سجائر)')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-950 text-amber-800 dark:text-amber-300 rounded-lg text-[10px] font-bold border border-amber-200/60 dark:border-amber-800/60">+ دخان 🚬</button>
+            <button type="button" onclick="appendGroceryItem('تمباك (صعوط)')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-amber-950 text-amber-800 dark:text-amber-300 rounded-lg text-[10px] font-bold border border-amber-200/60 dark:border-amber-800/60">+ تمباك 🌿</button>
             <button type="button" onclick="appendGroceryItem('سكر (10 رطل)')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 rounded-lg text-[10px] font-bold">+ سكر</button>
             <button type="button" onclick="appendGroceryItem('شاي كيني')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 rounded-lg text-[10px] font-bold">+ شاي</button>
             <button type="button" onclick="appendGroceryItem('زيت طعام')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 rounded-lg text-[10px] font-bold">+ زيت</button>
@@ -13524,6 +13599,7 @@ function saveGroceryTx(e, txId, isEdit) {
 
   if (!state.groceryTransactions) state.groceryTransactions = [];
 
+  let savedTx = null;
   if (isEdit) {
     const idx = state.groceryTransactions.findIndex(t => t.id === txId);
     if (idx !== -1) {
@@ -13532,6 +13608,7 @@ function saveGroceryTx(e, txId, isEdit) {
         date, workerId, workerName, items, amount, notes,
         loggedBy: currentUserName
       };
+      savedTx = state.groceryTransactions[idx];
       logAudit("تعديل سحب بقالة", `تحديث قيد مشتريات بقالة للعامل (${workerName}) بمبلغ ${amount.toLocaleString()} ج.س`, "بقالة المشروع");
     }
   } else {
@@ -13546,6 +13623,7 @@ function saveGroceryTx(e, txId, isEdit) {
       notes: notes || "مسحوبات إعاشة من بقالة الكمبو"
     };
     state.groceryTransactions.unshift(newTx);
+    savedTx = newTx;
     logAudit("تسجيل سحب بقالة", `تسجيل سحب بالآجل للعامل (${workerName}) بمبلغ ${amount.toLocaleString()} ج.س (${items})`, "بقالة المشروع");
   }
 
@@ -13553,7 +13631,14 @@ function saveGroceryTx(e, txId, isEdit) {
   saveData("✓ تم حفظ قيد مشتريات البقالة وخصمها من مستحقات العامل بنجاح");
   closeModal();
 
-  // مزامنة خصميات البقالة مع السحابة فوراً
+  // مزامنة قيد البقالة نفسه مع السحابة فوراً (جدول inventory_transactions)
+  if (savedTx && window.AgroAPI && typeof window.AgroAPI.upsertGroceryTransaction === 'function') {
+    window.AgroAPI.upsertGroceryTransaction(savedTx).then(res => {
+      console.log('✓ تم حفظ قيد البقالة في السحابة بنجاح:', savedTx.id);
+    }).catch(err => console.warn('Grocery cloud upsert error:', err));
+  }
+
+  // مزامنة خصميات البقالة مع السحابة فوراً في جدول labor
   if (window.AgroAPI && window.AgroAPI.client) {
     const updatedWorker = (state.labor || []).find(w => w.id === workerId);
     if (updatedWorker) {
@@ -13572,12 +13657,35 @@ function saveGroceryTx(e, txId, isEdit) {
 function deleteGroceryTx(txId) {
   const tx = state.groceryTransactions.find(t => t.id === txId);
   if (confirm(`هل أنت متأكد من حذف قيد البقالة هذا للعامل (${tx ? tx.workerName : ''}) بمبلغ ${tx ? tx.amount.toLocaleString() : ''} ج.س؟`)) {
+    const workerId = tx ? tx.workerId : null;
     state.groceryTransactions = state.groceryTransactions.filter(t => t.id !== txId);
     if (tx) {
       logAudit("حذف سحب بقالة", `حذف قيد مشتريات بقالة للعامل (${tx.workerName}) بمبلغ ${tx.amount.toLocaleString()} ج.س`, "بقالة المشروع");
     }
     autoUpdateLaborWages();
     saveData("✓ تم حذف قيد البقالة وتحديث مستحقات العامل بنجاح");
+
+    // حذف قيد البقالة من السحابة فوراً
+    if (window.AgroAPI && typeof window.AgroAPI.deleteGroceryTransaction === 'function') {
+      window.AgroAPI.deleteGroceryTransaction(txId).then(res => {
+        console.log('✓ تم حذف قيد البقالة من السحابة بنجاح:', txId);
+      }).catch(err => console.warn('Grocery cloud delete warning:', err));
+    }
+
+    // تحديث خصميات العامل في السحابة بعد حذف قيد البقالة
+    if (workerId && window.AgroAPI && window.AgroAPI.client) {
+      const updatedWorker = (state.labor || []).find(w => w.id === workerId);
+      if (updatedWorker) {
+        window.AgroAPI.client.from('labor').update({
+          deductions_amount: updatedWorker.totalDeductions || (updatedWorker.deductionsAmount + (updatedWorker.groceryTotal || 0)),
+          total_due: updatedWorker.totalDue || 0,
+          status: updatedWorker.status || 'pending'
+        }).eq('id', workerId).then(({ error }) => {
+          if (error) console.warn('Labor deduction sync warning after groc delete:', error);
+          else console.log('✓ تم تحديث خصميات العامل في السحابة بعد حذف قيد البقالة:', updatedWorker.name);
+        }).catch(err => console.warn('Labor deduction error:', err));
+      }
+    }
   }
 }
 
@@ -21290,22 +21398,43 @@ async function initCloudSyncOnStartup() {
     updateCloudStatusIndicator(true, 'جاري مزامنة السحابة...');
     try {
       const cloudState = await window.AgroAPI.fetchCloudState();
-      if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0)) {
+      if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0 || (cloudState.groceryTransactions && cloudState.groceryTransactions.length > 0))) {
+        // دمج قيود وسحوبات البقالة بذكاء بين السحابة والمحلي دون فقدان أي قيد
+        const localGroc = state.groceryTransactions || [];
+        const cloudGroc = cloudState.groceryTransactions || [];
+        const grocMap = new Map();
+        // أسبقية للبيانات السحابية المحدثة
+        cloudGroc.forEach(t => grocMap.set(t.id, t));
+        // ضم أي قيود مسجلة محلياً في انتظار الرفع
+        const pendingLocalGroc = [];
+        localGroc.forEach(t => {
+          if (!grocMap.has(t.id)) {
+            grocMap.set(t.id, t);
+            pendingLocalGroc.push(t);
+          }
+        });
+        const mergedGrocery = Array.from(grocMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
         state = {
           ...state,
           ...cloudState,
-          // الحفاظ على قيود وسحوبات البقالة المسجلة محلياً
-          groceryTransactions: (state.groceryTransactions && state.groceryTransactions.length > 0) 
-            ? state.groceryTransactions 
-            : (cloudState.groceryTransactions || DEFAULT_DATA.groceryTransactions || []),
+          groceryTransactions: mergedGrocery,
           farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
           forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
         };
+        autoUpdateLaborWages();
         saveData();
         updateActiveViews();
         safeCreateIcons();
         updateCloudStatusIndicator(true, '🟢 سحابي متصل (محدث)');
         console.log("✓ تم تحديث وتطبيق كامل البيانات بنجاح من PostgreSQL السحابية!");
+
+        // رفع أي قيود محلية غير مسجلة في السحابة تلقائياً
+        if (pendingLocalGroc.length > 0 && window.AgroAPI && typeof window.AgroAPI.upsertGroceryTransaction === 'function') {
+          Promise.all(pendingLocalGroc.map(gtx => window.AgroAPI.upsertGroceryTransaction(gtx)))
+            .then(() => console.log(`✓ تم رفع ومزامنة ${pendingLocalGroc.length} قيد بقالة محلي إلى السحابة تلقائياً`))
+            .catch(err => console.warn('Auto upload grocery error:', err));
+        }
       } else {
         updateCloudStatusIndicator(true, '🟢 سحابي متصل');
       }
@@ -21323,17 +21452,28 @@ async function handleFetchFromSupabase() {
   }
   showToast('جاري سحب أحدث نسخة من السحابة...', 'info');
   const cloudState = await window.AgroAPI.fetchCloudState();
-  if (cloudState && cloudState.expenses && cloudState.expenses.length > 0) {
+  if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0 || cloudState.groceryTransactions?.length > 0)) {
+    const localGroc = state.groceryTransactions || [];
+    const cloudGroc = cloudState.groceryTransactions || [];
+    const grocMap = new Map();
+    cloudGroc.forEach(t => grocMap.set(t.id, t));
+    localGroc.forEach(t => {
+      if (!grocMap.has(t.id)) grocMap.set(t.id, t);
+    });
+    const mergedGrocery = Array.from(grocMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
     state = {
       ...state,
       ...cloudState,
+      groceryTransactions: mergedGrocery,
       farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
       forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
     };
+    autoUpdateLaborWages();
     saveData();
     updateActiveViews();
     safeCreateIcons();
-    showToast(`تم استيراد ومزامنة ${cloudState.expenses.length} قيد مالي من السحابة بنجاح!`, 'success');
+    showToast(`تم استيراد ومزامنة ${cloudState.expenses ? cloudState.expenses.length : 0} قيد مالي و${mergedGrocery.length} قيد بقالة من السحابة بنجاح!`, 'success');
     closeModal();
   } else {
     showToast('لم يتم العثور على بيانات جديدة في السحابة', 'info');
@@ -21350,7 +21490,12 @@ if (typeof window !== 'undefined') {
     setTimeout(() => {
       if (window.AgroAPI) {
         window.AgroAPI.onDataChange((payload) => {
-          showToast(`⚡ تحديث سحابي فوري: تم تعديل جدول (${payload.table}) من قبل مستخدم آخر!`, 'info');
+          const isGroc = payload && payload.table === 'inventory_transactions' && (
+            (payload.new && (payload.new.category === 'بقالة' || payload.new.item_id === 'inv-grocery-camp' || (payload.new.id && String(payload.new.id).startsWith('groc-')))) ||
+            (payload.old && (payload.old.category === 'بقالة' || payload.old.item_id === 'inv-grocery-camp' || (payload.old.id && String(payload.old.id).startsWith('groc-'))))
+          );
+          const tableNameDesc = isGroc ? 'بقالة الكمبو والمسحوبات' : (payload.table === 'inventory_transactions' ? 'المخزن والمستودع' : payload.table);
+          showToast(`⚡ تحديث سحابي فوري: تم تعديل (${tableNameDesc}) من قبل مستخدم آخر!`, 'info');
           handleFetchFromSupabase();
         });
         updateCloudStatusIndicator(window.AgroAPI.isConnected, window.AgroAPI.isConnected ? '🟢 سحابي متصل' : 'سحابة غير متصلة');

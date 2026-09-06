@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v24.0-background-notifications-service
-const CACHE_NAME = 'mustagro-v24.0-background-notifications-service';
+// Cache Version: mustagro-v25.0-grocery-cloud-sync-and-items
+const CACHE_NAME = 'mustagro-v25.0-grocery-cloud-sync-and-items';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
