@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v27.0-photo-video-media-system
-const CACHE_NAME = 'mustagro-v27.0-photo-video-media-system';
+// Cache Version: mustagro-v28.0-darkmode-histogram-timeline-media
+const CACHE_NAME = 'mustagro-v28.0-darkmode-histogram-timeline-media';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

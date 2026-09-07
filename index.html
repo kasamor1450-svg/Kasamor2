@@ -661,6 +661,22 @@ html[dir="ltr"] .font-mono {
 }
 
 </style>
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          document.addEventListener('DOMContentLoaded', function() {
+            if (document.body) {
+              document.body.classList.add('dark', 'dark-mode');
+            }
+          });
+        }
+      } catch(e) {}
+    })();
+  </script>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
 
@@ -908,6 +924,12 @@ html[dir="ltr"] .font-mono {
         <button data-target="section-expenses" class="nav-tab-btn px-3.5 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap active:scale-95">
           <i data-lucide="receipt" class="w-4 h-4 text-emerald-600"></i>
           <span>المصروفات</span>
+        </button>
+
+        <!-- رصد الأمطار والطقس -->
+        <button data-target="section-rainfall" class="nav-tab-btn px-3.5 py-1.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap active:scale-95">
+          <i data-lucide="cloud-rain" class="w-4 h-4 text-sky-500"></i>
+          <span>الأمطار والطقس</span>
         </button>
 
         <!-- الرواتب والأجور -->
@@ -1171,7 +1193,35 @@ html[dir="ltr"] .font-mono {
       </div>
 
       <!-- الرسوم البيانية التحليلية -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- بطاقة رصد الأمطار الحية في لوحة القيادة -->
+      <div id="dashboard-rainfall-summary-card" class="glass-card rounded-2xl p-4 sm:p-5 border border-sky-200/80 dark:border-sky-900/60 bg-gradient-to-r from-sky-50/70 via-blue-50/40 to-slate-50/60 dark:from-sky-950/40 dark:via-slate-900/50 dark:to-slate-900/60 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 flex items-center justify-center text-2xl shadow-sm">🌧️</span>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">رصد أمطار خريف 2026 (مزارع كسمور الشرقي)</h3>
+                <span id="dash-rainfall-badge" class="px-2.5 py-0.5 rounded-full bg-sky-500 text-white font-mono text-[10px] font-black shadow-sm">73 ملم تراكمي</span>
+              </div>
+              <p id="dash-rainfall-latest" class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                آخر مطرة مسجلة: <strong class="text-sky-700 dark:text-sky-400 font-black">28 ملم (أمطار وسط)</strong> • نمرة 500 • ري عميق وجداول ممتلئة
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-center">
+            <button type="button" onclick="openAddRainfallModal()" class="px-3.5 py-2 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white rounded-xl text-xs font-black shadow-sm transition active:scale-95 flex items-center gap-1.5">
+              <span>➕</span>
+              <span>تسجيل مطرة جديدة</span>
+            </button>
+            <button type="button" onclick="switchSection('section-rainfall')" class="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800 rounded-xl text-xs font-black shadow-sm transition flex items-center gap-1">
+              <span>عرض السجل الكامل</span>
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
         <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
           <div class="flex items-center justify-between mb-4">
@@ -1197,6 +1247,65 @@ html[dir="ltr"] .font-mono {
           </div>
         </div>
 
+      </div>
+
+      <!-- المدرج التكراري التحليلي (Project Histogram Section) -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white flex items-center justify-center text-lg font-black shadow-sm">📊</span>
+            <div>
+              <h4 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <span>المدرج التكراري التحليلي (Interactive Histogram)</span>
+                <span id="histogram-active-badge" class="px-2 py-0.5 rounded-full text-[10px] bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 font-black border border-sky-300 dark:border-sky-800">توزيع الأمطار (ملم)</span>
+              </h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">توزيع تكراري إحصائي يوضح فئات وتكرار هطول الأمطار، المصروفات، وساعات عمل الآليات</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 overflow-x-auto text-xs font-bold no-scrollbar">
+            <button type="button" onclick="switchHistogramType('rainfall')" id="btn-hist-rainfall" class="px-3 py-1.5 rounded-xl transition flex items-center gap-1 bg-sky-600 text-white shadow-sm active:scale-95">
+              <span>🌧️</span>
+              <span>مدرج الأمطار</span>
+            </button>
+            <button type="button" onclick="switchHistogramType('expenses')" id="btn-hist-expenses" class="px-3 py-1.5 rounded-xl transition flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 active:scale-95">
+              <span>💰</span>
+              <span>مدرج المصروفات</span>
+            </button>
+            <button type="button" onclick="switchHistogramType('operations')" id="btn-hist-operations" class="px-3 py-1.5 rounded-xl transition flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 active:scale-95">
+              <span>🚜</span>
+              <span>مدرج العمليات</span>
+            </button>
+          </div>
+        </div>
+        <div id="histogram-stats-bar" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4"></div>
+        <div class="h-64 sm:h-72 relative flex items-center justify-center">
+          <canvas id="projectHistogramChart"></canvas>
+        </div>
+      </div>
+
+      <!-- الخط الزمني لأنشطة المشروع اليومية (Daily Activities Timeline) -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2.5">
+            <span class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center text-lg font-black shadow-sm">📅</span>
+            <div>
+              <h3 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <span>الخط الزمني لأنشطة المشروع اليومية (Daily Activities Timeline)</span>
+                <span id="timeline-count-badge" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-black"></span>
+              </h3>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">سجل زمني متسلسل لكافة العمليات الحقلية، المصروفات، الأمطار، حركات الوقود، وسحوبات العمالة يوماً بيوم</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 overflow-x-auto text-xs font-bold no-scrollbar">
+            <button type="button" onclick="filterDailyTimeline('all')" id="btn-tl-all" class="px-2.5 py-1 rounded-xl bg-emerald-600 text-white shadow-sm">الكل</button>
+            <button type="button" onclick="filterDailyTimeline('operations')" id="btn-tl-operations" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">🚜 عمليات</button>
+            <button type="button" onclick="filterDailyTimeline('expenses')" id="btn-tl-expenses" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">💳 مصروفات</button>
+            <button type="button" onclick="filterDailyTimeline('rainfall')" id="btn-tl-rainfall" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">🌧️ أمطار</button>
+            <button type="button" onclick="filterDailyTimeline('fuel')" id="btn-tl-fuel" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">⛽ وقود</button>
+            <button type="button" onclick="filterDailyTimeline('labor')" id="btn-tl-labor" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">👥 عمالة</button>
+          </div>
+        </div>
+        <div id="daily-activities-timeline-container" class="space-y-4"></div>
       </div>
 
       <!-- بطاقات متابعة خطة رأس المال والميزانية التقديرية (إجمالي 300,000,000 ج.س) -->
@@ -2828,7 +2937,11 @@ html[dir="ltr"] .font-mono {
 
       <!-- أزرار أدوات إضافية -->
       <div class="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
-        <button id="mobile-lang-toggle-btn" onclick="toggleAppLanguage()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition" title="Language / تغيير لغة المنظومة">
+        <button id="mobile-theme-toggle" onclick="toggleDarkMode()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition">
+          <i data-lucide="moon" class="w-4 h-4 text-amber-500"></i>
+          <span class="theme-label font-black">تبديل الوضع الليلي / النهاري</span>
+        </button>
+<button id="mobile-lang-toggle-btn" onclick="toggleAppLanguage()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition" title="Language / تغيير لغة المنظومة">
           <span class="text-base" id="mobile-lang-flag">🇬🇧</span>
           <span id="mobile-lang-text">English (الانتقال للإنجليزية)</span>
         </button>
@@ -11343,18 +11456,67 @@ function initNavigation() {
   });
 }
 
+// =========================================================================
+// نظام تبديل وحفظ الوضع الليلي والنهاري المتطور (Dark / Light Theme Engine)
+// =========================================================================
+function toggleDarkMode(forceState = null) {
+  const htmlEl = document.documentElement;
+  const bodyEl = document.body;
+  
+  let isDark;
+  if (forceState !== null) {
+    isDark = !!forceState;
+  } else {
+    isDark = !htmlEl.classList.contains('dark') && !bodyEl.classList.contains('dark-mode');
+  }
+
+  if (isDark) {
+    htmlEl.classList.add('dark');
+    bodyEl.classList.add('dark');
+    bodyEl.classList.add('dark-mode');
+    try { localStorage.setItem('theme', 'dark'); } catch(e) {}
+  } else {
+    htmlEl.classList.remove('dark');
+    bodyEl.classList.remove('dark');
+    bodyEl.classList.remove('dark-mode');
+    try { localStorage.setItem('theme', 'light'); } catch(e) {}
+  }
+
+  updateThemeToggleUI(isDark);
+  
+  if (typeof renderCharts === 'function') renderCharts();
+  if (typeof renderHistogramChart === 'function') renderHistogramChart();
+  if (typeof safeCreateIcons === 'function') safeCreateIcons();
+}
+
+function updateThemeToggleUI(isDark) {
+  const btns = document.querySelectorAll('#theme-toggle, #mobile-theme-toggle');
+  btns.forEach(btn => {
+    btn.innerHTML = isDark 
+      ? `<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>` 
+      : `<i data-lucide="moon" class="w-4 h-4 text-slate-600 dark:text-slate-300"></i>`;
+    const label = btn.querySelector('.theme-label');
+    if (label) {
+      label.textContent = isDark ? 'الوضع النهاري' : 'الوضع الليلي';
+    }
+  });
+}
+
 function initTheme() {
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem('theme'); } catch(e) {}
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+  
+  toggleDarkMode(shouldBeDark);
+
   const toggleBtn = document.getElementById('theme-toggle');
   if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      toggleBtn.innerHTML = isDark 
-        ? `<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>` 
-        : `<i data-lucide="moon" class="w-4 h-4 text-slate-600"></i>`;
-      safeCreateIcons();
-      renderCharts();
-    });
+    toggleBtn.onclick = () => toggleDarkMode();
+  }
+  const mobileToggleBtn = document.getElementById('mobile-theme-toggle');
+  if (mobileToggleBtn) {
+    mobileToggleBtn.onclick = () => toggleDarkMode();
   }
 }
 
@@ -11376,7 +11538,10 @@ function updateActiveViews() {
     renderForecastsSection();
     renderAuditLogsSection();
     renderUsersSection();
+    renderDashboardRainfallCard();
     renderCharts();
+    renderHistogramChart();
+    renderDailyActivitiesTimeline();
     checkBudgetAlerts();
     safeCreateIcons();
 
@@ -11668,6 +11833,568 @@ function renderCharts() {
     });
   }
 }
+
+// 2. تحديث بطاقة مؤشرات الأمطار في لوحة القيادة (Dashboard Rainfall Summary Card)
+function renderDashboardRainfallCard() {
+  const card = document.getElementById('dashboard-rainfall-summary-card');
+  if (!card) return;
+
+  const logs = state.rainfallLogs || [];
+  const totalRains = logs.length;
+  const totalMm = logs.reduce((sum, r) => sum + (Number(r.amountMm) || 0), 0);
+
+  const badgeEl = document.getElementById('dash-rainfall-badge');
+  if (badgeEl) {
+    badgeEl.textContent = `${totalMm} ملم تراكمي (${totalRains} مطرات)`;
+  }
+
+  const latestEl = document.getElementById('dash-rainfall-latest');
+  if (latestEl) {
+    if (logs.length > 0) {
+      const sorted = [...logs].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+      const last = sorted[0];
+      latestEl.innerHTML = `
+        آخر هطول مسجل: <strong class="text-sky-700 dark:text-sky-400 font-black">${last.amountMm || 0} ملم (${last.intensity || 'أمطار'})</strong> • ${last.dayName || ''} ${last.date} • ${last.location || 'كسمور'} • <span class="text-slate-500">${last.fieldImpact || 'ري الأرض'}</span>
+      `;
+    } else {
+      latestEl.innerHTML = 'لم يتم تسجيل أي هطول حتى الآن لموسم 2026. يمكنك تسجيل أول مطرة بالضغط على الزر.';
+    }
+  }
+}
+
+// 3. المدرج التكراري التحليلي (Interactive Histogram)
+let currentHistogramType = 'rainfall';
+let histogramChartInstance = null;
+
+function switchHistogramType(type) {
+  currentHistogramType = type;
+  
+  // تحديث أزرار التبويب
+  const buttons = {
+    rainfall: document.getElementById('btn-hist-rainfall'),
+    expenses: document.getElementById('btn-hist-expenses'),
+    operations: document.getElementById('btn-hist-operations')
+  };
+
+  const badge = document.getElementById('histogram-active-badge');
+
+  Object.keys(buttons).forEach(k => {
+    const btn = buttons[k];
+    if (!btn) return;
+    if (k === type) {
+      btn.className = 'px-3 py-1.5 rounded-xl transition flex items-center gap-1 bg-sky-600 text-white shadow-sm active:scale-95';
+    } else {
+      btn.className = 'px-3 py-1.5 rounded-xl transition flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 active:scale-95';
+    }
+  });
+
+  if (badge) {
+    if (type === 'rainfall') badge.textContent = 'توزيع الأمطار (ملم)';
+    else if (type === 'expenses') badge.textContent = 'توزيع المصروفات (ج.س)';
+    else badge.textContent = 'ساعات العمليات الحقلية';
+  }
+
+  renderHistogramChart();
+}
+
+function renderHistogramChart() {
+  const canvas = document.getElementById('projectHistogramChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const isDark = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark-mode');
+  const textColor = isDark ? '#cbd5e1' : '#334155';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.05)';
+
+  const statsBar = document.getElementById('histogram-stats-bar');
+
+  let labels = [];
+  let counts = [];
+  let secondaryData = [];
+  let datasetLabel = '';
+  let barColor = '#0ea5e9';
+  let hoverColor = '#0284c7';
+
+  if (currentHistogramType === 'rainfall') {
+    // مدرج تكراري لهطول الأمطار
+    const logs = state.rainfallLogs || [];
+    const bins = [
+      { name: '1-10 ملم (خفيفة)', min: 0, max: 10, count: 0, totalMm: 0 },
+      { name: '11-25 ملم (وسط)', min: 10, max: 25, count: 0, totalMm: 0 },
+      { name: '26-45 ملم (غزيرة)', min: 25, max: 45, count: 0, totalMm: 0 },
+      { name: '46+ ملم (طوفانية)', min: 45, max: 999, count: 0, totalMm: 0 }
+    ];
+
+    logs.forEach(r => {
+      const mm = Number(r.amountMm) || 0;
+      for (const b of bins) {
+        if (mm > b.min && mm <= b.max) {
+          b.count++;
+          b.totalMm += mm;
+          break;
+        }
+      }
+    });
+
+    labels = bins.map(b => b.name);
+    counts = bins.map(b => b.count);
+    secondaryData = bins.map(b => b.totalMm);
+    datasetLabel = 'تكرار الأيام الماطرة (عدد المطرات)';
+    barColor = isDark ? '#38bdf8' : '#0284c7';
+    hoverColor = '#0369a1';
+
+    const totalMm = logs.reduce((s, r) => s + (Number(r.amountMm) || 0), 0);
+    const avgMm = logs.length > 0 ? (totalMm / logs.length).toFixed(1) : 0;
+
+    if (statsBar) {
+      statsBar.innerHTML = `
+        <div class="p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">إجمالي الهطول:</span>
+          <span class="text-xs font-black text-sky-700 dark:text-sky-300 font-mono">${totalMm} ملم</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">عدد المطرات:</span>
+          <span class="text-xs font-black text-sky-700 dark:text-sky-300 font-mono">${logs.length} مطرة</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">متوسط المطرة:</span>
+          <span class="text-xs font-black text-sky-700 dark:text-sky-300 font-mono">${avgMm} ملم/مطرة</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">أعلى فئة تكراراً:</span>
+          <span class="text-xs font-black text-sky-700 dark:text-sky-300">${bins.reduce((prev, curr) => (curr.count > prev.count ? curr : prev)).name}</span>
+        </div>
+      `;
+    }
+
+  } else if (currentHistogramType === 'expenses') {
+    // مدرج تكراري لفئات المصروفات
+    const exps = state.expenses || [];
+    const bins = [
+      { name: '< 100 ألف ج.س', min: 0, max: 100000, count: 0, total: 0 },
+      { name: '100k - 500k ج.س', min: 100000, max: 500000, count: 0, total: 0 },
+      { name: '500k - 2 مليون ج.س', min: 500000, max: 2000000, count: 0, total: 0 },
+      { name: '2M - 10 مليون ج.س', min: 2000000, max: 10000000, count: 0, total: 0 },
+      { name: '> 10 مليون ج.س', min: 10000000, max: 9999999999, count: 0, total: 0 }
+    ];
+
+    exps.forEach(e => {
+      const amt = Number(e.amount) || 0;
+      for (const b of bins) {
+        if (amt > b.min && amt <= b.max) {
+          b.count++;
+          b.total += amt;
+          break;
+        }
+      }
+    });
+
+    labels = bins.map(b => b.name);
+    counts = bins.map(b => b.count);
+    secondaryData = bins.map(b => b.total);
+    datasetLabel = 'تكرار سندات الصرف (عدد العمليات)';
+    barColor = isDark ? '#10b981' : '#059669';
+    hoverColor = '#047857';
+
+    const totalSpent = exps.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+    const avgSpent = exps.length > 0 ? Math.round(totalSpent / exps.length) : 0;
+
+    if (statsBar) {
+      statsBar.innerHTML = `
+        <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">إجمالي المنصرف:</span>
+          <span class="text-xs font-black text-emerald-700 dark:text-emerald-300 font-mono">${totalSpent.toLocaleString()} ج.س</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">عدد السندات:</span>
+          <span class="text-xs font-black text-emerald-700 dark:text-emerald-300 font-mono">${exps.length} قيد</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">متوسط السند:</span>
+          <span class="text-xs font-black text-emerald-700 dark:text-emerald-300 font-mono">${avgSpent.toLocaleString()} ج.س</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">الشريحة الأكثر تكراراً:</span>
+          <span class="text-xs font-black text-emerald-700 dark:text-emerald-300">${bins.reduce((p, c) => (c.count > p.count ? c : p)).name}</span>
+        </div>
+      `;
+    }
+
+  } else {
+    // مدرج تكراري لساعات العمليات الحقلية
+    const allOps = [];
+    (state.plots || []).forEach(p => {
+      (p.operations || []).forEach(op => allOps.push(op));
+    });
+
+    const bins = [
+      { name: '< 10 ساعات (عملية خفيفة)', min: 0, max: 10, count: 0 },
+      { name: '10 - 25 ساعة (عملية متوسطة)', min: 10, max: 25, count: 0 },
+      { name: '25 - 50 ساعة (حراثة واسعة)', min: 25, max: 50, count: 0 },
+      { name: '50+ ساعة (عمليات كبرى)', min: 50, max: 9999, count: 0 }
+    ];
+
+    allOps.forEach(op => {
+      const h = Number(op.fieldHours) || 0;
+      for (const b of bins) {
+        if (h > b.min && h <= b.max) {
+          b.count++;
+          break;
+        }
+      }
+    });
+
+    labels = bins.map(b => b.name);
+    counts = bins.map(b => b.count);
+    datasetLabel = 'تكرار العمليات الحقلية (عدد المرات)';
+    barColor = isDark ? '#fbbf24' : '#d97706';
+    hoverColor = '#b45309';
+
+    const totalHours = allOps.reduce((s, o) => s + (Number(o.fieldHours) || 0), 0);
+
+    if (statsBar) {
+      statsBar.innerHTML = `
+        <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">إجمالي ساعات التشغيل:</span>
+          <span class="text-xs font-black text-amber-700 dark:text-amber-300 font-mono">${totalHours} ساعة</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">عدد العمليات المنفذة:</span>
+          <span class="text-xs font-black text-amber-700 dark:text-amber-300 font-mono">${allOps.length} عملية</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">متوسط العملية:</span>
+          <span class="text-xs font-black text-amber-700 dark:text-amber-300 font-mono">${allOps.length > 0 ? (totalHours / allOps.length).toFixed(1) : 0} س/عملية</span>
+        </div>
+        <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-right">
+          <span class="text-[10px] text-slate-500 font-bold block">الشريحة السائدة:</span>
+          <span class="text-xs font-black text-amber-700 dark:text-amber-300">${bins.reduce((p, c) => (c.count > p.count ? c : p)).name}</span>
+        </div>
+      `;
+    }
+  }
+
+  if (histogramChartInstance) {
+    histogramChartInstance.destroy();
+  }
+
+  histogramChartInstance = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: datasetLabel,
+        data: counts,
+        backgroundColor: barColor,
+        hoverBackgroundColor: hoverColor,
+        borderRadius: 8,
+        barPercentage: 0.92,
+        categoryPercentage: 0.95
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor,
+            font: { family: 'Cairo', size: 11, weight: 'bold' }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const val = context.raw || 0;
+              let txt = `${datasetLabel}: ${val}`;
+              if (currentHistogramType === 'rainfall' && secondaryData[context.dataIndex] !== undefined) {
+                txt += ` (${secondaryData[context.dataIndex]} ملم تراكمي)`;
+              } else if (currentHistogramType === 'expenses' && secondaryData[context.dataIndex] !== undefined) {
+                txt += ` (${secondaryData[context.dataIndex].toLocaleString()} ج.س)`;
+              }
+              return txt;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { family: 'Cairo', size: 10 } },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { 
+            stepSize: 1,
+            color: textColor, 
+            font: { family: 'Cairo', size: 10 } 
+          },
+          grid: { color: gridColor }
+        }
+      }
+    }
+  });
+}
+
+// 4. بناء وعرض الخط الزمني للأنشطة اليومية (Daily Activities Timeline)
+let currentTimelineFilter = 'all';
+
+function filterDailyTimeline(filter) {
+  currentTimelineFilter = filter;
+  const filterBtns = {
+    all: document.getElementById('btn-tl-all'),
+    operations: document.getElementById('btn-tl-operations'),
+    expenses: document.getElementById('btn-tl-expenses'),
+    rainfall: document.getElementById('btn-tl-rainfall'),
+    fuel: document.getElementById('btn-tl-fuel'),
+    labor: document.getElementById('btn-tl-labor')
+  };
+  Object.keys(filterBtns).forEach(k => {
+    const btn = filterBtns[k];
+    if (!btn) return;
+    if (k === filter) {
+      btn.className = 'px-2.5 py-1 rounded-xl bg-emerald-600 text-white shadow-sm font-bold text-xs';
+    } else {
+      btn.className = 'px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 font-bold text-xs';
+    }
+  });
+  renderDailyActivitiesTimeline();
+}
+
+function buildDailyActivitiesData() {
+  const events = [];
+
+  // أ. العمليات الحقلية
+  (state.plots || []).forEach(p => {
+    (p.operations || []).forEach(op => {
+      events.push({
+        id: op.id || ('op-' + Math.random()),
+        type: 'operations',
+        title: `عملية حقلية: ${op.type || 'حراثة/كسرة'}`,
+        date: op.date || '2026-07-20',
+        time: op.time || 'صباحاً',
+        actor: op.driver || 'سائق الحراثة',
+        details: `مقطوعية ${p.name} (${op.areaFeddan || p.area} فدان) • ساعات التشغيل: ${op.fieldHours || 10} ساعة ${op.fuelBarrels ? `• استهلاك: ${op.fuelBarrels} برميل جاز` : ''}`,
+        badgeText: 'عملية حقلية',
+        icon: '🚜',
+        colorClass: 'bg-emerald-500'
+      });
+    });
+  });
+
+  // ب. المصروفات
+  (state.expenses || []).forEach(exp => {
+    events.push({
+      id: exp.id,
+      type: 'expenses',
+      title: `مصروف مالي: ${exp.category}`,
+      date: exp.date || '2026-07-20',
+      time: exp.time || 'نهاري',
+      actor: exp.createdBy || 'مصطفى الجعلي',
+      details: `المبلغ: ${Number(exp.amount).toLocaleString()} ج.س • المحصول: ${exp.crop || 'مشترك'} • ${exp.notes || exp.op || ''}`,
+      badgeText: 'مصروف مالي',
+      icon: '💳',
+      colorClass: 'bg-rose-500'
+    });
+  });
+
+  // ج. الأمطار
+  (state.rainfallLogs || []).forEach(rain => {
+    events.push({
+      id: rain.id,
+      type: 'rainfall',
+      title: `هطول أمطار: ${rain.amountMm || 0} ملم (${rain.intensity || 'أمطار'})`,
+      date: rain.date || '2026-07-15',
+      time: rain.startTime ? `${rain.startTime} - ${rain.endTime || ''}` : 'فجر',
+      actor: rain.loggedBy || 'عبدالقادر',
+      details: `الموقع: ${rain.location || 'كسمور الشرقي'} • ${rain.fieldImpact || 'ري الأرض'} (${rain.durationMinutes || 60} دقيقة)`,
+      badgeText: 'أمطار ورصد',
+      icon: '🌧️',
+      colorClass: 'bg-sky-500'
+    });
+  });
+
+  // د. حركات الوقود
+  (state.fuelTransactions || []).forEach(fuel => {
+    events.push({
+      id: fuel.id,
+      type: 'fuel',
+      title: `حركة وقود: ${fuel.type === 'in' ? 'توريد واستلام' : 'صرف وتشغيل'} (${fuel.barrels} برميل)`,
+      date: fuel.date || '2026-07-20',
+      time: 'مستودع كسمور',
+      actor: fuel.receiver || fuel.supplier || 'المشرف الميداني',
+      details: `الكمية: ${fuel.liters || (fuel.barrels * 200)} لتر • الغرض: ${fuel.purpose || fuel.notes || '-'}`,
+      badgeText: 'وقود وجاز',
+      icon: '⛽',
+      colorClass: 'bg-amber-500'
+    });
+  });
+
+  // هـ. سحوبات البقالة والعمالة
+  (state.groceryTransactions || []).forEach(g => {
+    events.push({
+      id: g.id,
+      type: 'labor',
+      title: `سحب بقالة الكمبو: ${g.itemName}`,
+      date: g.date || '2026-08-01',
+      time: 'دكان الكمبو',
+      actor: g.workerName,
+      details: `الكمية: ${g.qty} ${g.unit || ''} • القيمة: ${Number(g.totalPrice).toLocaleString()} ج.س • خصم من مستحقات العامل`,
+      badgeText: 'مسحوبات عمالة',
+      icon: '👥',
+      colorClass: 'bg-purple-500'
+    });
+  });
+
+  // ترتيب الأحداث من الأحدث إلى الأقدم
+  events.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return events;
+}
+
+function renderDailyActivitiesTimeline() {
+  const container = document.getElementById('daily-activities-timeline-container');
+  if (!container) return;
+
+  const allEvents = buildDailyActivitiesData();
+  const filteredEvents = currentTimelineFilter === 'all' 
+    ? allEvents 
+    : allEvents.filter(e => e.type === currentTimelineFilter);
+
+  const countBadge = document.getElementById('timeline-count-badge');
+  if (countBadge) {
+    countBadge.textContent = `${filteredEvents.length} نشاط موثق`;
+  }
+
+  if (filteredEvents.length === 0) {
+    container.innerHTML = `
+      <div class="py-12 text-center text-slate-400">
+        <span class="text-4xl block mb-2">📅</span>
+        <p class="font-bold text-xs">لا توجد أنشطة مسجلة في هذا التصنيف حالياً</p>
+      </div>
+    `;
+    return;
+  }
+
+  // تجميع الأنشطة يوماً بيوم
+  const groupsByDate = {};
+  filteredEvents.forEach(ev => {
+    const d = ev.date || 'غير محدد';
+    if (!groupsByDate[d]) groupsByDate[d] = [];
+    groupsByDate[d].push(ev);
+  });
+
+  const datesSorted = Object.keys(groupsByDate).sort((a, b) => new Date(b) - new Date(a));
+
+  container.innerHTML = datesSorted.map(dateStr => {
+    const dayEvents = groupsByDate[dateStr];
+    
+    // تنسيق التاريخ بالعربية
+    let formattedDateHeader = dateStr;
+    try {
+      const dObj = new Date(dateStr + 'T12:00:00');
+      formattedDateHeader = dObj.toLocaleDateString('ar-SD', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    } catch(e) {}
+
+    return `
+      <div class="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/40 p-3.5 sm:p-4 shadow-sm">
+        
+        <!-- رأس اليوم -->
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-xs font-black">📅</span>
+            <h4 class="font-black text-xs sm:text-sm text-slate-900 dark:text-white">${formattedDateHeader}</h4>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">
+            ${dayEvents.length} أنشطة
+          </span>
+        </div>
+
+        <!-- قائمة أنشطة هذا اليوم في مسار زمني عمودي -->
+        <div class="relative pl-2 pr-4 space-y-3 before:absolute before:right-6 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+          ${dayEvents.map(ev => `
+            <div class="relative flex items-start gap-3 pr-6">
+              
+              <!-- عقدة المسار الزمني المضيئة -->
+              <span class="absolute right-0 top-1 w-3.5 h-3.5 rounded-full ${ev.colorClass} ring-4 ring-white dark:ring-slate-900 shadow-sm"></span>
+
+              <!-- محتوى النشاط -->
+              <div class="flex-1 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60 transition text-right">
+                <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-sm">${ev.icon}</span>
+                    <h5 class="font-black text-xs text-slate-900 dark:text-white">${ev.title}</h5>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <span class="text-[10px] font-mono text-slate-400 font-semibold">${ev.time}</span>
+                    <span class="text-[10px] px-2 py-0.2 rounded-md font-bold ${ev.type === 'operations' ? 'bg-emerald-100 text-emerald-800' : ev.type === 'expenses' ? 'bg-rose-100 text-rose-800' : ev.type === 'rainfall' ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-700'}">
+                      ${ev.badgeText}
+                    </span>
+                  </div>
+                </div>
+
+                <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">${ev.details}</p>
+                <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1 pt-1 border-t border-slate-200/40 dark:border-slate-700/40">
+                  <span>المسؤول: <strong class="text-slate-600 dark:text-slate-300">${ev.actor}</strong></span>
+                  <span class="font-mono">${ev.date}</span>
+                </div>
+              </div>
+
+            </div>
+          `).join('')}
+        </div>
+
+      </div>
+    `;
+  }).join('');
+}
+
+// 5. دالة تنزيل وحفظ الوسائط بنقرة واحدة (Blob Downloader المتوافق مع كافة الأجهزة والمتصفحات)
+function downloadMediaFile(mediaUrl, filename) {
+  try {
+    if (!mediaUrl) {
+      showToast('⚠️ لا يوجد رابط للملف المطلوب تنزيله');
+      return;
+    }
+
+    if (mediaUrl.startsWith('data:')) {
+      const parts = mediaUrl.split(',');
+      const mimeMatch = parts[0].match(/:(.*?);/);
+      const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], { type: mime });
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      const ext = mime.includes('video') ? '.mp4' : '.jpg';
+      a.download = (filename ? filename.replace(/\s+/g, '_') : ('mustagro-' + Date.now())) + ext;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+      showToast('✓ بدأ تنزيل وحفظ الملف على جهازك');
+    } else {
+      const a = document.createElement('a');
+      a.href = mediaUrl;
+      a.download = filename || 'mustagro-media';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('✓ تم بدء التحميل');
+    }
+  } catch(err) {
+    console.error('Download error:', err);
+    try {
+      window.open(mediaUrl, '_blank');
+    } catch(e) {}
+  }
+}
+
 
 function renderPlotsDashboard() {
   const container = document.getElementById('plots-container');
@@ -19045,7 +19772,7 @@ function openUploadPhotoModal() {
 
         <div>
           <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">عنوان الوسيط / المشهد (مطلوب):</label>
-          <input type="text" id="upload-media-title" placeholder="مثال: حصاد نمرة 500 تسالي، أو فيديو حراثة الكمبو..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold" required>
+          <input type="text" id="upload-media-title" placeholder="مثال: حصاد نمرة 500 تسالي، أو فيديو حراثة الكمبو (اختياري)..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
         </div>
 
         <div>
@@ -19154,6 +19881,18 @@ function previewSelectedMedia(event) {
           dataUrl: compressedDataUrl,
           thumbnail: compressedDataUrl,
           fileSizeFormatted,
+          mimeType: file.type
+        };
+      };
+      img.onerror = function() {
+        console.warn('Canvas draw failed, falling back to raw DataURL');
+        if (photoImg) photoImg.src = e.target.result;
+        if (photoMeta) photoMeta.textContent = '✓ صورة أصلية • ' + fileSizeFormatted;
+        currentSelectedMediaItem = {
+          type: 'image',
+          dataUrl: e.target.result,
+          thumbnail: e.target.result,
+          fileSizeFormatted: fileSizeFormatted,
           mimeType: file.type
         };
       };
@@ -19281,6 +20020,14 @@ function handleSaveCustomPhoto(event) {
 async function handleSaveCustomMedia(event) {
   event.preventDefault();
   if (!currentSelectedMediaItem || !currentSelectedMediaItem.dataUrl) {
+    const fileInp = document.getElementById('upload-media-file-input');
+    const photoInp = document.getElementById('upload-input-photo');
+    const videoInp = document.getElementById('upload-input-video');
+    const hasChosenFile = (fileInp && fileInp.files && fileInp.files[0]) || (photoInp && photoInp.files && photoInp.files[0]) || (videoInp && videoInp.files && videoInp.files[0]);
+    if (hasChosenFile) {
+      showToast('⏳ جاري إكمال معالجة وتجهيز الملف، يرجى الانتظار ثانية واحدة...');
+      return;
+    }
     showToast('⚠️ يرجى اختيار صورة أو مقطع فيديو أولاً');
     return;
   }
@@ -19391,10 +20138,10 @@ function viewMediaLightbox(itemOrSrc, title = '', type = 'image') {
         
         <div class="flex items-center gap-2">
           ${mediaSrc ? `
-            <a href="${mediaSrc}" download="${mediaTitle || 'mustagro-media'}" class="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl font-bold flex items-center gap-1">
+            <button type="button" onclick="downloadMediaFile('${mediaSrc}', '${mediaTitle}')" class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm active:scale-95 text-xs cursor-pointer">
               <span>⬇️</span>
-              <span>تحميل</span>
-            </a>
+              <span>تحميل وحفظ</span>
+            </button>
           ` : ''}
           <button onclick="openGedarefGalleryModal(currentGalleryFilter)" class="px-5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-sm">العودة للألبوم</button>
         </div>
