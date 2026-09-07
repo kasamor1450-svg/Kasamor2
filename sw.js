@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v29.1-grocery-withdrawals-fix
-const CACHE_NAME = 'mustagro-v29.1-grocery-withdrawals-fix';
+// Cache Version: mustagro-v29.2-profit-distributions-moved
+const CACHE_NAME = 'mustagro-v29.2-profit-distributions-moved';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

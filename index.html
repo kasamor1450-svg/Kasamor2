@@ -2023,53 +2023,7 @@ html[dir="ltr"] .font-mono {
           </table>
         </div>
       </div>
-
-      <!-- سجل توزيعات الأرباح على الشركاء بنظام الـ 13 سهماً -->
-      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-teal-50/50 dark:bg-teal-950/30">
-          <div class="flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 flex items-center justify-center font-bold text-base shadow-sm">💰</span>
-            <div>
-              <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل توزيعات الأرباح على الشركاء (نظام الـ 13 سهماً)</h3>
-              <p class="text-[11px] text-slate-500 mt-0.5">متابعة مبالغ الأرباح الموزعة والمخصومة مباشرة من الرصيد المتبقي بالخزينة</p>
-            </div>
-          </div>
-          <button onclick="openDistributeProfitsModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-sm active:scale-95">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>توزيع دفعة أرباح جديدة</span>
-          </button>
-        </div>
-
-        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل توزيعات الأرباح المعتمدة</h3>
-            <span class="text-xs text-slate-400 hidden sm:inline">• تصفية بالبيان، الموثق، أو التاريخ</span>
-          </div>
-          <div class="relative w-full sm:w-72">
-            <input type="text" id="profit-dist-search-input" onkeyup="filterTableRows('profit-dist-search-input', 'profit-distributions-table-body')" placeholder="🔍 بحث بالبيان، الموثق، أو التاريخ..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-teal-500 transition shadow-sm">
-          </div>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-right border-collapse">
-            <thead>
-              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
-                <th class="py-3 px-4">تاريخ التوزيع</th>
-                <th class="py-3 px-4">إجمالي المبلغ الموزع</th>
-                <th class="py-3 px-4">نصيب السهم الواحد (1/13)</th>
-                <th class="py-3 px-4">طريقة التحويل / الصرف</th>
-                <th class="py-3 px-4">البيان والملاحظات</th>
-                <th class="py-3 px-4">الموثق</th>
-                <th class="py-3 px-4 text-left">إجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="profit-distributions-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-              <tr>
-                <td colspan="7" class="text-center py-6 text-slate-400 text-xs font-medium">لم يتم تسجيل أي توزيعات أرباح بعد. يمكنك الضغط على "توزيع أرباح للشركاء" لبدء توزيع الأرباح.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+>
 
     </section>
 
@@ -2347,7 +2301,11 @@ html[dir="ltr"] .font-mono {
           <p class="text-xs text-slate-500 mt-1">توزيع رأس المال ومتابعة ضخ وتوريد المبالغ من الشركاء ونظام الـ 13 سهماً المعتمد لتوزيع الأرباح</p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openDistributeProfitsModal()" class="px-3.5 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-teal-600/20 active:scale-95">
+            <i data-lucide="coins" class="w-4 h-4"></i>
+            <span>توزيع دفعة أرباح جديدة</span>
+          </button>
           <button onclick="openAddCapitalInjectionModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span>تسجيل ضخ رأس مال جديد</span>
@@ -2426,6 +2384,53 @@ html[dir="ltr"] .font-mono {
           </table>
         </div>
       </div>
+
+      <!-- سجل توزيعات الأرباح على الشركاء بنظام الـ 13 سهماً -->
+      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-teal-50/50 dark:bg-teal-950/30">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 flex items-center justify-center font-bold text-base shadow-sm">💰</span>
+            <div>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل توزيعات الأرباح على الشركاء (نظام الـ 13 سهماً)</h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">متابعة مبالغ الأرباح الموزعة والمخصومة مباشرة من الرصيد المتبقي بالخزينة</p>
+            </div>
+          </div>
+          <button onclick="openDistributeProfitsModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-sm active:scale-95">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>توزيع دفعة أرباح جديدة</span>
+          </button>
+        </div>
+
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">سجل توزيعات الأرباح المعتمدة</h3>
+            <span class="text-xs text-slate-400 hidden sm:inline">• تصفية بالبيان، الموثق، أو التاريخ</span>
+          </div>
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="profit-dist-search-input" onkeyup="filterTableRows('profit-dist-search-input', 'profit-distributions-table-body')" placeholder="🔍 بحث بالبيان، الموثق، أو التاريخ..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-teal-500 transition shadow-sm">
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right border-collapse">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-3 px-4">تاريخ التوزيع</th>
+                <th class="py-3 px-4">إجمالي المبلغ الموزع</th>
+                <th class="py-3 px-4">نصيب السهم الواحد (1/13)</th>
+                <th class="py-3 px-4">طريقة التحويل / الصرف</th>
+                <th class="py-3 px-4">البيان والملاحظات</th>
+                <th class="py-3 px-4">الموثق</th>
+                <th class="py-3 px-4 text-left">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="profit-distributions-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              <tr>
+                <td colspan="7" class="text-center py-6 text-slate-400 text-xs font-medium">لم يتم تسجيل أي توزيعات أرباح بعد. يمكنك الضغط على "توزيع أرباح للشركاء" لبدء توزيع الأرباح.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div
 
     </section>
 
