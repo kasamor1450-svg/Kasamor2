@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v29.0-company-identity-logo
-const CACHE_NAME = 'mustagro-v29.0-company-identity-logo';
+// Cache Version: mustagro-v29.1-grocery-withdrawals-fix
+const CACHE_NAME = 'mustagro-v29.1-grocery-withdrawals-fix';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

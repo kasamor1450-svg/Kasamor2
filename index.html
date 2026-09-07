@@ -6073,7 +6073,28 @@ const DEFAULT_DATA = {
       "notes": "صرف تقاوي لزراعة مقطوعية ال500 بإشراف عبدالقادر"
     }
   ],
-  "groceryTransactions": [],
+  "groceryTransactions": [
+    {
+      "id": "groc-1788601590944",
+      "date": "2026-09-05",
+      "workerId": "lab-3",
+      "workerName": "محمد الجعيلي",
+      "amount": 30000,
+      "items": "دخان",
+      "notes": "سحب بالآجل من بقالة الكمبو",
+      "loggedBy": "محمد مصطفى"
+    },
+    {
+      "id": "groc-1788601819673",
+      "date": "2026-09-04",
+      "workerId": "lab-3",
+      "workerName": "محمد الجعيلي",
+      "amount": 30000,
+      "items": "باتة وحبوب",
+      "notes": "سحب بالآجل من بقالة الكمبو",
+      "loggedBy": "محمد مصطفى"
+    }
+  ],
   "rainfallLogs": [
     {
       "id": "rain-1",
@@ -10353,7 +10374,14 @@ function loadData() {
     fuelTransactions: Array.isArray(loaded.fuelTransactions) ? loaded.fuelTransactions : def.fuelTransactions,
     inventory: Array.isArray(loaded.inventory) ? loaded.inventory : def.inventory,
     inventoryTransactions: Array.isArray(loaded.inventoryTransactions) ? loaded.inventoryTransactions : def.inventoryTransactions,
-    groceryTransactions: Array.isArray(loaded.groceryTransactions) ? loaded.groceryTransactions : def.groceryTransactions,
+    groceryTransactions: (() => {
+      const existing = Array.isArray(loaded.groceryTransactions) ? loaded.groceryTransactions : [];
+      const defItems = Array.isArray(def.groceryTransactions) ? def.groceryTransactions : [];
+      const map = new Map();
+      defItems.forEach(t => map.set(t.id, t));
+      existing.forEach(t => map.set(t.id, t));
+      return Array.from(map.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    })(),
     // ترحيل وتحديث رأس المال الإلزامي والمعتمد لموسم 2026:
     // جميع المبالغ غير مسترد (69,618,003 ج.س) باستثناء مبلغ 66,500,000 ج.س مسترد للشريك عمرو
     // الإجمالي الصحيح الإلزامي: 136,118,003 ج.س
@@ -11006,6 +11034,38 @@ function initNotificationsSystem() {
             details = `تم تسجيل سحب بقالة للعامل (${wName}) بمبلغ ${cost.toLocaleString()} ج.س${itemDesc ? ' (' + itemDesc + ')' : ''}`;
             target = 'section-grocery';
             icon = '🛒';
+
+            // دمج فوري وتلقائي لقيد البقالة في الذاكرة المحلية وتحديث المستحقات دون الحاجة للتحديث اليدوي
+            if (payload.new && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
+              const liveGrocTx = {
+                id: payload.new.id,
+                date: payload.new.date,
+                workerId: payload.new.crop || payload.new.sale_id || '',
+                workerName: payload.new.receiver || '',
+                amount: Number(payload.new.total_cost || payload.new.unit_price || 0),
+                items: payload.new.item_name || 'مسحوبات بقالة',
+                notes: payload.new.notes || '',
+                loggedBy: payload.new.logged_by || 'المشرف'
+              };
+              if (!state.groceryTransactions) state.groceryTransactions = [];
+              const gIdx = state.groceryTransactions.findIndex(t => t.id === liveGrocTx.id);
+              if (gIdx >= 0) {
+                state.groceryTransactions[gIdx] = liveGrocTx;
+              } else {
+                state.groceryTransactions.unshift(liveGrocTx);
+              }
+              autoUpdateLaborWages();
+              saveData();
+              updateActiveViews();
+            } else if (payload.eventType === 'DELETE' && payload.old) {
+              const delId = payload.old.id;
+              if (delId && state.groceryTransactions) {
+                state.groceryTransactions = state.groceryTransactions.filter(t => t.id !== delId);
+                autoUpdateLaborWages();
+                saveData();
+                updateActiveViews();
+              }
+            }
           } else {
             title = '📦 حركة مخزن ومستودع جديدة';
             details = `تسجيل حركة في المخزن (${payload.new?.item_name || ''})`;
@@ -11150,8 +11210,18 @@ function autoUpdateLaborWages() {
       w.workerType = (w.id === 'lab-5') ? 'temporary' : 'permanent';
     }
 
-    // احتساب إجمالي مسحوبات البقالة الآجلة للعامل
-    const workerGroc = groceryTxList.filter(t => t.workerId === w.id || t.workerName === w.name);
+    // احتساب إجمالي مسحوبات البقالة الآجلة للعامل بدقة وموثوقية عالية
+    const cleanStr = (s) => (s || '').toString().trim().toLowerCase();
+    const workerGroc = groceryTxList.filter(t => {
+      if (t.workerId && cleanStr(t.workerId) === cleanStr(w.id)) return true;
+      if (t.workerName && cleanStr(t.workerName) === cleanStr(w.name)) return true;
+      if (t.workerName && w.name) {
+        const tw = cleanStr(t.workerName);
+        const wn = cleanStr(w.name);
+        if (tw.length >= 3 && wn.length >= 3 && (tw.includes(wn) || wn.includes(tw))) return true;
+      }
+      return false;
+    });
     w.groceryTotal = workerGroc.reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
 
     // معالجة تصحيحية لأي تاريخ بداية ونهاية غير متناسقين
@@ -14638,7 +14708,17 @@ function openWorkerGroceryStatementModal(workerId) {
   const worker = (state.labor || []).find(w => w.id === workerId);
   if (!worker) return;
 
-  const txs = (state.groceryTransactions || []).filter(t => t.workerId === workerId || t.workerName === worker.name);
+  const cleanGrocStr = (s) => (s || '').toString().trim().toLowerCase();
+  const txs = (state.groceryTransactions || []).filter(t => {
+    if (t.workerId && cleanGrocStr(t.workerId) === cleanGrocStr(workerId)) return true;
+    if (t.workerName && cleanGrocStr(t.workerName) === cleanGrocStr(worker.name)) return true;
+    if (t.workerName && worker.name) {
+      const tw = cleanGrocStr(t.workerName);
+      const wn = cleanGrocStr(worker.name);
+      if (tw.length >= 3 && wn.length >= 3 && (tw.includes(wn) || wn.includes(tw))) return true;
+    }
+    return false;
+  });
   const totalGrocery = txs.reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
 
   const html = `
