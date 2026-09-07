@@ -2023,7 +2023,6 @@ html[dir="ltr"] .font-mono {
           </table>
         </div>
       </div>
->
 
     </section>
 
@@ -3084,7 +3083,7 @@ html[dir="ltr"] .font-mono {
       if (!currentData) currentData = {};
       const requiredTables = [
         'users', 'plots', 'fuelTransactions', 'inventory',
-        'inventoryTransactions', 'groceryTransactions', 'partners',
+        'inventoryTransactions', 'groceryTransactions', 'rainfallLogs', 'partners',
         'capitalInjections', 'harvestIntakes', 'cropSales',
         'zakatDeliveries', 'machinery', 'machineryMaintenance',
         'labor', 'expenses', 'budgetCaps', 'auditLogs'
@@ -3585,7 +3584,7 @@ html[dir="ltr"] .font-mono {
             reorderLevel: Number(i.reorder_level || 0)
           })),
           inventoryTransactions: (inventoryTxRes.data || [])
-            .filter(itx => !(itx.category === 'بقالة' || itx.item_id === 'inv-grocery-camp' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('groc-'))))
+            .filter(itx => !(itx.category === 'بقالة' || itx.item_id === 'inv-grocery-camp' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('groc-')) || itx.category === 'أمطار' || itx.item_id === 'inv-weather-rainfall' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('rain-'))))
             .map(itx => ({
               id: itx.id, date: itx.date, itemId: itx.item_id, itemName: itx.item_name,
               category: itx.category, type: itx.type, quantity: Number(itx.quantity || 0),
@@ -3605,6 +3604,30 @@ html[dir="ltr"] .font-mono {
               notes: gtx.notes || '',
               loggedBy: gtx.logged_by || 'المشرف'
             })),
+          rainfallLogs: (inventoryTxRes.data || [])
+            .filter(itx => itx.category === 'أمطار' || itx.item_id === 'inv-weather-rainfall' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('rain-')))
+            .map(rtx => {
+              let extra = null;
+              try {
+                if (rtx.notes && rtx.notes.trim().startsWith('{')) {
+                  extra = JSON.parse(rtx.notes);
+                }
+              } catch(e) {}
+              return {
+                id: rtx.id,
+                date: rtx.date || (extra && extra.date) || '',
+                dayName: (extra && extra.dayName) || rtx.crop || '',
+                startTime: (extra && extra.startTime) || '00:00',
+                endTime: (extra && extra.endTime) || '00:00',
+                durationMinutes: (extra && extra.durationMinutes) !== undefined ? Number(extra.durationMinutes) : (Number(rtx.unit_price) || 0),
+                intensity: (extra && extra.intensity) || rtx.item_name || 'وسط',
+                amountMm: (extra && extra.amountMm) !== undefined ? Number(extra.amountMm) : (Number(rtx.quantity) || 0),
+                location: (extra && extra.location) || rtx.plot || '',
+                fieldImpact: (extra && extra.fieldImpact) || rtx.receiver || '',
+                loggedBy: (extra && extra.loggedBy) || rtx.logged_by || '',
+                notes: (extra && extra.notes !== undefined) ? extra.notes : (rtx.notes || '')
+              };
+            }),
           harvestIntakes: (harvestRes.data || []).map(h => ({
             id: h.id, date: h.date, plot: h.plot, crop: h.crop,
             bags: Number(h.bags || 0), weightTons: Number(h.weight_tons || 0),
@@ -3834,6 +3857,61 @@ html[dir="ltr"] .font-mono {
         return !error;
       } catch(err) {
         console.warn('deleteGroceryTransaction error:', err);
+        return false;
+      }
+    }
+
+    async upsertRainfallLog(rain) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: rain.id,
+          date: rain.date || new Date().toISOString().split('T')[0],
+          item_id: 'inv-weather-rainfall',
+          item_name: rain.intensity || 'أمطار',
+          category: 'أمطار',
+          type: 'issue',
+          quantity: Number(rain.amountMm) || 0,
+          unit: 'ملم',
+          unit_price: Number(rain.durationMinutes) || 0,
+          total_cost: 0,
+          plot: rain.location || '',
+          crop: rain.dayName || '',
+          receiver: rain.fieldImpact || '',
+          logged_by: rain.loggedBy || 'المشرف',
+          notes: JSON.stringify({
+            id: rain.id,
+            date: rain.date,
+            dayName: rain.dayName,
+            startTime: rain.startTime,
+            endTime: rain.endTime,
+            durationMinutes: rain.durationMinutes,
+            intensity: rain.intensity,
+            amountMm: rain.amountMm,
+            location: rain.location,
+            fieldImpact: rain.fieldImpact,
+            loggedBy: rain.loggedBy,
+            notes: rain.notes
+          }),
+          sale_id: null
+        };
+        const { data, error } = await this.client.from('inventory_transactions').upsert(row);
+        if (error) console.warn('Supabase upsert rainfall log warning:', error);
+        return data;
+      } catch(err) {
+        console.warn('upsertRainfallLog error:', err);
+        return null;
+      }
+    }
+
+    async deleteRainfallLog(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('inventory_transactions').delete().eq('id', id);
+        if (error) console.warn('Supabase delete rainfall log warning:', error);
+        return !error;
+      } catch(err) {
+        console.warn('deleteRainfallLog error:', err);
         return false;
       }
     }
@@ -10435,7 +10513,14 @@ function loadData() {
       return lList;
     })(),
     expenses: Array.isArray(loaded.expenses) ? loaded.expenses : def.expenses,
-    rainfallLogs: Array.isArray(loaded.rainfallLogs) ? loaded.rainfallLogs : (def.rainfallLogs || []),
+    rainfallLogs: (() => {
+      const existing = Array.isArray(loaded.rainfallLogs) ? loaded.rainfallLogs : [];
+      const defItems = Array.isArray(def.rainfallLogs) ? def.rainfallLogs : [];
+      const map = new Map();
+      defItems.forEach(r => map.set(r.id, r));
+      existing.forEach(r => map.set(r.id, r));
+      return Array.from(map.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    })(),
     capitalPlan: loaded.capitalPlan || def.capitalPlan,
     budgetCaps: Array.isArray(loaded.budgetCaps) ? loaded.budgetCaps : def.budgetCaps,
     forecastSettings: {
@@ -20661,6 +20746,11 @@ function handleSaveRainfallSubmit(event, editId) {
         intensity, amountMm, location, fieldImpact,
         loggedBy: currentUserObj.name
       };
+      if (window.AgroAPI && typeof window.AgroAPI.upsertRainfallLog === 'function') {
+        window.AgroAPI.upsertRainfallLog(state.rainfallLogs[idx]).then(() => {
+          console.log('✓ تم حفظ تحديث سجل المطر في Supabase');
+        }).catch(e => console.warn('Rainfall cloud sync warning:', e));
+      }
       showToast('✓ تم تحديث سجل هطول المطر بنجاح');
     }
   } else {
@@ -20673,6 +20763,11 @@ function handleSaveRainfallSubmit(event, editId) {
       notes: `هطول أمطار ${intensity} من ${startTime} إلى ${endTime}`
     };
     state.rainfallLogs.unshift(newRecord);
+    if (window.AgroAPI && typeof window.AgroAPI.upsertRainfallLog === 'function') {
+      window.AgroAPI.upsertRainfallLog(newRecord).then(() => {
+        console.log('✓ تم حفظ سجل المطر الجديد في Supabase');
+      }).catch(e => console.warn('Rainfall cloud sync warning:', e));
+    }
     showToast(`✓ تم تسجيل هطول أمطار (${intensity}) بنجاح!`);
   }
 
@@ -20704,6 +20799,11 @@ function deleteRainfallRecord(rainId) {
   
   if (!confirm('هل أنت متأكد من حذف هذا السجل لهطول الأمطار؟')) return;
   state.rainfallLogs = (state.rainfallLogs || []).filter(r => r.id !== rainId);
+  if (window.AgroAPI && typeof window.AgroAPI.deleteRainfallLog === 'function') {
+    window.AgroAPI.deleteRainfallLog(rainId).then(() => {
+      console.log('✓ تم حذف سجل المطر من Supabase');
+    }).catch(e => console.warn('Rainfall cloud delete warning:', e));
+  }
   saveData('✓ تم حذف سجل هطول المطر');
   renderRainfallSection();
 }
@@ -23117,7 +23217,7 @@ async function initCloudSyncOnStartup() {
     updateCloudStatusIndicator(true, 'جاري مزامنة السحابة...');
     try {
       const cloudState = await window.AgroAPI.fetchCloudState();
-      if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0 || (cloudState.groceryTransactions && cloudState.groceryTransactions.length > 0))) {
+      if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0 || (cloudState.groceryTransactions && cloudState.groceryTransactions.length > 0) || (cloudState.rainfallLogs && cloudState.rainfallLogs.length > 0))) {
         // دمج قيود وسحوبات البقالة بذكاء بين السحابة والمحلي دون فقدان أي قيد
         const localGroc = state.groceryTransactions || [];
         const cloudGroc = cloudState.groceryTransactions || [];
@@ -23134,10 +23234,25 @@ async function initCloudSyncOnStartup() {
         });
         const mergedGrocery = Array.from(grocMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
+        // دمج سجلات الأمطار والطقس بذكاء بين السحابة والمحلي دون فقدان أي قيد
+        const localRain = state.rainfallLogs || [];
+        const cloudRain = cloudState.rainfallLogs || [];
+        const rainMap = new Map();
+        cloudRain.forEach(r => rainMap.set(r.id, r));
+        const pendingLocalRain = [];
+        localRain.forEach(r => {
+          if (!rainMap.has(r.id)) {
+            rainMap.set(r.id, r);
+            pendingLocalRain.push(r);
+          }
+        });
+        const mergedRainfall = Array.from(rainMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
         state = {
           ...state,
           ...cloudState,
           groceryTransactions: mergedGrocery,
+          rainfallLogs: mergedRainfall,
           farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
           forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
         };
@@ -23148,11 +23263,18 @@ async function initCloudSyncOnStartup() {
         updateCloudStatusIndicator(true, '🟢 سحابي متصل (محدث)');
         console.log("✓ تم تحديث وتطبيق كامل البيانات بنجاح من PostgreSQL السحابية!");
 
-        // رفع أي قيود محلية غير مسجلة في السحابة تلقائياً
+        // رفع أي قيود بقالة محلية غير مسجلة في السحابة تلقائياً
         if (pendingLocalGroc.length > 0 && window.AgroAPI && typeof window.AgroAPI.upsertGroceryTransaction === 'function') {
           Promise.all(pendingLocalGroc.map(gtx => window.AgroAPI.upsertGroceryTransaction(gtx)))
             .then(() => console.log(`✓ تم رفع ومزامنة ${pendingLocalGroc.length} قيد بقالة محلي إلى السحابة تلقائياً`))
             .catch(err => console.warn('Auto upload grocery error:', err));
+        }
+
+        // رفع أي سجلات أمطار محلية غير مسجلة في السحابة تلقائياً
+        if (pendingLocalRain.length > 0 && window.AgroAPI && typeof window.AgroAPI.upsertRainfallLog === 'function') {
+          Promise.all(pendingLocalRain.map(rtx => window.AgroAPI.upsertRainfallLog(rtx)))
+            .then(() => console.log(`✓ تم رفع ومزامنة ${pendingLocalRain.length} سجل أمطار محلي إلى السحابة تلقائياً`))
+            .catch(err => console.warn('Auto upload rainfall error:', err));
         }
       } else {
         updateCloudStatusIndicator(true, '🟢 سحابي متصل');
@@ -23171,7 +23293,7 @@ async function handleFetchFromSupabase() {
   }
   showToast('جاري سحب أحدث نسخة من السحابة...', 'info');
   const cloudState = await window.AgroAPI.fetchCloudState();
-  if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0 || cloudState.groceryTransactions?.length > 0)) {
+  if (cloudState && (cloudState.expenses?.length > 0 || cloudState.partners?.length > 0 || cloudState.groceryTransactions?.length > 0 || cloudState.rainfallLogs?.length > 0)) {
     const localGroc = state.groceryTransactions || [];
     const cloudGroc = cloudState.groceryTransactions || [];
     const grocMap = new Map();
@@ -23181,10 +23303,20 @@ async function handleFetchFromSupabase() {
     });
     const mergedGrocery = Array.from(grocMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
+    const localRain = state.rainfallLogs || [];
+    const cloudRain = cloudState.rainfallLogs || [];
+    const rainMap = new Map();
+    cloudRain.forEach(r => rainMap.set(r.id, r));
+    localRain.forEach(r => {
+      if (!rainMap.has(r.id)) rainMap.set(r.id, r);
+    });
+    const mergedRainfall = Array.from(rainMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
     state = {
       ...state,
       ...cloudState,
       groceryTransactions: mergedGrocery,
+      rainfallLogs: mergedRainfall,
       farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
       forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
     };
@@ -23192,7 +23324,7 @@ async function handleFetchFromSupabase() {
     saveData();
     updateActiveViews();
     safeCreateIcons();
-    showToast(`تم استيراد ومزامنة ${cloudState.expenses ? cloudState.expenses.length : 0} قيد مالي و${mergedGrocery.length} قيد بقالة من السحابة بنجاح!`, 'success');
+    showToast(`تم استيراد ومزامنة ${cloudState.expenses ? cloudState.expenses.length : 0} قيد مالي و${mergedRainfall.length} سجل أمطار من السحابة بنجاح!`, 'success');
     closeModal();
   } else {
     showToast('لم يتم العثور على بيانات جديدة في السحابة', 'info');
@@ -23213,7 +23345,11 @@ if (typeof window !== 'undefined') {
             (payload.new && (payload.new.category === 'بقالة' || payload.new.item_id === 'inv-grocery-camp' || (payload.new.id && String(payload.new.id).startsWith('groc-')))) ||
             (payload.old && (payload.old.category === 'بقالة' || payload.old.item_id === 'inv-grocery-camp' || (payload.old.id && String(payload.old.id).startsWith('groc-'))))
           );
-          const tableNameDesc = isGroc ? 'بقالة الكمبو والمسحوبات' : (payload.table === 'inventory_transactions' ? 'المخزن والمستودع' : payload.table);
+          const isRain = payload && payload.table === 'inventory_transactions' && (
+            (payload.new && (payload.new.category === 'أمطار' || payload.new.item_id === 'inv-weather-rainfall' || (payload.new.id && String(payload.new.id).startsWith('rain-')))) ||
+            (payload.old && (payload.old.category === 'أمطار' || payload.old.item_id === 'inv-weather-rainfall' || (payload.old.id && String(payload.old.id).startsWith('rain-'))))
+          );
+          const tableNameDesc = isGroc ? 'بقالة الكمبو والمسحوبات' : (isRain ? 'سجلات الأمطار والطقس' : (payload.table === 'inventory_transactions' ? 'المخزن والمستودع' : payload.table));
           showToast(`⚡ تحديث سحابي فوري: تم تعديل (${tableNameDesc}) من قبل مستخدم آخر!`, 'info');
           handleFetchFromSupabase();
         });

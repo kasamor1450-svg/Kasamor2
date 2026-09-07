@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v29.2-profit-distributions-moved
-const CACHE_NAME = 'mustagro-v29.2-profit-distributions-moved';
+// Cache Version: mustagro-v29.3-rainfall-cloud-sync
+const CACHE_NAME = 'mustagro-v29.3-rainfall-cloud-sync';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
