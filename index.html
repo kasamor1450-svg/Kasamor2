@@ -1179,7 +1179,7 @@ html[dir="ltr"] .font-mono {
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-emerald-100 dark:border-emerald-900/50">
             
             <div class="p-3 bg-white/80 dark:bg-slate-800/70 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-right">
-              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">رأس المال المضخوخ</p>
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400">💰 إجمالي رأس المال المدفوع</p>
               <h3 id="kpi-total-capital" class="text-sm sm:text-base font-black text-indigo-700 dark:text-indigo-400 font-mono mt-0.5">136,118,003 ج.س</h3>
               <p class="text-[10px] text-slate-400">شامل الـ 13 سهماً</p>
             </div>
@@ -2340,28 +2340,41 @@ html[dir="ltr"] .font-mono {
       <!-- بطاقات مؤشرات الشركاء ورأس المال -->
       <div id="partners-kpi-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
 
-      <!-- جدول تفصيل أنصبة الشركاء والمصروفات والأرباح -->
-      <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <!-- عرض الشركاء: جدول تفصيلي أو كروت متجاوبة -->
+      <div id="partners-table-wrapper" class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
           <div>
             <h3 class="text-sm font-black text-slate-900 dark:text-white">جدول توزيع الحصص ورأس المال المدفوع للشركاء (13 سهم)</h3>
             <p class="text-[11px] text-slate-400 mt-0.5">استرداد 100% لرأس المال المدفوع والمضخوخ وتوزيع الأرباح الصافية بنظام الـ 13 سهماً</p>
           </div>
-          <div class="text-xs font-bold text-slate-500">
-            📊 رأس المال المستهدف: 300 مليون ج.س (200م زراعة + 100م حصاد)
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="text-xs font-bold text-slate-500">
+              📊 رأس المال المستهدف: 300 مليون ج.س (200م زراعة + 100م حصاد)
+            </div>
+            <!-- زر التبديل بين الجدول والكروت -->
+            <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
+              <button id="btn-partners-view-table" type="button" onclick="setPartnersViewMode('table')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                <span>📊 عرض الجدول</span>
+              </button>
+              <button id="btn-partners-view-cards" type="button" onclick="setPartnersViewMode('cards')" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 transition flex items-center gap-1.5 cursor-pointer">
+                <span>🎴 كروت الشركاء</span>
+              </button>
+            </div>
           </div>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
             <thead>
-              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 whitespace-nowrap">
                 <th class="py-3.5 px-4">اسم الشريك</th>
-                <th class="py-3.5 px-4">الأنصبة الثابتة للأرباح</th>
-                <th class="py-3.5 px-4">نسبة توزيع الأرباح</th>
-                <th class="py-3.5 px-4 text-slate-900 dark:text-white">إجمالي رأس المال المدفوع (مسترد 100%)</th>
-                <th class="py-3.5 px-4">حالة الاسترداد</th>
-                <th class="py-3.5 px-4">الملاحظات</th>
+                <th class="py-3.5 px-4">الأنصبة والنسبة</th>
+                <th class="py-3.5 px-4 text-teal-700 dark:text-teal-400">🟢 غير مسترد (أصل دائم)</th>
+                <th class="py-3.5 px-4 text-blue-700 dark:text-blue-400">🔵 مسترد (سلفة تشغيلية)</th>
+                <th class="py-3.5 px-4 font-black text-emerald-900 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/60 border-x border-emerald-200 dark:border-emerald-800">💰 إجمالي رأس المال المدفوع</th>
+                <th class="py-3.5 px-4 text-emerald-700 dark:text-emerald-400">🌾 حصة مبيعات المحاصيل</th>
+                <th class="py-3.5 px-4 text-indigo-700 dark:text-indigo-400">الإجمالي شامل المبيعات</th>
+                <th class="py-3.5 px-4 text-amber-700 dark:text-amber-400">الأرباح المستلمة</th>
                 <th class="py-3.5 px-4 text-left">إجراءات</th>
               </tr>
             </thead>
@@ -2369,6 +2382,9 @@ html[dir="ltr"] .font-mono {
           </table>
         </div>
       </div>
+
+      <!-- كروت الشركاء الحديثة المتجاوبة (Modern Partner Cards View) -->
+      <div id="partners-modern-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden"></div>
 
       <!-- سجل حركات ضخ وتوريد رأس المال للمشروع -->
       <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
@@ -15597,7 +15613,7 @@ function recalculatePartnerCapital() {
 
 function setPartnersViewMode(mode) {
   const cardsCont = document.getElementById('partners-modern-cards-container');
-  const tableCont = document.querySelector('#section-partners .overflow-x-auto')?.parentElement;
+  const tableCont = document.getElementById('partners-table-wrapper') || document.querySelector('#section-partners .overflow-x-auto')?.parentElement;
   const btnCards = document.getElementById('btn-partners-view-cards');
   const btnTable = document.getElementById('btn-partners-view-table');
 
@@ -15825,7 +15841,7 @@ function renderPartnersSection() {
   }
 
   // Render Partners Table Rows
-  tableBody.innerHTML = state.partners.map(p => {
+  const partnerRowsHtml = state.partners.map(p => {
     const sharesCount = parseFloat(p.shares) || 1;
     const percent = ((sharesCount / 13) * 100).toFixed(2);
     const nonRef = parseFloat(p.nonRefundableCapital) || 0;
@@ -15865,7 +15881,7 @@ function renderPartnersSection() {
           ${formatCapitalMoney(ref)} ج.س
         </td>
 
-        <td class="py-3.5 px-4 font-mono font-black text-slate-900 dark:text-white text-xs">
+        <td class="py-3.5 px-4 font-mono font-black text-emerald-950 dark:text-emerald-100 text-xs bg-emerald-50/70 dark:bg-emerald-950/40 border-x border-emerald-100 dark:border-emerald-900/40">
           ${formatCapitalMoney(paidCap)} ج.س
         </td>
 
@@ -15902,6 +15918,22 @@ function renderPartnersSection() {
       </tr>
     `;
   }).join('');
+
+    const totalRowHtml = `
+      <tr class="bg-slate-100/90 dark:bg-slate-800/90 font-black text-xs border-t-2 border-slate-300 dark:border-slate-700">
+        <td class="py-3.5 px-4 text-slate-900 dark:text-white font-black">الإجمالي العام للشركاء</td>
+        <td class="py-3.5 px-4 text-slate-900 dark:text-white font-black">13 سهماً (100%)</td>
+        <td class="py-3.5 px-4 font-mono text-teal-800 dark:text-teal-300 font-bold">${formatCapitalMoney(totalNonRefundable)} ج.س</td>
+        <td class="py-3.5 px-4 font-mono text-blue-800 dark:text-blue-300 font-bold">${formatCapitalMoney(totalRefundable)} ج.س</td>
+        <td class="py-3.5 px-4 font-mono text-emerald-900 dark:text-emerald-100 bg-emerald-100/80 dark:bg-emerald-900/50 font-black border-x border-emerald-200 dark:border-emerald-800 text-sm">${formatCapitalMoney(totalPaidCapital)} ج.س</td>
+        <td class="py-3.5 px-4 font-mono text-emerald-800 dark:text-emerald-300 font-bold">+${formatCapitalMoney(totalCropSales)} ج.س</td>
+        <td class="py-3.5 px-4 font-mono text-indigo-800 dark:text-indigo-300 font-bold">${formatCapitalMoney(totalPaidCapital + totalCropSales)} ج.س</td>
+        <td class="py-3.5 px-4 font-mono text-amber-800 dark:text-amber-300 font-bold">${formatCapitalMoney(totalProfitsDistributed)} ج.س</td>
+        <td class="py-3.5 px-4 text-left font-bold text-slate-500">-</td>
+      </tr>
+    `;
+
+    tableBody.innerHTML = partnerRowsHtml + totalRowHtml;;
 
   // Render Capital Injections Table
   if (injectionsTableBody) {
