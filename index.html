@@ -6794,7 +6794,7 @@ const DEFAULT_DATA = {
       "id": "inj-1",
       "date": "2026-06-15",
       "partnerId": "prt-1",
-      "partnerName": "محمد",
+      "partnerName": "عمرو",
       "amount": 10710462,
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
@@ -10935,8 +10935,8 @@ function loadData() {
     })(),
     capitalInjections: (() => {
       let cList = Array.isArray(loaded.capitalInjections) ? loaded.capitalInjections : def.capitalInjections;
-      const curSum = cList.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
-      if ((curSum < 130000000 || Math.round(curSum) === 118500000)) {
+      const curSum = Math.round(cList.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0));
+      if (curSum !== 136118003) {
         console.log("⚡ ترقية فورية لتوريدات رأس المال من 118.5م القديمة إلى المعتمد");
         return JSON.parse(JSON.stringify(def.capitalInjections));
       }
@@ -15591,16 +15591,26 @@ function recalculatePartnerCapital() {
   if (!state.profitDistributions) state.profitDistributions = [];
   if (!state.cropSales) state.cropSales = [];
 
+  // تنقية سجل حركات الضخ من أي تكرار
+  const seenInj = new Set();
+  state.capitalInjections = (state.capitalInjections || []).filter(inj => {
+    if (!inj) return false;
+    const key = inj.id || `${inj.partnerId || inj.partner_id}-${inj.amount}-${inj.date}`;
+    if (seenInj.has(key)) return false;
+    seenInj.add(key);
+    return true;
+  });
+
   const AUTHORITATIVE_PARTNERS = {
-    'prt-1': { name: 'عمرو', fullName: 'محمد مصطفى حسن', shares: 2, nonRef: 10710462, ref: 66500000, paid: 77210462 },
-    'prt-2': { name: 'حسن', fullName: 'حسن مصطفى حسن', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
-    'prt-3': { name: 'ابوبكر', fullName: 'أبوبكر مصطفى حسن', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
-    'prt-4': { name: 'هاجر', fullName: 'هاجر عوض السيد', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
-    'prt-5': { name: 'الجعلي', fullName: 'مصطفى الجعلي', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
-    'prt-6': { name: 'هديل', fullName: 'هديل مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
-    'prt-7': { name: 'ايناس', fullName: 'إيناس مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
-    'prt-8': { name: 'رزاز', fullName: 'رزاز مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
-    'prt-9': { name: 'عناب', fullName: 'عناب مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 }
+    'prt-1': { id: 'prt-1', name: 'عمرو', fullName: 'محمد مصطفى حسن', shares: 2, nonRef: 10710462, ref: 66500000, paid: 77210462 },
+    'prt-2': { id: 'prt-2', name: 'حسن', fullName: 'حسن مصطفى حسن', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
+    'prt-3': { id: 'prt-3', name: 'ابوبكر', fullName: 'أبوبكر مصطفى حسن', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
+    'prt-4': { id: 'prt-4', name: 'هاجر', fullName: 'هاجر عوض السيد', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
+    'prt-5': { id: 'prt-5', name: 'الجعلي', fullName: 'مصطفى الجعلي', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
+    'prt-6': { id: 'prt-6', name: 'هديل', fullName: 'هديل مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
+    'prt-7': { id: 'prt-7', name: 'ايناس', fullName: 'إيناس مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
+    'prt-8': { id: 'prt-8', name: 'رزاز', fullName: 'رزاز مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
+    'prt-9': { id: 'prt-9', name: 'عناب', fullName: 'عناب مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 }
   };
 
   // 1. حساب إجمالي مبيعات المحاصيل وتوزيعها على 13 سهماً
@@ -15620,41 +15630,50 @@ function recalculatePartnerCapital() {
   state.partners.forEach(p => {
     const auth = AUTHORITATIVE_PARTNERS[p.id] || 
                  Object.values(AUTHORITATIVE_PARTNERS).find(a => 
-                   (p.name && (p.name.includes(a.name) || a.name.includes(p.name))) ||
-                   (p.fullName && (p.fullName.includes(a.name) || a.name.includes(p.fullName)))
+                   (p.name && (p.name === a.name || p.name === a.fullName)) ||
+                   (p.fullName && (p.fullName === a.fullName || p.fullName === a.name))
                  );
     
-    // فحص حركات الضخ الخاصة بالشريك
-    const pInjections = (state.capitalInjections || []).filter(inj => 
-      (p.id && (inj.partnerId === p.id || inj.partner_id === p.id)) ||
-      (p.name && (inj.partnerName === p.name || inj.partner_name === p.name)) ||
-      (p.fullName && (inj.partnerName === p.fullName || inj.partner_name === p.fullName)) ||
-      (inj.partnerName && (p.fullName && p.fullName.includes(inj.partnerName) || p.name && p.name.includes(inj.partnerName)))
-    );
+    // فحص حركات الضخ الخاصة بالشريك بدقة تامة وبدون مطابقة جزئية
+    const pInjections = (state.capitalInjections || []).filter(inj => {
+      const injId = inj.partnerId || inj.partner_id;
+      if (injId && p.id && injId === p.id) return true;
+      const injName = (inj.partnerName || inj.partner_name || '').trim();
+      if (!injName) return false;
+      if (p.name && injName === p.name.trim()) return true;
+      if (p.fullName && injName === p.fullName.trim()) return true;
+      if (auth && (injName === auth.name || injName === auth.fullName)) return true;
+      return false;
+    });
 
-    let calcNonRef = 0;
-    let calcRef = 0;
+    let extraNonRef = 0;
+    let extraRef = 0;
 
-    if (pInjections.length > 0) {
-      pInjections.forEach(inj => {
-        const amt = parseFloat(inj.amount) || 0;
-        const isRef = inj.capitalType === 'refundable' || 
-                      (inj.notes && (inj.notes.includes('مسترد') || inj.notes.includes('سلفة') || inj.notes.includes('تشغيلي')) && !inj.notes.includes('غير مسترد')) ||
-                      (inj.purpose && (inj.purpose.includes('مسترد') || inj.purpose.includes('سلفة') || inj.purpose.includes('تشغيلي')) && !inj.purpose.includes('غير مسترد'));
-        if (isRef) {
-          calcRef += amt;
-        } else {
-          calcNonRef += amt;
-        }
-      });
-    }
+    pInjections.forEach(inj => {
+      const idStr = String(inj.id || '');
+      // استبعاد القيود التأسيسية الثابتة لمنع ازدواجية الحساب
+      if (idStr === 'inj-1' || idStr === 'inj-2' || idStr === 'inj-3' || idStr === 'inj-4' ||
+          idStr === 'inj-5' || idStr === 'inj-6' || idStr === 'inj-7' || idStr === 'inj-8' ||
+          idStr === 'inj-9' || idStr === 'inj-1788086905527' || idStr.startsWith('inj-nr-') || idStr.startsWith('inj-ref-')) {
+        return;
+      }
+      const amt = parseFloat(inj.amount) || 0;
+      const isRef = inj.capitalType === 'refundable' || 
+                    (inj.notes && (inj.notes.includes('مسترد') || inj.notes.includes('سلفة') || inj.notes.includes('تشغيلي')) && !inj.notes.includes('غير مسترد')) ||
+                    (inj.purpose && (inj.purpose.includes('مسترد') || inj.purpose.includes('سلفة') || inj.purpose.includes('تشغيلي')) && !inj.purpose.includes('غير مسترد'));
+      if (isRef) {
+        extraRef += amt;
+      } else {
+        extraNonRef += amt;
+      }
+    });
 
-    // ضمان الحد الأدنى المعتمد لرأس المال المدفوع
+    // القيمة التأسيسية المعتمدة لكل شريك (10,710,462 لحصتين أو 5,355,231 لحصة واحدة + 66.5م مسترد لعمرو)
     const baseNonRef = auth ? auth.nonRef : (parseFloat(p.shares) === 2 ? 10710462 : 5355231);
     const baseRef = auth ? auth.ref : 0;
 
-    p.nonRefundableCapital = Math.max(calcNonRef, baseNonRef);
-    p.refundableCapital = Math.max(calcRef, baseRef);
+    p.nonRefundableCapital = baseNonRef + extraNonRef;
+    p.refundableCapital = baseRef + extraRef;
     p.paidCapital = p.nonRefundableCapital + p.refundableCapital;
 
     // توزيع مبيعات المحاصيل على الأسهم (13 سهماً)
