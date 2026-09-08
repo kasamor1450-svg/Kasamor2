@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v29.9-definitive-capital-fix
-const CACHE_NAME = 'mustagro-v29.9-definitive-capital-fix';
+// Cache Version: mustagro-v30.0-treasury-balance-63003
+const CACHE_NAME = 'mustagro-v30.0-treasury-balance-63003';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
