@@ -10893,7 +10893,7 @@ function loadData() {
       let pList = Array.isArray(loaded.partners) ? loaded.partners : def.partners;
       const curSum = pList.reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
       // ترقية فقط إذا كانت البيانات العالقة هي النسخة القديمة 118,500,000 ج.س
-      if (Math.round(curSum) === 118500000) {
+      if ((curSum < 130000000 || Math.round(curSum) === 118500000)) {
         console.log("⚡ ترقية فورية لبيانات الشركاء ورأس المال من 118.5م القديمة إلى المعتمد");
         return JSON.parse(JSON.stringify(def.partners));
       }
@@ -10902,7 +10902,7 @@ function loadData() {
     capitalInjections: (() => {
       let cList = Array.isArray(loaded.capitalInjections) ? loaded.capitalInjections : def.capitalInjections;
       const curSum = cList.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
-      if (Math.round(curSum) === 118500000) {
+      if ((curSum < 130000000 || Math.round(curSum) === 118500000)) {
         console.log("⚡ ترقية فورية لتوريدات رأس المال من 118.5م القديمة إلى المعتمد");
         return JSON.parse(JSON.stringify(def.capitalInjections));
       }
@@ -15762,8 +15762,20 @@ function renderPartnersSection() {
     cardsContainer.innerHTML = state.partners.map(p => {
       const sharesCount = parseFloat(p.shares) || 1;
       const percent = ((sharesCount / 13) * 100).toFixed(2);
-      const nonRef = parseFloat(p.nonRefundableCapital) || 0;
-      const ref = parseFloat(p.refundableCapital) || 0;
+      const authMap = {
+        'prt-1': { nonRef: 10710462, ref: 66500000, paid: 77210462 },
+        'prt-2': { nonRef: 10710462, ref: 0, paid: 10710462 },
+        'prt-3': { nonRef: 10710462, ref: 0, paid: 10710462 },
+        'prt-4': { nonRef: 10710462, ref: 0, paid: 10710462 },
+        'prt-5': { nonRef: 5355231, ref: 0, paid: 5355231 },
+        'prt-6': { nonRef: 5355231, ref: 0, paid: 5355231 },
+        'prt-7': { nonRef: 5355231, ref: 0, paid: 5355231 },
+        'prt-8': { nonRef: 5355231, ref: 0, paid: 5355231 },
+        'prt-9': { nonRef: 5355231, ref: 0, paid: 5355231 }
+      };
+      const auth = authMap[p.id] || (sharesCount === 2 ? { nonRef: 10710462, ref: (p.id === 'prt-1' || (p.name && p.name.includes('عمرو')) ? 66500000 : 0), paid: (p.id === 'prt-1' || (p.name && p.name.includes('عمرو')) ? 77210462 : 10710462) } : { nonRef: 5355231, ref: 0, paid: 5355231 });
+      const nonRef = (parseFloat(p.nonRefundableCapital) > 0) ? parseFloat(p.nonRefundableCapital) : auth.nonRef;
+      const ref = (parseFloat(p.refundableCapital) > 0) ? parseFloat(p.refundableCapital) : (auth.ref || 0);
       const paid = nonRef + ref;
       const cropSalesShare = parseFloat(p.cropSalesShare) || 0;
       const totalWithSales = parseFloat(p.totalCapitalWithSales) || (paid + cropSalesShare);
@@ -15867,8 +15879,20 @@ function renderPartnersSection() {
   const partnerRowsHtml = state.partners.map(p => {
     const sharesCount = parseFloat(p.shares) || 1;
     const percent = ((sharesCount / 13) * 100).toFixed(2);
-    const nonRef = parseFloat(p.nonRefundableCapital) || 0;
-    const ref = parseFloat(p.refundableCapital) || 0;
+    const authMap = {
+      'prt-1': { nonRef: 10710462, ref: 66500000, paid: 77210462 },
+      'prt-2': { nonRef: 10710462, ref: 0, paid: 10710462 },
+      'prt-3': { nonRef: 10710462, ref: 0, paid: 10710462 },
+      'prt-4': { nonRef: 10710462, ref: 0, paid: 10710462 },
+      'prt-5': { nonRef: 5355231, ref: 0, paid: 5355231 },
+      'prt-6': { nonRef: 5355231, ref: 0, paid: 5355231 },
+      'prt-7': { nonRef: 5355231, ref: 0, paid: 5355231 },
+      'prt-8': { nonRef: 5355231, ref: 0, paid: 5355231 },
+      'prt-9': { nonRef: 5355231, ref: 0, paid: 5355231 }
+    };
+    const auth = authMap[p.id] || (sharesCount === 2 ? { nonRef: 10710462, ref: (p.id === 'prt-1' || (p.name && p.name.includes('عمرو')) ? 66500000 : 0), paid: (p.id === 'prt-1' || (p.name && p.name.includes('عمرو')) ? 77210462 : 10710462) } : { nonRef: 5355231, ref: 0, paid: 5355231 });
+    const nonRef = (parseFloat(p.nonRefundableCapital) > 0) ? parseFloat(p.nonRefundableCapital) : auth.nonRef;
+    const ref = (parseFloat(p.refundableCapital) > 0) ? parseFloat(p.refundableCapital) : (auth.ref || 0);
     const paidCap = nonRef + ref;
     const cropSalesShare = parseFloat(p.cropSalesShare) || 0;
     const totalWithSales = parseFloat(p.totalCapitalWithSales) || (paidCap + cropSalesShare);
