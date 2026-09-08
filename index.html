@@ -4004,7 +4004,260 @@ html[dir="ltr"] .font-mono {
       }
     }
 
-    async deleteMediaItem(id) {
+        async upsertPlot(pl) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: pl.id,
+          name: pl.name,
+          area_feddan: Number(pl.area || pl.areaFeddan || 0),
+          crop: pl.crop || '',
+          target_sowing_date: pl.targetSowingDate || null,
+          prep_feddans: Number(pl.prepFeddans || 0),
+          planted_feddans: Number(pl.plantedFeddans || 0),
+          status: pl.status || 'active'
+        };
+        const { data, error } = await this.client.from('plots').upsert(row);
+        if (error) console.warn('Supabase upsert plot warning:', error);
+        return data;
+      } catch(e) {
+        console.warn('upsertPlot error:', e);
+        return null;
+      }
+    }
+
+    async deletePlot(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('plots').delete().eq('id', id);
+        return !error;
+      } catch(e) { return false; }
+    }
+
+    async upsertPlotOperation(op, plotId) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: op.id,
+          plot_id: plotId || op.plotId,
+          type: op.type,
+          date: op.date || new Date().toISOString().split('T')[0],
+          status: op.status || 'completed',
+          driver: op.driver || '',
+          fuel_barrels: Number(op.fuelBarrels || 0),
+          created_by: op.createdBy || (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'المشرف'),
+          notes: op.notes || ''
+        };
+        const { data, error } = await this.client.from('plot_operations').upsert(row);
+        if (error) console.warn('Supabase upsert plot op warning:', error);
+        return data;
+      } catch(e) {
+        console.warn('upsertPlotOperation error:', e);
+        return null;
+      }
+    }
+
+    async deletePlotOperation(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('plot_operations').delete().eq('id', id);
+        return !error;
+      } catch(e) { return false; }
+    }
+
+    async upsertFuelTransaction(f) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: f.id,
+          date: f.date || new Date().toISOString().split('T')[0],
+          type: f.type || 'issue',
+          quantity: Number(f.quantity || 0),
+          unit: f.unit || 'برميل',
+          driver: f.driver || '',
+          plot: f.plot || '',
+          operation_name: f.operationName || f.op || '',
+          logged_by: f.loggedBy || (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'المشرف'),
+          notes: f.notes || ''
+        };
+        const { data, error } = await this.client.from('fuel_transactions').upsert(row);
+        if (error) console.warn('Supabase upsert fuel warning:', error);
+        return data;
+      } catch(e) {
+        console.warn('upsertFuelTransaction error:', e);
+        return null;
+      }
+    }
+
+    async deleteFuelTransaction(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('fuel_transactions').delete().eq('id', id);
+        return !error;
+      } catch(e) { return false; }
+    }
+
+    async upsertLaborWorker(w) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: w.id,
+          name: w.name,
+          role: w.role || '',
+          worker_type: w.workerType || w.type || 'seasonal',
+          start_date: w.startDate || null,
+          end_date: w.endDate || null,
+          monthly_salary: Number(w.monthlySalary || w.salary || 0),
+          days_worked: Number(w.daysWorked || 0),
+          months_worked: Number(w.monthsWorked || 0),
+          deductions_amount: Number(w.deductionsAmount || w.deductions || 0),
+          overtime: Number(w.overtime || 0),
+          total_due: Number(w.totalDue || 0),
+          total_paid: Number(w.totalPaid || 0),
+          status: w.status || 'active',
+          task: w.task || '',
+          plot: w.plot || '',
+          crop: w.crop || '',
+          area_feddan: Number(w.areaFeddan || 0),
+          last_updated_by: (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'المشرف')
+        };
+        const { data, error } = await this.client.from('labor').upsert(row);
+        if (error) console.warn('Supabase upsert labor warning:', error);
+        return data;
+      } catch(e) {
+        console.warn('upsertLaborWorker error:', e);
+        return null;
+      }
+    }
+
+    async deleteLaborWorker(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('labor').delete().eq('id', id);
+        return !error;
+      } catch(e) { return false; }
+    }
+
+    async upsertMachinery(m) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: m.id,
+          name: m.name,
+          type: m.type || '',
+          plate: m.plate || '',
+          driver: m.driver || '',
+          status: m.status || 'جاهز للعمل',
+          hours_operated: Number(m.hoursOperated || 0),
+          oil_change_due_hours: Number(m.oilChangeDueHours || 250),
+          fuel_tank_capacity: Number(m.fuelTankCapacity || 0),
+          feddan_done: Number(m.feddanDone || 0),
+          fuel_used_barrels: Number(m.fuelUsedBarrels || 0)
+        };
+        const { data, error } = await this.client.from('machinery').upsert(row);
+        if (error) console.warn('Supabase upsert machinery warning:', error);
+        return data;
+      } catch(e) {
+        console.warn('upsertMachinery error:', e);
+        return null;
+      }
+    }
+
+    async deleteMachinery(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('machinery').delete().eq('id', id);
+        return !error;
+      } catch(e) { return false; }
+    }
+
+    async upsertHarvestIntake(h) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: h.id,
+          date: h.date || new Date().toISOString().split('T')[0],
+          plot: h.plot || '',
+          crop: h.crop || '',
+          bags: Number(h.bags || 0),
+          weight_tons: Number(h.weightTons || 0),
+          storage_location: h.storageLocation || 'المخزن الرئيسي',
+          supervisor: h.supervisor || (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'المشرف'),
+          quality_grade: h.qualityGrade || 'درجة أولى',
+          notes: h.notes || ''
+        };
+        const { data, error } = await this.client.from('harvest_intakes').upsert(row);
+        if (error) console.warn('Supabase upsert harvest warning:', error);
+        return data;
+      } catch(e) {
+        console.warn('upsertHarvestIntake error:', e);
+        return null;
+      }
+    }
+
+    async deleteHarvestIntake(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('harvest_intakes').delete().eq('id', id);
+        return !error;
+      } catch(e) { return false; }
+    }
+
+    async upsertCropSale(s) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: s.id,
+          date: s.date || new Date().toISOString().split('T')[0],
+          buyer_name: s.buyerName || '',
+          crop: s.crop || '',
+          bags: Number(s.bags || 0),
+          price_per_bag: Number(s.pricePerBag || 0),
+          total_amount: Number(s.totalAmount || 0),
+          paid_amount: Number(s.paidAmount || 0),
+          remaining_amount: Number(s.remainingAmount || 0),
+          payment_method: s.paymentMethod || 'نقداً',
+          delivery_location: s.deliveryLocation || 'صومعة القضارف',
+          status: s.status || 'completed',
+          logged_by: s.loggedBy || (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'المشرف'),
+          notes: s.notes || ''
+        };
+        const { data, error } = await this.client.from('crop_sales').upsert(row);
+        if (error) console.warn('Supabase upsert crop sale warning:', error);
+        return data;
+      } catch(e) {
+        console.warn('upsertCropSale error:', e);
+        return null;
+      }
+    }
+
+    async upsertExpense(exp) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: exp.id,
+          date: exp.date || new Date().toISOString().split('T')[0],
+          category: exp.category || 'عام',
+          amount: Number(exp.amount || 0),
+          plot: exp.plot || null,
+          crop: exp.crop || null,
+          op: exp.op || null,
+          is_under_review: !!exp.isUnderReview,
+          created_by: exp.createdBy || (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'المشرف'),
+          modified_by: exp.modifiedBy || null,
+          notes: exp.notes || '',
+          receipt_photo_url: exp.receiptPhotoUrl || null
+        };
+        const { data, error } = await this.client.from('expenses').upsert(row);
+        if (error) console.warn('Supabase upsert expense warning:', error);
+        return data;
+      } catch(e) {
+        console.warn('upsertExpense error:', e);
+        return null;
+      }
+    }
+
+async deleteMediaItem(id) {
       if (!this.client) return null;
       try {
         const { data, error } = await this.client.from('inventory_transactions').delete().eq('id', id);
@@ -19822,6 +20075,48 @@ let currentGalleryFilter = 'all';
 
 async function openGedarefGalleryModal(filter = 'all') {
   currentGalleryFilter = filter;
+
+  // جلب فوري لأحدث وسائط الألبوم من Supabase ليراها كافة المستخدمين على جميع الأجهزة
+  if (window.AgroAPI && window.AgroAPI.isConnected && window.AgroAPI.client) {
+    try {
+      const { data: cloudMediaRows, error: cloudErr } = await window.AgroAPI.client
+        .from('inventory_transactions')
+        .select('*')
+        .or('category.eq.وسائط,item_id.eq.inv-media-gallery')
+        .order('date', { ascending: false });
+
+      if (!cloudErr && Array.isArray(cloudMediaRows)) {
+        const fetchedCloud = cloudMediaRows.map(mtx => {
+          let extra = null;
+          try {
+            if (mtx.notes && mtx.notes.trim().startsWith('{')) {
+              extra = JSON.parse(mtx.notes);
+            }
+          } catch(e) {}
+          return {
+            id: mtx.id,
+            type: (extra && extra.type) || mtx.unit || 'image',
+            title: (extra && extra.title) || mtx.item_name || 'مشهد من مشروع كسمور',
+            tag: (extra && extra.tag) || mtx.plot || 'توثيق ميداني',
+            desc: (extra && extra.desc) || mtx.crop || '',
+            thumbnail: (extra && extra.thumbnail) || (extra && extra.dataUrl) || '',
+            dataUrl: (extra && extra.dataUrl) || (extra && extra.thumbnail) || '',
+            duration: (extra && extra.duration) || Number(mtx.unit_price) || 0,
+            fileSizeFormatted: (extra && extra.fileSizeFormatted) || mtx.receiver || '',
+            date: (extra && extra.date) || mtx.date || '',
+            createdAt: (extra && extra.createdAt) || Date.now(),
+            loggedBy: (extra && extra.loggedBy) || mtx.logged_by || 'المشرف'
+          };
+        });
+
+        fetchedCloud.forEach(m => MustagroMediaStore.saveMedia(m).catch(() => {}));
+        state.mediaGallery = fetchedCloud;
+      }
+    } catch(err) {
+      console.warn('Gallery cloud fetch error:', err);
+    }
+  }
+
   let allMedia = [];
   try {
     const localMedia = await MustagroMediaStore.getAllMedia();
@@ -19831,17 +20126,17 @@ async function openGedarefGalleryModal(filter = 'all') {
   }
 
   // دمج الوسائط المشتركة من السحابة ليراها كافة المستخدمين عبر جميع الأجهزة
-  if (state.mediaGallery && Array.isArray(state.mediaGallery) && state.mediaGallery.length > 0) {
-    const mediaMap = new Map();
-    allMedia.forEach(m => mediaMap.set(m.id, m));
-    state.mediaGallery.forEach(m => {
-      if (!mediaMap.has(m.id)) {
-        mediaMap.set(m.id, m);
-        MustagroMediaStore.saveMedia(m).catch(() => {});
-      }
-    });
-    allMedia = Array.from(mediaMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  }
+  const mediaMap = new Map();
+  allMedia.forEach(m => mediaMap.set(m.id, m));
+  (state.mediaGallery || []).forEach(m => {
+    if (!mediaMap.has(m.id)) {
+      mediaMap.set(m.id, m);
+    } else {
+      const exist = mediaMap.get(m.id);
+      if (!exist.dataUrl && m.dataUrl) mediaMap.set(m.id, m);
+    }
+  });
+  allMedia = Array.from(mediaMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   const defaultGalleryItems = [
     { title: "صوامع غلال القضارف الشهيرة", desc: "أكبر مركز استراتيجي لتخزين ومناولة الغلال في السودان وسوق المحاصيل الرئيسي", key: "silo", tag: "صومعة القضارف", type: "image" },
@@ -20220,7 +20515,7 @@ function previewSelectedMedia(event) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.84);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.76);
         if (photoImg) photoImg.src = compressedDataUrl;
         if (photoMeta) photoMeta.textContent = `✓ صورة بدقة ${width}×${height} • ${fileSizeFormatted}`;
 
@@ -20408,6 +20703,16 @@ async function handleSaveCustomMedia(event) {
 
   try {
     await MustagroMediaStore.saveMedia(newMedia);
+
+    // إضافة الوسيط مباشرة لحالة التطبيق وحفظها محلياً وسحابياً
+    if (!state.mediaGallery) state.mediaGallery = [];
+    const existIdx = state.mediaGallery.findIndex(m => m.id === newMedia.id);
+    if (existIdx !== -1) {
+      state.mediaGallery[existIdx] = newMedia;
+    } else {
+      state.mediaGallery.unshift(newMedia);
+    }
+    saveData();
 
     // مزامنة فورية إلى السحابة ليراها جميع المستخدمين عبر جميع الأجهزة
     if (window.AgroAPI && typeof window.AgroAPI.upsertMediaItem === 'function') {
@@ -23543,21 +23848,45 @@ if (typeof window !== 'undefined') {
     setTimeout(() => {
       if (window.AgroAPI) {
         window.AgroAPI.onDataChange((payload) => {
-          const isGroc = payload && payload.table === 'inventory_transactions' && (
+          if (!payload) return;
+          const table = payload.table;
+          const isGroc = table === 'inventory_transactions' && (
             (payload.new && (payload.new.category === 'بقالة' || payload.new.item_id === 'inv-grocery-camp' || (payload.new.id && String(payload.new.id).startsWith('groc-')))) ||
             (payload.old && (payload.old.category === 'بقالة' || payload.old.item_id === 'inv-grocery-camp' || (payload.old.id && String(payload.old.id).startsWith('groc-'))))
           );
-          const isRain = payload && payload.table === 'inventory_transactions' && (
+          const isRain = table === 'inventory_transactions' && (
             (payload.new && (payload.new.category === 'أمطار' || payload.new.item_id === 'inv-weather-rainfall' || (payload.new.id && String(payload.new.id).startsWith('rain-')))) ||
             (payload.old && (payload.old.category === 'أمطار' || payload.old.item_id === 'inv-weather-rainfall' || (payload.old.id && String(payload.old.id).startsWith('rain-'))))
           );
-          const isMedia = payload && payload.table === 'inventory_transactions' && (
+          const isMedia = table === 'inventory_transactions' && (
             (payload.new && (payload.new.category === 'وسائط' || payload.new.item_id === 'inv-media-gallery' || (payload.new.id && String(payload.new.id).startsWith('media-')))) ||
             (payload.old && (payload.old.category === 'وسائط' || payload.old.item_id === 'inv-media-gallery' || (payload.old.id && String(payload.old.id).startsWith('media-'))))
           );
-          const tableNameDesc = isGroc ? 'بقالة الكمبو والمسحوبات' : (isRain ? 'سجلات الأمطار والطقس' : (isMedia ? 'ألبوم صور وفيديوهات المشروع' : (payload.table === 'inventory_transactions' ? 'المخزن والمستودع' : payload.table)));
+
+          let tableNameDesc = 'بيانات المشروع';
+          if (isGroc) tableNameDesc = 'بقالة الكمبو والمسحوبات';
+          else if (isRain) tableNameDesc = 'سجلات الأمطار والطقس';
+          else if (isMedia) tableNameDesc = 'ألبوم صور وفيديوهات كسمور';
+          else if (table === 'expenses') tableNameDesc = 'المصروفات المالية';
+          else if (table === 'plot_operations') tableNameDesc = 'العمليات الحقلية';
+          else if (table === 'fuel_transactions') tableNameDesc = 'حركات الوقود';
+          else if (table === 'labor') tableNameDesc = 'سجلات العمالة';
+          else if (table === 'plots') tableNameDesc = 'بيانات الأراضي والمقطوعيات';
+          else if (table === 'capital_injections') tableNameDesc = 'رؤوس الأموال';
+          else if (table === 'partners') tableNameDesc = 'بيانات الشركاء';
+          else if (table === 'machinery') tableNameDesc = 'أسطول الآليات';
+          else if (table === 'harvest_intakes') tableNameDesc = 'توريدات الحصاد';
+          else if (table === 'crop_sales') tableNameDesc = 'مبيعات المحاصيل';
+
           showToast(`⚡ تحديث سحابي فوري: تم تعديل (${tableNameDesc}) من قبل مستخدم آخر!`, 'info');
-          handleFetchFromSupabase();
+          handleFetchFromSupabase(true);
+
+          if (isMedia) {
+            const galleryOpen = document.getElementById('upload-media-title');
+            if (galleryOpen && typeof openGedarefGalleryModal === 'function') {
+              openGedarefGalleryModal(currentGalleryFilter);
+            }
+          }
         });
         updateCloudStatusIndicator(window.AgroAPI.isConnected, window.AgroAPI.isConnected ? '🟢 سحابي متصل' : 'سحابة غير متصلة');
       }
