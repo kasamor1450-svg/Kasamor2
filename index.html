@@ -609,17 +609,38 @@ table tbody tr:hover {
   body.role-is-viewer .btn-action-add,
   body.role-is-viewer .btn-action-edit,
   body.role-is-viewer .btn-action-delete,
-  body.role-is-viewer button[onclick*="openAdd"],
+  body.role-is-viewer button[onclick*="openAdd"]:not([onclick*="openAddRainfallModal"]):not([onclick*="openUploadPhotoModal"]),
   body.role-is-viewer button[onclick*="openEdit"],
   body.role-is-viewer button[onclick*="delete"],
   body.role-is-viewer button[onclick*="Delete"],
   body.role-is-viewer button[onclick*="toggleMobileQuickActions"] {
     display: none !important;
   }
-  body.role-is-viewer input:not([type="search"]),
-  body.role-is-viewer select:not(#currency-filter):not(#expenses-month-filter) {
+  body.role-is-viewer input:not([type="search"]):not([type="file"]):not(#modal-overlay input),
+  body.role-is-viewer select:not(#currency-filter):not(#expenses-month-filter):not(#modal-overlay select) {
     pointer-events: none !important;
     opacity: 0.85 !important;
+  }
+
+  /* تمكين تسجيل الأمطار ورفع الوسائط لجميع المستخدمين دائماً دون أي قيود */
+  button[onclick*="openAddRainfallModal"],
+  button[onclick*="openUploadPhotoModal"],
+  button[onclick*="openGedarefGalleryModal"],
+  body.role-is-viewer button[onclick*="openAddRainfallModal"],
+  body.role-is-viewer button[onclick*="openUploadPhotoModal"],
+  body.role-is-viewer button[onclick*="openGedarefGalleryModal"],
+  body.role-is-viewer #modal-overlay button,
+  body.role-is-viewer #modal-overlay input,
+  body.role-is-viewer #modal-overlay select,
+  body.role-is-viewer #modal-overlay textarea {
+    display: inline-flex !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+  }
+  input[type="file"],
+  body.role-is-viewer input[type="file"] {
+    pointer-events: auto !important;
+    opacity: 1 !important;
   }
     
 
@@ -3083,7 +3104,7 @@ html[dir="ltr"] .font-mono {
       if (!currentData) currentData = {};
       const requiredTables = [
         'users', 'plots', 'fuelTransactions', 'inventory',
-        'inventoryTransactions', 'groceryTransactions', 'rainfallLogs', 'partners',
+        'inventoryTransactions', 'groceryTransactions', 'rainfallLogs', 'mediaGallery', 'partners',
         'capitalInjections', 'harvestIntakes', 'cropSales',
         'zakatDeliveries', 'machinery', 'machineryMaintenance',
         'labor', 'expenses', 'budgetCaps', 'auditLogs'
@@ -3584,7 +3605,7 @@ html[dir="ltr"] .font-mono {
             reorderLevel: Number(i.reorder_level || 0)
           })),
           inventoryTransactions: (inventoryTxRes.data || [])
-            .filter(itx => !(itx.category === 'بقالة' || itx.item_id === 'inv-grocery-camp' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('groc-')) || itx.category === 'أمطار' || itx.item_id === 'inv-weather-rainfall' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('rain-'))))
+            .filter(itx => !(itx.category === 'بقالة' || itx.item_id === 'inv-grocery-camp' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('groc-')) || itx.category === 'أمطار' || itx.item_id === 'inv-weather-rainfall' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('rain-')) || itx.category === 'وسائط' || itx.item_id === 'inv-media-gallery' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('media-'))))
             .map(itx => ({
               id: itx.id, date: itx.date, itemId: itx.item_id, itemName: itx.item_name,
               category: itx.category, type: itx.type, quantity: Number(itx.quantity || 0),
@@ -3626,6 +3647,30 @@ html[dir="ltr"] .font-mono {
                 fieldImpact: (extra && extra.fieldImpact) || rtx.receiver || '',
                 loggedBy: (extra && extra.loggedBy) || rtx.logged_by || '',
                 notes: (extra && extra.notes !== undefined) ? extra.notes : (rtx.notes || '')
+              };
+            }),
+          mediaGallery: (inventoryTxRes.data || [])
+            .filter(itx => itx.category === 'وسائط' || itx.item_id === 'inv-media-gallery' || (itx.id && typeof itx.id === 'string' && itx.id.startsWith('media-')))
+            .map(mtx => {
+              let extra = null;
+              try {
+                if (mtx.notes && mtx.notes.trim().startsWith('{')) {
+                  extra = JSON.parse(mtx.notes);
+                }
+              } catch(e) {}
+              return {
+                id: mtx.id,
+                type: (extra && extra.type) || mtx.unit || 'image',
+                title: (extra && extra.title) || mtx.item_name || 'مشهد من مشروع كسمور',
+                tag: (extra && extra.tag) || mtx.plot || 'توثيق ميداني',
+                desc: (extra && extra.desc) || mtx.crop || '',
+                thumbnail: (extra && extra.thumbnail) || (extra && extra.dataUrl) || '',
+                dataUrl: (extra && extra.dataUrl) || (extra && extra.thumbnail) || '',
+                duration: (extra && extra.duration) || Number(mtx.unit_price) || 0,
+                fileSizeFormatted: (extra && extra.fileSizeFormatted) || mtx.receiver || '',
+                date: (extra && extra.date) || mtx.date || '',
+                createdAt: (extra && extra.createdAt) || Date.now(),
+                loggedBy: (extra && extra.loggedBy) || mtx.logged_by || 'المشرف'
               };
             }),
           harvestIntakes: (harvestRes.data || []).map(h => ({
@@ -3912,6 +3957,61 @@ html[dir="ltr"] .font-mono {
         return !error;
       } catch(err) {
         console.warn('deleteRainfallLog error:', err);
+        return false;
+      }
+    }
+
+    async upsertMediaItem(item) {
+      if (!this.client) return null;
+      try {
+        const row = {
+          id: item.id,
+          date: item.date ? (item.date.includes('-') ? item.date : new Date().toISOString().split('T')[0]) : new Date().toISOString().split('T')[0],
+          item_id: 'inv-media-gallery',
+          item_name: item.title || (item.type === 'video' ? 'فيديو ميداني' : 'صورة ميدانية'),
+          category: 'وسائط',
+          type: 'issue',
+          quantity: 1,
+          unit: item.type || 'image',
+          unit_price: Number(item.duration) || 0,
+          total_cost: 0,
+          plot: item.tag || 'مشروع كسامور',
+          crop: item.desc || '',
+          receiver: item.fileSizeFormatted || '',
+          logged_by: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : (item.loggedBy || 'المشرف'),
+          notes: JSON.stringify({
+            id: item.id,
+            type: item.type || 'image',
+            title: item.title,
+            tag: item.tag,
+            desc: item.desc,
+            thumbnail: item.thumbnail || item.dataUrl,
+            dataUrl: item.dataUrl || item.thumbnail,
+            duration: item.duration || 0,
+            fileSizeFormatted: item.fileSizeFormatted || '',
+            date: item.date || new Date().toISOString().split('T')[0],
+            createdAt: item.createdAt || Date.now(),
+            loggedBy: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : (item.loggedBy || 'المشرف')
+          }),
+          sale_id: null
+        };
+        const { data, error } = await this.client.from('inventory_transactions').upsert(row);
+        if (error) console.warn('Supabase upsert media warning:', error);
+        return data;
+      } catch(err) {
+        console.warn('upsertMediaItem error:', err);
+        return null;
+      }
+    }
+
+    async deleteMediaItem(id) {
+      if (!this.client) return null;
+      try {
+        const { data, error } = await this.client.from('inventory_transactions').delete().eq('id', id);
+        if (error) console.warn('Supabase delete media warning:', error);
+        return !error;
+      } catch(err) {
+        console.warn('deleteMediaItem error:', err);
         return false;
       }
     }
@@ -6180,18 +6280,32 @@ const DEFAULT_DATA = {
   ],
   "rainfallLogs": [
     {
-      "id": "rain-1",
-      "date": "2026-07-15",
-      "dayName": "الأربعاء",
-      "startTime": "03:30",
-      "endTime": "06:15",
-      "durationMinutes": 165,
+      "id": "rain-user-20260814",
+      "date": "2026-08-14",
+      "dayName": "الجمعة",
+      "startTime": "20:00",
+      "endTime": "22:00",
+      "durationMinutes": 120,
       "intensity": "قوية",
-      "amountMm": 45,
-      "location": "كسمور الشرقي - نمرة 500",
-      "fieldImpact": "مطرة خريفية غزيرة سيلت الجداول، روت الأرض تماماً وجهزتها للكسرة",
-      "loggedBy": "عبدالقادر (الوكيل)",
-      "notes": "سيل في خور كسمور وري عميق"
+      "amountMm": 48,
+      "location": "كامل المشروع - كسمور الشرقي",
+      "fieldImpact": "مطرة سيلية غزيرة لمدة ساعتين روت حقول الذرة والتسالي بعمق",
+      "loggedBy": "محمد مصطفى",
+      "notes": "أمطار قوية متواصلة لمدة ساعتين (8-10 مساء) سيل في خور كسمور"
+    },
+    {
+      "id": "rain-3",
+      "date": "2026-08-18",
+      "dayName": "الثلاثاء",
+      "startTime": "21:15",
+      "endTime": "22:45",
+      "durationMinutes": 90,
+      "intensity": "خفيفة",
+      "amountMm": 12,
+      "location": "نمرة 250 ذرة والكمبو",
+      "fieldImpact": "رشاش رطب الجو ورشح التربة الخفيفة",
+      "loggedBy": "حسن مصطفى",
+      "notes": "رذاذ متقطع"
     },
     {
       "id": "rain-2",
@@ -6208,18 +6322,46 @@ const DEFAULT_DATA = {
       "notes": "أمطار رطبة جيدة للمحصول"
     },
     {
-      "id": "rain-3",
-      "date": "2026-08-18",
+      "id": "rain-user-20260731",
+      "date": "2026-07-31",
+      "dayName": "الجمعة",
+      "startTime": "20:30",
+      "endTime": "21:30",
+      "durationMinutes": 60,
+      "intensity": "قوية",
+      "amountMm": 35,
+      "location": "كامل المشروع - كسمور الشرقي",
+      "fieldImpact": "مطرة غزيرة عمت كامل مساحات المشروع وجهزت الأرض للنمو",
+      "loggedBy": "محمد مصطفى",
+      "notes": "أمطار قوية من 8:30 مساء إلى 9:30 مساء على كافة النمر"
+    },
+    {
+      "id": "rain-user-20260728",
+      "date": "2026-07-28",
       "dayName": "الثلاثاء",
-      "startTime": "21:15",
-      "endTime": "22:45",
-      "durationMinutes": 90,
-      "intensity": "خفيفة",
-      "amountMm": 12,
-      "location": "نمرة 250 ذرة والكمبو",
-      "fieldImpact": "رشاش رطب الجو ورشح التربة الخفيفة",
-      "loggedBy": "حسن مصطفى",
-      "notes": "رذاذ متقطع"
+      "startTime": "18:00",
+      "endTime": "19:45",
+      "durationMinutes": 105,
+      "intensity": "قوية",
+      "amountMm": 42,
+      "location": "كامل المشروع - كسمور الشرقي",
+      "fieldImpact": "مطرة قوية خريفية روت كامل أراضي المشروع وسيلت الجداول",
+      "loggedBy": "محمد مصطفى",
+      "notes": "هطول أمطار قوية من 6:00 مساء إلى 7:45 مساء عمت كامل المشروع"
+    },
+    {
+      "id": "rain-1",
+      "date": "2026-07-15",
+      "dayName": "الأربعاء",
+      "startTime": "03:30",
+      "endTime": "06:15",
+      "durationMinutes": 165,
+      "intensity": "قوية",
+      "amountMm": 45,
+      "location": "كسمور الشرقي - نمرة 500",
+      "fieldImpact": "مطرة خريفية غزيرة سيلت الجداول، روت الأرض تماماً وجهزتها للكسرة",
+      "loggedBy": "عبدالقادر (الوكيل)",
+      "notes": "سيل في خور كسمور وري عميق"
     }
   ],
   "partners": [
@@ -19682,9 +19824,23 @@ async function openGedarefGalleryModal(filter = 'all') {
   currentGalleryFilter = filter;
   let allMedia = [];
   try {
-    allMedia = await MustagroMediaStore.getAllMedia();
+    const localMedia = await MustagroMediaStore.getAllMedia();
+    allMedia = Array.isArray(localMedia) ? localMedia : [];
   } catch (e) {
-    allMedia = getCustomGalleryPhotos();
+    allMedia = getCustomGalleryPhotos() || [];
+  }
+
+  // دمج الوسائط المشتركة من السحابة ليراها كافة المستخدمين عبر جميع الأجهزة
+  if (state.mediaGallery && Array.isArray(state.mediaGallery) && state.mediaGallery.length > 0) {
+    const mediaMap = new Map();
+    allMedia.forEach(m => mediaMap.set(m.id, m));
+    state.mediaGallery.forEach(m => {
+      if (!mediaMap.has(m.id)) {
+        mediaMap.set(m.id, m);
+        MustagroMediaStore.saveMedia(m).catch(() => {});
+      }
+    });
+    allMedia = Array.from(mediaMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }
 
   const defaultGalleryItems = [
@@ -20252,10 +20408,19 @@ async function handleSaveCustomMedia(event) {
 
   try {
     await MustagroMediaStore.saveMedia(newMedia);
-    showToast(isVideo ? '✓ تم حفظ مقطع الفيديو بنجاح في ألبوم المشروع 🎥' : '✓ تم حفظ الصورة بنجاح في ألبوم المشروع 📸');
+
+    // مزامنة فورية إلى السحابة ليراها جميع المستخدمين عبر جميع الأجهزة
+    if (window.AgroAPI && typeof window.AgroAPI.upsertMediaItem === 'function') {
+      window.AgroAPI.upsertMediaItem(newMedia).then(() => {
+        console.log('✓ تم رفع وحفظ الوسيط في Supabase بنجاح');
+      }).catch(err => console.warn('Cloud media sync warning:', err));
+    }
+
+    const currentUserName = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : 'مستخدم مصرح';
+    showToast(isVideo ? '✓ تم حفظ مقطع الفيديو ومزامنته في ألبوم المشروع 🎥' : '✓ تم حفظ الصورة ومزامنتها في ألبوم المشروع 📸');
 
     if (typeof logAudit === 'function') {
-      logAudit(isVideo ? 'إضافة فيديو للألبوم' : 'إضافة صورة للألبوم', `تمت إضافة ${isVideo ? 'فيديو' : 'صورة'}: "${newMedia.title}"`, 'محمد مصطفى');
+      logAudit(isVideo ? 'إضافة فيديو للألبوم' : 'إضافة صورة للألبوم', `تمت إضافة ${isVideo ? 'فيديو' : 'صورة'}: "${newMedia.title}"`, currentUserName);
     }
 
     currentSelectedMediaItem = null;
@@ -20276,6 +20441,11 @@ async function deleteCustomPhoto(mediaId) {
   if (!confirm('هل أنت متأكد من رغبتك في حذف هذا العنصر من الألبوم؟')) return;
   try {
     await MustagroMediaStore.deleteMedia(mediaId);
+    if (window.AgroAPI && typeof window.AgroAPI.deleteMediaItem === 'function') {
+      window.AgroAPI.deleteMediaItem(mediaId).then(() => {
+        console.log('✓ تم حذف الوسيط من Supabase بنجاح');
+      }).catch(e => console.warn('Delete cloud media warning:', e));
+    }
     showToast('✓ تم حذف العنصر بنجاح');
     openGedarefGalleryModal(currentGalleryFilter);
   } catch (e) {
@@ -20568,12 +20738,8 @@ function renderRainfallSection() {
   }
 }
 
-// نافذة تسجيل / تعديل هطول الأمطار
+// نافذة تسجيل / تعديل هطول الأمطار - متاحة لكافة المستخدمين وأعضاء الفريق
 function openAddRainfallModal(editId = null) {
-  if (typeof isCurrentUserViewer === 'function' && isCurrentUserViewer()) {
-    showToast('⚠️ عفواً، حسابك للاطلاع فقط ولا يملك صلاحية إضافة أو تعديل البيانات.', 'warning');
-    return;
-  }
 
   const isEdit = !!editId;
   const existing = isEdit ? (state.rainfallLogs || []).find(r => r.id === editId) : null;
@@ -23248,11 +23414,30 @@ async function initCloudSyncOnStartup() {
         });
         const mergedRainfall = Array.from(rainMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
+        // دمج وسائط ألبوم المشروع السحابية ليراها الجميع
+        const localMediaItems = [];
+        try {
+          const ldb = await MustagroMediaStore.getAllMedia();
+          if (Array.isArray(ldb)) localMediaItems.push(...ldb);
+        } catch(e) {}
+        const cloudMediaItems = cloudState.mediaGallery || [];
+        const medMap = new Map();
+        cloudMediaItems.forEach(m => medMap.set(m.id, m));
+        const pendingLocalMedia = [];
+        localMediaItems.forEach(m => {
+          if (!medMap.has(m.id)) {
+            medMap.set(m.id, m);
+            pendingLocalMedia.push(m);
+          }
+        });
+        const mergedMedia = Array.from(medMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
         state = {
           ...state,
           ...cloudState,
           groceryTransactions: mergedGrocery,
           rainfallLogs: mergedRainfall,
+          mediaGallery: mergedMedia,
           farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
           forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
         };
@@ -23275,6 +23460,13 @@ async function initCloudSyncOnStartup() {
           Promise.all(pendingLocalRain.map(rtx => window.AgroAPI.upsertRainfallLog(rtx)))
             .then(() => console.log(`✓ تم رفع ومزامنة ${pendingLocalRain.length} سجل أمطار محلي إلى السحابة تلقائياً`))
             .catch(err => console.warn('Auto upload rainfall error:', err));
+        }
+
+        // رفع أي وسائط محلية غير مسجلة في السحابة تلقائياً
+        if (pendingLocalMedia.length > 0 && window.AgroAPI && typeof window.AgroAPI.upsertMediaItem === 'function') {
+          Promise.all(pendingLocalMedia.map(m => window.AgroAPI.upsertMediaItem(m)))
+            .then(() => console.log(`✓ تم رفع ومزامنة ${pendingLocalMedia.length} وسيط محلي إلى السحابة تلقائياً`))
+            .catch(err => console.warn('Auto upload media error:', err));
         }
       } else {
         updateCloudStatusIndicator(true, '🟢 سحابي متصل');
@@ -23312,11 +23504,21 @@ async function handleFetchFromSupabase() {
     });
     const mergedRainfall = Array.from(rainMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
+    const localMed = state.mediaGallery || [];
+    const cloudMed = cloudState.mediaGallery || [];
+    const medMap = new Map();
+    cloudMed.forEach(m => medMap.set(m.id, m));
+    localMed.forEach(m => {
+      if (!medMap.has(m.id)) medMap.set(m.id, m);
+    });
+    const mergedMedia = Array.from(medMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
     state = {
       ...state,
       ...cloudState,
       groceryTransactions: mergedGrocery,
       rainfallLogs: mergedRainfall,
+      mediaGallery: mergedMedia,
       farmInfo: { ...(state.farmInfo || {}), ...(cloudState.farmInfo || {}) },
       forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
     };
@@ -23349,7 +23551,11 @@ if (typeof window !== 'undefined') {
             (payload.new && (payload.new.category === 'أمطار' || payload.new.item_id === 'inv-weather-rainfall' || (payload.new.id && String(payload.new.id).startsWith('rain-')))) ||
             (payload.old && (payload.old.category === 'أمطار' || payload.old.item_id === 'inv-weather-rainfall' || (payload.old.id && String(payload.old.id).startsWith('rain-'))))
           );
-          const tableNameDesc = isGroc ? 'بقالة الكمبو والمسحوبات' : (isRain ? 'سجلات الأمطار والطقس' : (payload.table === 'inventory_transactions' ? 'المخزن والمستودع' : payload.table));
+          const isMedia = payload && payload.table === 'inventory_transactions' && (
+            (payload.new && (payload.new.category === 'وسائط' || payload.new.item_id === 'inv-media-gallery' || (payload.new.id && String(payload.new.id).startsWith('media-')))) ||
+            (payload.old && (payload.old.category === 'وسائط' || payload.old.item_id === 'inv-media-gallery' || (payload.old.id && String(payload.old.id).startsWith('media-'))))
+          );
+          const tableNameDesc = isGroc ? 'بقالة الكمبو والمسحوبات' : (isRain ? 'سجلات الأمطار والطقس' : (isMedia ? 'ألبوم صور وفيديوهات المشروع' : (payload.table === 'inventory_transactions' ? 'المخزن والمستودع' : payload.table)));
           showToast(`⚡ تحديث سحابي فوري: تم تعديل (${tableNameDesc}) من قبل مستخدم آخر!`, 'info');
           handleFetchFromSupabase();
         });
