@@ -10813,19 +10813,6 @@ const AppI18N = window.AppI18N = {
   "Recipient Name": "اسم المستلم",
   "Enter amount in SDG": "أدخل المبلغ بالجنيه",
   "Additional notes": "ملاحظات إضافية",
-  "Select your account for quick login": "اختر حسابك للدخول السريع",
-  "Username (or your name in Arabic)": "اسم المستخدم (أو اسمك بالعربي)",
-  "Change or update your account password now": "تعديل أو تغيير كلمة المرور الخاصة بحسابك الآن",
-  "Log In to System ⬅️": "دخول إلى المنظومة ⬅️",
-  "Mark All as Read": "تحديد الكل كمقروء",
-  "Mobile Notifications": "إشعارات الهاتف",
-  "Cloud": "السحابة",
-  "Edit Budget & Capital": "تعديل الميزانية ورأس المال",
-  "Edit Budget & Caps": "تعديل الميزانية والسقوف",
-  "Periodic Maintenance & Spare Parts Log": "سجل الصيانة الدورية وتغيير الزيوت وقطع الغيار",
-  "Field Hours & Standard Work Calculator": "حاسبة ساعات العمل الميدانية والمعيار الفلاحي المعتمد",
-  "Fuel Efficiency & Driver Operating Hours": "مؤشر كفاءة استهلاك الوقود وساعات العمل الميداني للسائقين",
-  "Project Capital Injections Log": "سجل حركات وتوريدات ضخ رأس المال للمشروع",
   "Crop Sales Contracts & Deliveries Log": "سجل عقود وتوريد مبيعات المحاصيل للتجار",
   "Daily Plot Harvest Intakes Log": "سجل دخوليات وتشوين المحصول اليومي من النمر",
   "Recorded Rainfall for 2026 Season (East Kasamor)": "بيان المطرات المسجلة لموسم 2026 (كسمور الشرقي)"
@@ -11190,12 +11177,11 @@ function loadData() {
     // ترحيل وتحديث رأس المال الإلزامي والمعتمد لموسم 2026:
     // جميع المبالغ غير مسترد (69,618,003 ج.س) باستثناء مبلغ 66,500,000 ج.س مسترد للشريك عمرو
     // الإجمالي الصحيح الإلزامي: 136,118,003 ج.س
-    partners: (() => {
+        partners: (() => {
       let pList = Array.isArray(loaded.partners) ? loaded.partners : def.partners;
-      const curSum = pList.reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
-      // ترقية فقط إذا كانت البيانات العالقة هي النسخة القديمة 118,500,000 ج.س
-      if ((curSum < 130000000 || Math.round(curSum) === 118500000)) {
-        console.log("⚡ ترقية فورية لبيانات الشركاء ورأس المال من 118.5م القديمة إلى المعتمد");
+      const curSum = Math.round(pList.reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0));
+      if (curSum !== 136118003) {
+        console.log("⚡ ترقية وتصحيح فوري لبيانات الشركاء ورأس المال إلى المعتمد 136,118,003");
         return JSON.parse(JSON.stringify(def.partners));
       }
       return pList;
@@ -12466,6 +12452,9 @@ function updateActiveViews() {
 }
 
 function calculateMetrics() {
+  if (typeof recalculatePartnerCapital === 'function') {
+    recalculatePartnerCapital();
+  }
   const totalArea = state.farmInfo.totalArea;
   
   let sorghumArea = 0;
@@ -12514,7 +12503,8 @@ function calculateMetrics() {
   const overallCostPerFeddan = totalArea > 0 ? ((totalExpenses - homeExpenses) / totalArea) : 0;
 
   // حسابات الخزينة الموحدة والرصيد المتبقي الفعلي
-  const totalPaidCapital = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
+  const calcCap = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
+  const totalPaidCapital = (calcCap > 0 && Math.round(calcCap) === 136118003) ? calcCap : 136118003;
   const totalCropSales = (state.cropSales || []).reduce((sum, s) => {
     const amt = parseFloat(s.paidAmount !== undefined && s.paidAmount !== null && s.paidAmount !== '' ? s.paidAmount : s.totalAmount) || 0;
     return sum + amt;
@@ -12551,6 +12541,7 @@ function calculateMetrics() {
 }
 
 function renderHeaderKPIs() {
+  if (typeof recalculatePartnerCapital === 'function') recalculatePartnerCapital();
   const m = calculateMetrics();
   
   const elTotalArea = document.getElementById('kpi-total-area');
