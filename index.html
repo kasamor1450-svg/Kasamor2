@@ -6753,7 +6753,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "loggedBy": "محمد مصطفى",
       "purpose": "استكمال راس مال تشغيلي",
-      "notes": ""
+      "capitalType": "refundable",
+      "notes": "سلفة تشغيلية مستردة بالكامل عند التصفية [نوع: مسترد]"
     },
     {
       "id": "inj-1",
@@ -6764,7 +6765,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     },
     {
       "id": "inj-2",
@@ -6775,7 +6777,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     },
     {
       "id": "inj-3",
@@ -6786,7 +6789,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     },
     {
       "id": "inj-4",
@@ -6797,7 +6801,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     },
     {
       "id": "inj-5",
@@ -6808,7 +6813,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     },
     {
       "id": "inj-6",
@@ -6819,7 +6825,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     },
     {
       "id": "inj-7",
@@ -6830,7 +6837,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     },
     {
       "id": "inj-8",
@@ -6841,7 +6849,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     },
     {
       "id": "inj-9",
@@ -6852,7 +6861,8 @@ const DEFAULT_DATA = {
       "method": "تحويل بنكك",
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة"
+      "capitalType": "non_refundable",
+      "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة [نوع: غير مسترد]"
     }
   ],
   "harvestIntakes": [
@@ -15548,15 +15558,15 @@ function recalculatePartnerCapital() {
   if (!state.cropSales) state.cropSales = [];
 
   const AUTHORITATIVE_PARTNERS = {
-    'prt-1': { name: 'عمرو', shares: 2, nonRef: 10710462, ref: 66500000, paid: 77210462 },
-    'prt-2': { name: 'حسن', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
-    'prt-3': { name: 'ابوبكر', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
-    'prt-4': { name: 'هاجر', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
-    'prt-5': { name: 'الجعلي', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
-    'prt-6': { name: 'هديل', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
-    'prt-7': { name: 'ايناس', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
-    'prt-8': { name: 'رزاز', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
-    'prt-9': { name: 'عناب', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 }
+    'prt-1': { name: 'عمرو', fullName: 'محمد مصطفى حسن', shares: 2, nonRef: 10710462, ref: 66500000, paid: 77210462 },
+    'prt-2': { name: 'حسن', fullName: 'حسن مصطفى حسن', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
+    'prt-3': { name: 'ابوبكر', fullName: 'أبوبكر مصطفى حسن', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
+    'prt-4': { name: 'هاجر', fullName: 'هاجر عوض السيد', shares: 2, nonRef: 10710462, ref: 0, paid: 10710462 },
+    'prt-5': { name: 'الجعلي', fullName: 'مصطفى الجعلي', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
+    'prt-6': { name: 'هديل', fullName: 'هديل مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
+    'prt-7': { name: 'ايناس', fullName: 'إيناس مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
+    'prt-8': { name: 'رزاز', fullName: 'رزاز مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 },
+    'prt-9': { name: 'عناب', fullName: 'عناب مصطفى حسن', shares: 1, nonRef: 5355231, ref: 0, paid: 5355231 }
   };
 
   // 1. حساب إجمالي مبيعات المحاصيل وتوزيعها على 13 سهماً
@@ -15574,29 +15584,43 @@ function recalculatePartnerCapital() {
   });
 
   state.partners.forEach(p => {
-    const auth = AUTHORITATIVE_PARTNERS[p.id];
+    const auth = AUTHORITATIVE_PARTNERS[p.id] || 
+                 Object.values(AUTHORITATIVE_PARTNERS).find(a => 
+                   (p.name && (p.name.includes(a.name) || a.name.includes(p.name))) ||
+                   (p.fullName && (p.fullName.includes(a.name) || a.name.includes(p.fullName)))
+                 );
     
-    // Check if partner has custom injections added
-    const pInjections = state.capitalInjections.filter(inj => 
-      inj.partnerId === p.id || inj.partnerName === p.name || inj.partnerName === p.fullName
+    // فحص حركات الضخ الخاصة بالشريك
+    const pInjections = (state.capitalInjections || []).filter(inj => 
+      (p.id && (inj.partnerId === p.id || inj.partner_id === p.id)) ||
+      (p.name && (inj.partnerName === p.name || inj.partner_name === p.name)) ||
+      (p.fullName && (inj.partnerName === p.fullName || inj.partner_name === p.fullName)) ||
+      (inj.partnerName && (p.fullName && p.fullName.includes(inj.partnerName) || p.name && p.name.includes(inj.partnerName)))
     );
 
-    if (pInjections.length > 0) {
-      p.nonRefundableCapital = pInjections
-        .filter(inj => inj.capitalType === 'non_refundable' || (inj.notes && inj.notes.includes('غير مسترد')) || (inj.purpose && inj.purpose.includes('غير مسترد')))
-        .reduce((sum, inj) => sum + (parseFloat(inj.amount) || 0), 0);
+    let calcNonRef = 0;
+    let calcRef = 0;
 
-      p.refundableCapital = pInjections
-        .filter(inj => inj.capitalType === 'refundable' || (inj.notes && inj.notes.includes('مسترد') && !inj.notes.includes('غير مسترد')) || (inj.purpose && inj.purpose.includes('مسترد') && !inj.purpose.includes('غير مسترد')))
-        .reduce((sum, inj) => sum + (parseFloat(inj.amount) || 0), 0);
-    } else if (auth) {
-      p.nonRefundableCapital = auth.nonRef;
-      p.refundableCapital = auth.ref;
-    } else {
-      p.nonRefundableCapital = p.shares === 2 ? 10710462 : 5355231;
-      p.refundableCapital = 0;
+    if (pInjections.length > 0) {
+      pInjections.forEach(inj => {
+        const amt = parseFloat(inj.amount) || 0;
+        const isRef = inj.capitalType === 'refundable' || 
+                      (inj.notes && (inj.notes.includes('مسترد') || inj.notes.includes('سلفة') || inj.notes.includes('تشغيلي')) && !inj.notes.includes('غير مسترد')) ||
+                      (inj.purpose && (inj.purpose.includes('مسترد') || inj.purpose.includes('سلفة') || inj.purpose.includes('تشغيلي')) && !inj.purpose.includes('غير مسترد'));
+        if (isRef) {
+          calcRef += amt;
+        } else {
+          calcNonRef += amt;
+        }
+      });
     }
 
+    // ضمان الحد الأدنى المعتمد لرأس المال المدفوع
+    const baseNonRef = auth ? auth.nonRef : (parseFloat(p.shares) === 2 ? 10710462 : 5355231);
+    const baseRef = auth ? auth.ref : 0;
+
+    p.nonRefundableCapital = Math.max(calcNonRef, baseNonRef);
+    p.refundableCapital = Math.max(calcRef, baseRef);
     p.paidCapital = p.nonRefundableCapital + p.refundableCapital;
 
     // توزيع مبيعات المحاصيل على الأسهم (13 سهماً)
@@ -15610,7 +15634,6 @@ function recalculatePartnerCapital() {
     p.notes = `نسبة ربح ثابتة ${p.shares} من 13 (${((partnerShares/13)*100).toFixed(2)}%) [غير مسترد: ${p.nonRefundableCapital}] [مسترد: ${p.refundableCapital}] [مبيعات مضافة: ${p.cropSalesShare}] [أرباح مستلمة: ${p.totalProfitsReceived}]`;
   });
 }
-
 function setPartnersViewMode(mode) {
   const cardsCont = document.getElementById('partners-modern-cards-container');
   const tableCont = document.getElementById('partners-table-wrapper') || document.querySelector('#section-partners .overflow-x-auto')?.parentElement;
