@@ -14549,6 +14549,12 @@ function openDisburseWageModal(preselectedWorkerId = null) {
     return;
   }
 
+  // الحماية الفولاذية: ضمان وجود بيانات العمالة دائماً
+  if (!state.labor || !Array.isArray(state.labor) || state.labor.length === 0) {
+    state.labor = (typeof DEFAULT_DATA !== 'undefined' && DEFAULT_DATA.labor) 
+      ? JSON.parse(JSON.stringify(DEFAULT_DATA.labor)) : [];
+  }
+
   if (!state.labor || state.labor.length === 0) {
     showToast('⚠️ لا يوجد عمال مسجلين في النظام حالياً', 'warning');
     return;
@@ -14558,15 +14564,25 @@ function openDisburseWageModal(preselectedWorkerId = null) {
 
   const activeWorkerId = preselectedWorkerId || state.labor[0].id;
   const currentWorker = state.labor.find(w => w.id === activeWorkerId) || state.labor[0];
-  const balance = Math.max(0, (currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0));
+  const rawBalance = (parseFloat(currentWorker.totalDue) || 0) - (parseFloat(currentWorker.totalPaid) || 0);
+  const balance = Math.max(0, rawBalance);
   const today = new Date().toISOString().split('T')[0];
 
+  const m = calculateMetrics();
+  const remTreasury = Math.round(m.remainingTreasuryBalance || 0);
+
+  // تحديد المبلغ المقترح مبدئياً بذكاء
+  let suggestedAmount = balance > 0 ? balance : 50000;
+  if (remTreasury > 0 && suggestedAmount > remTreasury && balance <= 0) {
+    suggestedAmount = remTreasury;
+  }
+
   const workersOptions = state.labor.map(w => {
-    const rawBal = (w.totalDue || 0) - (w.totalPaid || 0);
+    const rawBal = (parseFloat(w.totalDue) || 0) - (parseFloat(w.totalPaid) || 0);
     const balText = rawBal < 0 
       ? `⚠️ مدين بالسالب: -${Math.abs(rawBal).toLocaleString()} ج.س` 
       : (rawBal === 0 ? 'خالص (0 ج.س)' : `متبقي: ${rawBal.toLocaleString()} ج.س`);
-    return `<option value="${w.id}" ${w.id === activeWorkerId ? 'selected' : ''}>${w.name} (${w.role}) [${balText}]</option>`;
+    return `<option value="${w.id}" ${w.id === currentWorker.id ? 'selected' : ''}>${w.name} (${w.role}) [${balText}]</option>`;
   }).join('');
 
   const modalHTML = `
@@ -14580,7 +14596,7 @@ function openDisburseWageModal(preselectedWorkerId = null) {
           </span>
           <div>
             <h3 class="text-base font-black text-slate-900 dark:text-white">صرف أجر / دفعة راتب لعامل</h3>
-            <p class="text-xs text-slate-400">توثيق دفع الراتب وخصم المسحوبات والمزامنة مع المصروفات</p>
+            <p class="text-xs text-slate-400">توثيق دفع الراتب وخصم المسحوبات والمزامنة مع الخزينة والمصروفات</p>
           </div>
         </div>
         <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-lg">&times;</button>
@@ -14600,11 +14616,13 @@ function openDisburseWageModal(preselectedWorkerId = null) {
         <div class="p-2.5 rounded-xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs space-y-1">
           <div class="flex justify-between items-center font-bold">
             <span class="text-purple-900 dark:text-purple-300">الرصيد المتبقي المتاح بالخزينة حالياً:</span>
-            <span class="font-mono text-purple-800 dark:text-purple-200 font-black">${Math.round(calculateMetrics().remainingTreasuryBalance || 0).toLocaleString()} ج.س</span>
+            <span id="disburse-cur-treasury" class="font-mono text-purple-800 dark:text-purple-200 font-black">${remTreasury.toLocaleString()} ج.س</span>
           </div>
           <div class="flex justify-between items-center text-[11px]">
             <span class="text-slate-500 dark:text-slate-400">المتبقي بالخزينة بعد صرف هذا الأجر:</span>
-            <span id="disburse-rem-treasury-preview" class="font-mono font-black text-emerald-700 dark:text-emerald-400">${Math.round(Math.max(0, (calculateMetrics().remainingTreasuryBalance || 0) - balance)).toLocaleString()} ج.س</span>
+            <span id="disburse-rem-treasury-preview" class="font-mono font-black ${(remTreasury - suggestedAmount) < 0 ? 'text-rose-600' : 'text-emerald-700 dark:text-emerald-400'}">
+              ${Math.round(remTreasury - suggestedAmount).toLocaleString()} ج.س
+            </span>
           </div>
         </div>
 
@@ -14623,14 +14641,14 @@ function openDisburseWageModal(preselectedWorkerId = null) {
             <span class="font-mono text-emerald-600">${(currentWorker.totalPaid || 0).toLocaleString()} ج.س</span>
           </div>
           <div class="flex justify-between items-center font-black pt-1 border-t border-slate-200 dark:border-slate-700 text-xs">
-            <span class="${((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)) < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}">المبلغ المتبقي المستحق:</span>
-            <span id="disburse-balance-badge" class="font-mono font-black ${((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)) < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600'}">
-              ${((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)) < 0 
-                ? `-${Math.abs((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)).toLocaleString()} ج.س (⚠️ مدين للمشروع)` 
-                : `${Math.max(0, (currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)).toLocaleString()} ج.س`}
+            <span class="${rawBalance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'}">المبلغ المتبقي المستحق:</span>
+            <span id="disburse-balance-badge" class="font-mono font-black ${rawBalance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600'}">
+              ${rawBalance < 0 
+                ? `-${Math.abs(rawBalance).toLocaleString()} ج.س (⚠️ مدين للمشروع)` 
+                : `${balance.toLocaleString()} ج.س`}
             </span>
           </div>
-          ${((currentWorker.totalDue || 0) - (currentWorker.totalPaid || 0)) < 0 ? `
+          ${rawBalance < 0 ? `
             <div class="p-2 bg-rose-50 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-200 text-[10px] font-bold mt-1">
               ⚠️ تنبيه: مسحوبات أو منصرفات هذا العامل تجاوزت إجمالي مستحقاته. رصيده حالياً سالب (مدين للمشروع). أي صرف إضافي سيزيد من عجز العامل.
             </div>
@@ -14645,16 +14663,21 @@ function openDisburseWageModal(preselectedWorkerId = null) {
           </div>
           <div>
             <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">المبلغ المصروف (ج.س):</label>
-            <input type="number" id="disburse-amount" min="1" step="any" oninput="onDisburseAmountInput()" value="${balance > 0 ? balance : (currentWorker.monthlySalary || '')}" class="w-full p-2.5 rounded-xl border border-teal-400 dark:border-teal-700 bg-white dark:bg-slate-800 font-black font-mono text-teal-800 dark:text-teal-300 text-sm" required>
+            <input type="number" id="disburse-amount" min="1" step="any" oninput="onDisburseAmountInput()" value="${suggestedAmount}" class="w-full p-2.5 rounded-xl border border-teal-400 dark:border-teal-700 bg-white dark:bg-slate-800 font-black font-mono text-teal-800 dark:text-teal-300 text-sm" required>
           </div>
         </div>
 
         <!-- أزرار سريعة للمبلغ -->
         <div class="flex flex-wrap gap-1.5 pt-0.5">
           <span class="text-[10px] text-slate-400 font-bold ml-1">خيارات سريعة:</span>
-          <button type="button" onclick="setDisburseAmountQuick('balance')" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-800 rounded-lg text-[10px] font-bold border border-rose-200">صرف كامل المتبقي</button>
-          <button type="button" onclick="setDisburseAmountQuick('salary')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-[10px] font-bold">راتب شهر كامل</button>
-          <button type="button" onclick="setDisburseAmountQuick('half_salary')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-[10px] font-bold">نصف شهر (سلفة)</button>
+          ${balance > 0 ? `
+            <button type="button" onclick="setDisburseAmountQuick('balance')" class="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-lg text-[10px] font-bold border border-emerald-200 dark:border-emerald-800">كامل المتبقي (${balance.toLocaleString()} ج.س)</button>
+          ` : ''}
+          <button type="button" onclick="setDisburseAmountQuick('salary')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-[10px] font-bold">راتب شهر (${(currentWorker.monthlySalary || 0).toLocaleString()} ج.س)</button>
+          <button type="button" onclick="setDisburseAmountQuick('advance_50k')" class="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-blue-800 dark:text-blue-300 rounded-lg text-[10px] font-bold border border-blue-200 dark:border-blue-800">سلفة 50,000 ج.س</button>
+          ${remTreasury > 0 ? `
+            <button type="button" onclick="setDisburseAmountQuick('treasury')" class="px-2 py-0.5 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 text-purple-800 dark:text-purple-300 rounded-lg text-[10px] font-bold border border-purple-200 dark:border-purple-800">المتاح بالخزينة (${remTreasury.toLocaleString()} ج.س)</button>
+          ` : ''}
         </div>
 
         <!-- 4. نوع الدفعة وطريقة الصرف -->
@@ -14671,8 +14694,8 @@ function openDisburseWageModal(preselectedWorkerId = null) {
           <div>
             <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">طريقة الدفع:</label>
             <select id="disburse-method" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
-              <option value="تحويل بنكك">تحويل بنكك (Bankak)</option>
               <option value="نقداً كاش">نقداً كاش من الخزينة</option>
+              <option value="تحويل بنكك">تحويل بنكك (Bankak)</option>
               <option value="إيداع بنكي">إيداع بنكي مباشر</option>
             </select>
           </div>
@@ -14681,20 +14704,20 @@ function openDisburseWageModal(preselectedWorkerId = null) {
         <!-- 5. البيان والملاحظات -->
         <div>
           <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">البيان والملاحظات:</label>
-          <input type="text" id="disburse-notes" placeholder="مثال: صرف راتب شهر أغسطس 2026 - تسليم مباشر" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium">
+          <input type="text" id="disburse-notes" placeholder="مثال: صرف أجر للعامل - تسليم مباشر باليد" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium">
         </div>
 
         <!-- 6. خيار قيد المصروف في المصروفات العامة -->
         <div class="p-2.5 bg-emerald-50/70 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
           <label class="flex items-center gap-2 cursor-pointer font-bold text-emerald-950 dark:text-emerald-200 text-xs">
             <input type="checkbox" id="disburse-record-expense" checked class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
-            <span>تسجيل هذا المبلغ كمصروف رسمي في حسابات المزرعة (بند: رواتب وأجور)</span>
+            <span>تسجيل هذا المبلغ كمصروف رسمي في حسابات المزرعة (خصم مباشر من الخزينة)</span>
           </label>
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-          <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 text-white rounded-xl font-black transition shadow-sm active:scale-95 text-xs">
-            💾 تأكيد صرف الأجر وتسجيل السند
+          <button type="submit" class="flex-1 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 text-white rounded-xl font-black transition shadow-sm active:scale-95 text-xs flex items-center justify-center gap-1.5">
+            <span>💾 تأكيد صرف الأجر وتسجيل السند</span>
           </button>
           <button type="button" onclick="closeModal()" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded-xl font-bold text-xs">
             إلغاء
@@ -14713,10 +14736,12 @@ function onDisburseWorkerSelectChange() {
   const worker = (state.labor || []).find(w => w.id === workerId);
   if (!worker) return;
 
-  const rawBalance = (worker.totalDue || 0) - (worker.totalPaid || 0);
+  const rawBalance = (parseFloat(worker.totalDue) || 0) - (parseFloat(worker.totalPaid) || 0);
   const balance = Math.max(0, rawBalance);
   const card = document.getElementById('disburse-worker-card');
   const amountInput = document.getElementById('disburse-amount');
+  const m = calculateMetrics();
+  const remTreasury = Math.round(m.remainingTreasuryBalance || 0);
 
   if (card) {
     card.innerHTML = `
@@ -14748,8 +14773,11 @@ function onDisburseWorkerSelectChange() {
     `;
   }
 
-  if (amountInput && (!amountInput.value || parseFloat(amountInput.value) <= 0)) {
-    amountInput.value = balance > 0 ? balance : (worker.monthlySalary || '');
+  if (amountInput) {
+    let sugg = balance > 0 ? balance : 50000;
+    if (remTreasury > 0 && sugg > remTreasury && balance <= 0) sugg = remTreasury;
+    amountInput.value = sugg;
+    onDisburseAmountInput();
   }
 }
 
@@ -14759,14 +14787,22 @@ function setDisburseAmountQuick(mode) {
   const amountInput = document.getElementById('disburse-amount');
   if (!worker || !amountInput) return;
 
+  const m = calculateMetrics();
+  const remTreasury = Math.round(m.remainingTreasuryBalance || 0);
+
   if (mode === 'balance') {
-    const bal = Math.max(0, (worker.totalDue || 0) - (worker.totalPaid || 0));
+    const bal = Math.max(0, (parseFloat(worker.totalDue) || 0) - (parseFloat(worker.totalPaid) || 0));
     amountInput.value = bal;
   } else if (mode === 'salary') {
     amountInput.value = worker.monthlySalary || 0;
+  } else if (mode === 'advance_50k') {
+    amountInput.value = 50000;
   } else if (mode === 'half_salary') {
     amountInput.value = Math.round((worker.monthlySalary || 0) / 2);
+  } else if (mode === 'treasury') {
+    amountInput.value = Math.max(1, remTreasury);
   }
+  onDisburseAmountInput();
 }
 
 function onDisburseAmountInput() {
@@ -14807,80 +14843,117 @@ function onDisburseAmountInput() {
   }
 }
 
-function handleSaveDisburseWage(event) {
-  event.preventDefault();
+async function handleSaveDisburseWage(event) {
+  if (event && event.preventDefault) event.preventDefault();
 
-  const workerId = document.getElementById('disburse-worker-id').value;
-  const worker = (state.labor || []).find(w => w.id === workerId);
-  if (!worker) {
-    showToast('⚠️ يرجى اختيار العامل أولاً', 'warning');
-    return;
+  const submitBtn = event && event.target ? event.target.querySelector('button[type="submit"]') : null;
+  const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>⏳ جاري صرف الأجر والمزامنة...</span>';
   }
 
-  const date = document.getElementById('disburse-date').value;
-  const amount = parseFloat(document.getElementById('disburse-amount').value) || 0;
-  if (amount <= 0) {
-    showToast('⚠️ يرجى إدخال مبلغ صحيح أكبر من الصفر', 'warning');
-    return;
-  }
-
-  const disburseType = document.getElementById('disburse-type').value;
-  const method = document.getElementById('disburse-method').value;
-  const notes = document.getElementById('disburse-notes').value.trim();
-  const recordExpense = document.getElementById('disburse-record-expense').checked;
-  const currentUserName = currentUser ? currentUser.name : "عبدالقادر (الوكيل)";
-
-  // 1. تحديث المدفوع للعامل
-  worker.totalPaid = (parseFloat(worker.totalPaid) || 0) + amount;
-  autoUpdateLaborWages();
-
-  // 2. إذا تم اختيار تسجيله كمصروف رسمي للمزرعة
-  if (recordExpense) {
-    if (!state.expenses) state.expenses = [];
-    const expRecord = {
-      id: `exp-wages-${Date.now()}`,
-      date: date,
-      category: 'رواتب وأجور',
-      amount: amount,
-      plot: worker.plot || 'كامل المشروع',
-      crop: 'مشترك',
-      op: `صرف ${disburseType} للعامل (${worker.name}) - ${method}`,
-      notes: notes || `صرف أجر لعامل (${worker.name} - ${worker.role})`,
-      createdBy: currentUserName,
-      isUnderReview: false
-    };
-    state.expenses.unshift(expRecord);
-
-    // مزامنة المصروف سحابياً
-    if (window.AgroAPI && window.AgroAPI.insertExpense) {
-      window.AgroAPI.insertExpense(expRecord).catch(() => {});
+  try {
+    const workerSelect = document.getElementById('disburse-worker-id');
+    const workerId = workerSelect ? workerSelect.value : null;
+    const worker = (state.labor || []).find(w => w.id === workerId);
+    if (!worker) {
+      showToast('⚠️ يرجى اختيار العامل أولاً', 'warning');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnText; }
+      return;
     }
-  }
 
-  // 3. توثيق في سجل التدقيق الميداني
-  logAudit("صرف أجر", `صرف ${disburseType} للعامل (${worker.name}) بمبلغ ${amount.toLocaleString()} ج.س (${method})`, "الرواتب والأجور");
+    const dateInput = document.getElementById('disburse-date');
+    const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+    const amountInput = document.getElementById('disburse-amount');
+    const amount = parseFloat(amountInput ? amountInput.value : 0) || 0;
+    if (amount <= 0) {
+      showToast('⚠️ يرجى إدخال مبلغ صحيح أكبر من الصفر', 'warning');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnText; }
+      return;
+    }
 
-  // 4. حفظ وتحديث الواجهات والمزامنة السحابية
-  saveData(`✓ تم صرف أجر بمبلغ (${amount.toLocaleString()} ج.س) للعامل ${worker.name} وخصمه من الرصيد المتبقي بالخزينة بنجاح!`);
-  closeModal();
+    const disburseType = document.getElementById('disburse-type')?.value || 'راتب شهري';
+    const method = document.getElementById('disburse-method')?.value || 'نقداً كاش';
+    const notes = (document.getElementById('disburse-notes')?.value || '').trim();
+    const recordExpense = document.getElementById('disburse-record-expense') ? document.getElementById('disburse-record-expense').checked : true;
+    const currentUserName = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : "عبدالقادر (الوكيل)";
 
-  // مزامنة سجل العامل مع جدول labor السحابي
-  if (window.AgroAPI && window.AgroAPI.client) {
-    window.AgroAPI.client.from('labor').update({
-      total_paid: worker.totalPaid,
-      total_due: worker.totalDue,
-      status: worker.status
-    }).eq('id', worker.id).catch(() => {});
-  }
+    // 1. تحديث المدفوع للعامل محلياً
+    worker.totalPaid = (parseFloat(worker.totalPaid) || 0) + amount;
+    autoUpdateLaborWages();
 
-  // إشعار في مركز الإشعارات
-  if (typeof addSystemNotification === 'function') {
-    addSystemNotification({
-      title: '💵 صرف أجر / دفعة راتب',
-      desc: `تم صرف ${amount.toLocaleString()} ج.س للعامل ${worker.name} (${disburseType} - ${method})`,
-      category: 'finance',
-      targetSection: 'section-labor'
-    });
+    // 2. تحديد حالة متوافقة تماماً مع شروط قاعدة بيانات سوبابيس (labor_status_check: 'pending', 'partial', 'paid')
+    const rawNet = (parseFloat(worker.totalDue) || 0) - (parseFloat(worker.totalPaid) || 0);
+    const safeCloudStatus = rawNet <= 0 ? 'paid' : (parseFloat(worker.totalPaid) > 0 ? 'partial' : 'pending');
+
+    // 3. مزامنة جدول العمالة في سوبابيس أولاً وانتظار اكتمالها لمنع أي تضارب سحابي
+    if (window.AgroAPI && window.AgroAPI.client) {
+      try {
+        await window.AgroAPI.client.from('labor').update({
+          total_paid: worker.totalPaid,
+          total_due: worker.totalDue,
+          status: safeCloudStatus,
+          last_updated_by: currentUserName
+        }).eq('id', worker.id);
+      } catch (err) {
+        console.warn('Supabase labor update warning:', err);
+      }
+    }
+
+    // 4. تسجيل المصروف رسمياً في حسابات المزرعة وسوبابيس إن تم تحديد الخيار
+    let expRecord = null;
+    if (recordExpense) {
+      if (!state.expenses) state.expenses = [];
+      expRecord = {
+        id: 'exp-wages-' + Date.now(),
+        date: date,
+        category: 'رواتب وأجور',
+        amount: amount,
+        plot: worker.plot || 'كامل المشروع',
+        crop: 'مشترك',
+        op: 'صرف ' + disburseType + ' للعامل (' + worker.name + ') - ' + method,
+        notes: notes || ('صرف أجر لعامل (' + worker.name + ' - ' + worker.role + ')'),
+        createdBy: currentUserName,
+        isUnderReview: false
+      };
+      state.expenses.unshift(expRecord);
+
+      if (window.AgroAPI && window.AgroAPI.insertExpense) {
+        try {
+          await window.AgroAPI.insertExpense(expRecord);
+        } catch (err) {
+          console.warn('Supabase expense insert warning:', err);
+        }
+      }
+    }
+
+    // 5. توثيق الحركة في سجل التدقيق
+    if (typeof logAudit === 'function') {
+      logAudit("صرف أجر", 'صرف ' + disburseType + ' للعامل (' + worker.name + ') بمبلغ ' + amount.toLocaleString() + ' ج.س (' + method + ')', "الرواتب والأجور");
+    }
+
+    // 6. حفظ البيانات محلياً وتحديث الواجهات
+    const newRemTreasury = Math.round(calculateMetrics().remainingTreasuryBalance || 0);
+    saveData('✓ تم صرف مبلغ (' + amount.toLocaleString() + ' ج.س) للعامل ' + worker.name + ' بنجاح! الرصيد المتبقي بالخزينة: ' + newRemTreasury.toLocaleString() + ' ج.س');
+    closeModal();
+
+    // 7. إشعار في مركز الإشعارات
+    if (typeof addSystemNotification === 'function') {
+      addSystemNotification({
+        title: '💵 صرف أجر / دفعة راتب',
+        desc: 'تم صرف ' + amount.toLocaleString() + ' ج.س للعامل ' + worker.name + ' (' + disburseType + ' - ' + method + ')',
+        category: 'finance',
+        targetSection: 'section-labor'
+      });
+    }
+  } catch (err) {
+    console.error('handleSaveDisburseWage error:', err);
+    showToast('حدث خطأ أثناء صرف الأجر: ' + err.message, 'danger');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+    }
   }
 }
 
@@ -24135,9 +24208,30 @@ async function initCloudSyncOnStartup() {
         });
         const mergedMedia = Array.from(medMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
+        // دمج بيانات العمالة بذكاء للحفاظ على أي أجر تم صرفه محلياً وعدم التراجع عنه
+        const localLabor = state.labor || [];
+        const cloudLabor = cloudState.labor || [];
+        const laborMap = new Map();
+        localLabor.forEach(l => laborMap.set(l.id, { ...l }));
+        cloudLabor.forEach(cl => {
+          if (!laborMap.has(cl.id)) {
+            laborMap.set(cl.id, cl);
+          } else {
+            const loc = laborMap.get(cl.id);
+            const maxPaid = Math.max(parseFloat(loc.totalPaid) || 0, parseFloat(cl.totalPaid) || 0);
+            laborMap.set(cl.id, {
+              ...cl,
+              ...loc,
+              totalPaid: maxPaid
+            });
+          }
+        });
+        const mergedLabor = Array.from(laborMap.values());
+
         state = {
           ...state,
           ...cloudState,
+          labor: mergedLabor,
           groceryTransactions: mergedGrocery,
           rainfallLogs: mergedRainfall,
           mediaGallery: mergedMedia,
@@ -24216,9 +24310,30 @@ async function handleFetchFromSupabase() {
     });
     const mergedMedia = Array.from(medMap.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
+    // دمج بيانات العمالة بذكاء للحفاظ على أي أجر تم صرفه محلياً وعدم التراجع عنه
+    const localLabor = state.labor || [];
+    const cloudLabor = cloudState.labor || [];
+    const laborMap = new Map();
+    localLabor.forEach(l => laborMap.set(l.id, { ...l }));
+    cloudLabor.forEach(cl => {
+      if (!laborMap.has(cl.id)) {
+        laborMap.set(cl.id, cl);
+      } else {
+        const loc = laborMap.get(cl.id);
+        const maxPaid = Math.max(parseFloat(loc.totalPaid) || 0, parseFloat(cl.totalPaid) || 0);
+        laborMap.set(cl.id, {
+          ...cl,
+          ...loc,
+          totalPaid: maxPaid
+        });
+      }
+    });
+    const mergedLabor = Array.from(laborMap.values());
+
     state = {
       ...state,
       ...cloudState,
+      labor: mergedLabor,
       groceryTransactions: mergedGrocery,
       rainfallLogs: mergedRainfall,
       mediaGallery: mergedMedia,

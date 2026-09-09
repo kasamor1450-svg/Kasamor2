@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v30.1-treasury-balance-63003-confirmed
-const CACHE_NAME = 'mustagro-v30.1-treasury-balance-63003-confirmed';
+// Cache Version: mustagro-v31.0-wage-disbursement-fixed
+const CACHE_NAME = 'mustagro-v31.0-wage-disbursement-fixed';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
