@@ -6999,7 +6999,7 @@ const DEFAULT_DATA = {
       "monthsWorked": 1.8,
       "deductionsAmount": 0,
       "overtime": 0,
-      "totalDue": 2000000,
+      "totalDue": 1210000,
       "totalPaid": 2000000,
       "task": "إشراف عام على العمليات والوقود والمخزون وسلفة عملية جراحية",
       "plot": "كامل المشروع",
@@ -11266,10 +11266,7 @@ function loadData() {
       let lList = Array.isArray(loaded.labor) ? loaded.labor : def.labor;
       lList.forEach(w => {
         if (w.id === 'lab-1' || (w.name && w.name.includes('عبدالقادر'))) {
-          w.totalDue = 2000000;
-          w.totalPaid = 2000000;
-          w.status = 'paid';
-          w.netBalance = 0;
+          w.totalPaid = Math.max(parseFloat(w.totalPaid) || 0, 2000000);
         }
         if (w.id === 'lab-3' || (w.name && w.name.includes('الجعيلي'))) {
           w.endDate = '2026-09-04';
@@ -12156,21 +12153,8 @@ function autoUpdateLaborWages() {
       }
     }
 
-    // حالات خاصة مؤكدة للعمال المسددين بالكامل والمخالصين:
-    // 1. عبدالقادر (lab-1): تم صرف 2 مليون (تشمل سلفة العملية الجراحية)، مستحقاته مسددة بالكامل ورصيده 0 وليس مديناً
-    if (w.id === 'lab-1' || (w.name && w.name.includes('عبدالقادر'))) {
-      w.totalPaid = 2000000;
-      w.totalDue = 2000000;
-      w.netBalance = 0;
-      w.status = 'paid';
-      w.daysWorked = 53;
-      w.monthsWorked = 1.8;
-      w.grossEarnings = 2000000;
-      w.totalDeductions = 0;
-      return;
-    }
-
-    // 2. محمد الجعيلي (lab-3): انتهى عقده بتاريخ 04/09/2026 وتمت مخالصته نهائياً بمبلغ 1,240,000 ج.س
+    // حالات خاصة مؤكدة للعمال المخالصين والمنتهية عقودهم:
+    // 1. محمد الجعيلي (lab-3): انتهى عقده بتاريخ 04/09/2026 وتمت مخالصته نهائياً بمبلغ 1,240,000 ج.س
     if (w.id === 'lab-3' || (w.name && w.name.includes('الجعيلي'))) {
       w.endDate = '2026-09-04';
       w.totalPaid = 1240000;
@@ -15197,7 +15181,7 @@ function renderLaborSection() {
   if (balStat) balStat.textContent = Math.round(totalBalanceDueToWorkers).toLocaleString() + ' ' + currSymbol;
   if (balSub) {
     if (totalDebtsOwedByWorkers > 0) {
-      balSub.innerHTML = `<span class="text-rose-600 dark:text-rose-400 font-bold">⚠️ عجز/مسحوبات سالبة على العمال: -${Math.round(totalDebtsOwedByWorkers).toLocaleString()} ${currSymbol}</span>`;
+      balSub.innerHTML = `<span class="text-amber-600 dark:text-amber-400 font-bold">سلفيات مدفوعة مقدماً: ${Math.round(totalDebtsOwedByWorkers).toLocaleString()} ${currSymbol}</span>`;
     } else {
       balSub.textContent = (typeof AppI18N !== 'undefined' && AppI18N.currentLang === 'en')
         ? 'Outstanding balance due to workers'
@@ -15206,36 +15190,10 @@ function renderLaborSection() {
   }
   if (cntStat) cntStat.textContent = activeCount;
 
-  // إظهار أو إخفاء شريط التنبيه البارز في حال وجود أي عامل رصيده بالسالب
-  let overdrawnAlertBanner = document.getElementById('labor-overdrawn-alert-banner');
-  const laborTableWrapper = laborTable.closest('.overflow-x-auto') || laborTable.parentElement;
-  if (laborTableWrapper && laborTableWrapper.parentElement) {
-    if (overdrawnWorkers.length > 0) {
-      if (!overdrawnAlertBanner) {
-        overdrawnAlertBanner = document.createElement('div');
-        overdrawnAlertBanner.id = 'labor-overdrawn-alert-banner';
-        laborTableWrapper.parentElement.insertBefore(overdrawnAlertBanner, laborTableWrapper);
-      }
-      overdrawnAlertBanner.className = "mb-4 p-4 bg-rose-50/90 dark:bg-rose-950/80 border-2 border-rose-400 dark:border-rose-700 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md";
-      overdrawnAlertBanner.innerHTML = `
-        <div class="flex items-center gap-3">
-          <span class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl font-black shrink-0 shadow">⚠️</span>
-          <div>
-            <h4 class="font-black text-rose-900 dark:text-rose-100 text-sm">تنبيه مالي حرج: تجاوز مسحوبات أو منصرفات العمالة لإجمالي مستحقاتهم!</h4>
-            <p class="text-xs text-rose-800 dark:text-rose-200 mt-0.5">
-              يوجد <strong class="font-black text-rose-950 dark:text-rose-100">${overdrawnWorkers.length}</strong> من العمال تجاوزت سحوباتهم من البقالة أو المبالغ المنصرفة لهم رواتبهم المستحقة بإجمالي رصيد سالب قدره: 
-              <span class="font-mono font-black text-rose-700 dark:text-rose-300 text-sm">-${Math.round(totalDebtsOwedByWorkers).toLocaleString()} ${currSymbol}</span> 
-              (ديون مستحقة السداد لإدارة المشروع).
-            </p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
-          <span class="px-3 py-1 rounded-full text-xs font-black bg-rose-600 text-white shadow-sm">أرصدة سالبة 🔴</span>
-        </div>
-      `;
-    } else if (overdrawnAlertBanner) {
-      overdrawnAlertBanner.remove();
-    }
+  // إزالة أي شريط تنبيه قديم للأرصدة السالبة
+  let overdrawnAlertBanner = document.getElementById("labor-overdrawn-alert-banner");
+  if (overdrawnAlertBanner) {
+    overdrawnAlertBanner.remove();
   }
 
   laborTable.innerHTML = state.labor.map(w => {
@@ -15246,15 +15204,15 @@ function renderLaborSection() {
 
     let statusHtml = '';
     if (balance < 0) {
-      const deficit = Math.abs(balance);
+      const advanceAmount = Math.abs(balance);
       statusHtml = `
         <div class="flex flex-col gap-1 items-start">
-          <span class="bg-rose-600 text-white text-[11px] px-2.5 py-1 rounded-full font-black border border-rose-700 shadow-sm flex items-center gap-1">
-            <span>⚠️ مدين:</span>
-            <span class="font-mono">-${deficit.toLocaleString()} ج.س</span>
+          <span class="bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 text-[11px] px-2.5 py-1 rounded-full font-bold border border-amber-300 shadow-sm flex items-center gap-1">
+            <span>سلفة مقدمة:</span>
+            <span class="font-mono">${advanceAmount.toLocaleString()} ج.س</span>
           </span>
-          <span class="text-[9px] text-rose-600 dark:text-rose-400 font-bold">
-            ${w.totalDeductions > (w.grossEarnings || 0) ? 'المسحوبات تجاوزت المستحق' : 'المنصرف تجاوز المستحق'}
+          <span class="text-[9px] text-amber-600 dark:text-amber-400 font-bold">
+            منصرف بالزيادة على الحساب
           </span>
         </div>
       `;
