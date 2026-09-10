@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v32.0-treasury-grocery-rain-fixes
-const CACHE_NAME = 'mustagro-v32.0-treasury-grocery-rain-fixes';
+// Cache Version: mustagro-v33.0-payroll-sync-bonus-fix
+const CACHE_NAME = 'mustagro-v33.0-payroll-sync-bonus-fix';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

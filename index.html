@@ -1760,6 +1760,10 @@ html[dir="ltr"] .font-mono {
             <span class="text-sm">💵</span>
             <span>صرف أجر / دفعة راتب</span>
           </button>
+          <button type="button" onclick="openLaborWageDisbursementLedgerModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer" title="عرض سجل كافة الدفعات والحوافز المصروفة لجميع العمال">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
+            <span>📋 سجل صرف الرواتب والحوافز</span>
+          </button>
           <button onclick="openEditLaborModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
             <i data-lucide="user-plus" class="w-4 h-4"></i>
             <span>إضافة عامل / موظف جديد</span>
@@ -6969,14 +6973,14 @@ const DEFAULT_DATA = {
       "monthsWorked": 1.8,
       "deductionsAmount": 0,
       "overtime": 0,
-      "totalDue": 1080000,
-      "totalPaid": 1400000,
+      "totalDue": 1210000,
+      "totalPaid": 2000000,
       "task": "إشراف عام على العمليات والوقود والمخزون",
       "plot": "كامل المشروع",
       "crop": "مشترك",
       "areaFeddan": 1450,
       "status": "paid",
-      "lastUpdatedBy": "محمد مصطفى",
+      "lastUpdatedBy": "مصطفى الجعلي",
       "daysWorked": 53,
       "workerType": "permanent",
       "groceryTotal": 0,
@@ -6990,42 +6994,44 @@ const DEFAULT_DATA = {
       "startDate": "2026-07-14",
       "monthlySalary": 800000,
       "monthsWorked": 1.6,
-      "deductionsAmount": 0,
+      "deductionsAmount": 24000,
       "overtime": 0,
-      "totalDue": 1280000,
-      "totalPaid": 650000,
+      "totalDue": 1576000,
+      "totalPaid": 750000,
       "task": "حراثة وزراعة النوبة والويكة",
       "plot": "النوبة / الويكة",
       "crop": "مشترك",
       "areaFeddan": 380,
       "status": "partial",
-      "lastUpdatedBy": "محمد مصطفى",
+      "lastUpdatedBy": "مصطفى الجعلي",
       "daysWorked": 49,
       "workerType": "permanent",
       "groceryTotal": 0,
-      "totalDeductions": 0
+      "totalDeductions": 24000,
+      "endDate": ""
     },
     {
       "id": "lab-3",
       "name": "محمد الجعيلي",
       "role": "سائق تركتور ثانٍ",
       "startDate": "2026-07-14",
+      "endDate": "2026-09-04",
       "monthlySalary": 800000,
-      "monthsWorked": 1.6,
+      "monthsWorked": 1.7,
       "deductionsAmount": 0,
       "overtime": 0,
-      "totalDue": 1280000,
-      "totalPaid": 650000,
+      "totalDue": 1240000,
+      "totalPaid": 1240000,
       "task": "حراثة وزراعة ال500 والرقيقة",
       "plot": "ال500 / الرقيقة",
       "crop": "ذرة",
       "areaFeddan": 579,
-      "status": "partial",
+      "status": "paid",
       "lastUpdatedBy": "محمد مصطفى",
-      "daysWorked": 49,
-      "workerType": "permanent",
-      "groceryTotal": 0,
-      "totalDeductions": 0
+      "daysWorked": 52,
+      "workerType": "temporary",
+      "groceryTotal": 60000,
+      "totalDeductions": 60000
     },
     {
       "id": "lab-4",
@@ -7047,26 +7053,28 @@ const DEFAULT_DATA = {
       "daysWorked": 25,
       "workerType": "permanent",
       "groceryTotal": 0,
-      "totalDeductions": 0
+      "totalDeductions": 0,
+      "endDate": ""
     },
     {
       "id": "lab-5",
       "name": "عمال الكمبو والبناء",
       "role": "بناء وتجهيز كمبو المزرعة",
       "startDate": "2026-07-13",
+      "endDate": "2026-08-13",
       "monthlySalary": 950000,
-      "monthsWorked": 1.7,
+      "monthsWorked": 1,
       "deductionsAmount": 0,
       "overtime": 0,
-      "totalDue": 1615000,
+      "totalDue": 950000,
       "totalPaid": 950000,
       "task": "بناء الرواكيب والكرانك والسراير",
       "plot": "كمبو المزرعة",
       "crop": "مشترك",
       "areaFeddan": 0,
-      "status": "partial",
+      "status": "paid",
       "lastUpdatedBy": "محمد مصطفى",
-      "daysWorked": 50,
+      "daysWorked": 31,
       "workerType": "temporary",
       "groceryTotal": 0,
       "totalDeductions": 0
@@ -7075,7 +7083,8 @@ const DEFAULT_DATA = {
       "id": "lab-1788077268220",
       "name": "زيات حبشي",
       "role": "زيات",
-      "startDate": "2026-07-01",
+      "startDate": "2026-07-31",
+      "endDate": "2026-08-31",
       "monthsWorked": 1,
       "monthlySalary": 400000,
       "deductionsAmount": 303000,
@@ -7083,14 +7092,13 @@ const DEFAULT_DATA = {
       "totalDue": 97000,
       "totalPaid": 97000,
       "status": "paid",
-      "task": "عمليات موسمية وتزييت وتشحيم الآليات",
+      "task": "عمليات موسمية",
       "plot": "مشترك",
       "crop": "مشترك",
       "areaFeddan": 0,
       "lastUpdatedBy": "محمد مصطفى",
       "daysWorked": 31,
       "workerType": "temporary",
-      "endDate": "2026-07-31",
       "groceryTotal": 0,
       "totalDeductions": 303000
     }
@@ -11177,18 +11185,47 @@ function loadData() {
       let lList = Array.isArray(loaded.labor) ? loaded.labor : def.labor;
       lList.forEach(w => {
         if (w.id === 'lab-1788077268220' || w.name === 'زيات حبشي') {
-          if (w.totalPaid === 970000 || w.totalDue < 0 || (w.startDate === '2026-08-07' && w.endDate === '2026-07-31')) {
-            w.startDate = '2026-07-01';
-            w.endDate = '2026-07-31';
-            w.daysWorked = 31;
-            w.monthsWorked = 1;
-            w.monthlySalary = 400000;
-            w.deductionsAmount = 303000;
-            w.totalDeductions = 303000;
-            w.totalDue = 97000;
-            w.totalPaid = 97000;
+          w.startDate = '2026-07-31';
+          w.endDate = '2026-08-31';
+          w.daysWorked = 31;
+          w.monthsWorked = 1;
+          w.monthlySalary = 400000;
+          w.deductionsAmount = 303000;
+          w.totalDeductions = 303000;
+          w.totalDue = 97000;
+          w.totalPaid = 97000;
+          w.status = 'paid';
+        }
+        if (w.id === 'lab-3' || w.name === 'محمد الجعيلي') {
+          if (!w.endDate || w.endDate.trim() === '' || w.totalPaid < 1240000) {
+            w.endDate = '2026-09-04';
+            w.daysWorked = 52;
+            w.monthsWorked = 1.7;
+            w.totalPaid = 1240000;
+            w.totalDue = 1240000;
             w.status = 'paid';
           }
+        }
+        if (w.id === 'lab-1' || w.name === 'عبدالقادر') {
+          if (w.totalPaid < 2000000) {
+            w.totalPaid = 2000000;
+            w.totalDue = 1210000;
+            w.status = 'paid';
+          }
+        }
+        if (w.id === 'lab-2' || w.name === 'ابستة') {
+          if (w.totalPaid < 750000) {
+            w.totalPaid = 750000;
+            w.deductionsAmount = 24000;
+          }
+        }
+        if (w.id === 'lab-5' || w.name.includes('كمبو')) {
+          w.endDate = '2026-08-13';
+          w.daysWorked = 31;
+          w.monthsWorked = 1;
+          w.totalPaid = 950000;
+          w.totalDue = 950000;
+          w.status = 'paid';
         }
       });
       return lList;
@@ -11804,6 +11841,45 @@ function initNotificationsSystem() {
           details = `تم ضخ ${Number(payload.new.amount || 0).toLocaleString()} ج.س للشريك ${payload.new.partner_name || ''}`;
           target = 'section-partners';
           icon = '👥';
+        } else if (table === 'labor') {
+          title = '👷 تحديث في سجل الرواتب والعمالة';
+          const wName = (payload.new && payload.new.name) || (payload.old && payload.old.name) || 'عامل';
+          details = `تم تحديث بيانات ومسير العامل (${wName}) في السحابة`;
+          target = 'section-labor';
+          icon = '👷';
+          if (payload.new && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
+            const liveLabor = {
+              id: payload.new.id,
+              name: payload.new.name,
+              role: payload.new.role,
+              workerType: payload.new.worker_type || 'permanent',
+              startDate: payload.new.start_date,
+              endDate: payload.new.end_date || '',
+              monthlySalary: Number(payload.new.monthly_salary || 0),
+              daysWorked: Number(payload.new.days_worked || 0),
+              monthsWorked: Number(payload.new.months_worked || 0),
+              deductionsAmount: Number(payload.new.deductions_amount || 0),
+              overtime: Number(payload.new.overtime || 0),
+              totalDue: Number(payload.new.total_due || 0),
+              totalPaid: Number(payload.new.total_paid || 0),
+              status: payload.new.status,
+              task: payload.new.task,
+              plot: payload.new.plot,
+              crop: payload.new.crop,
+              areaFeddan: Number(payload.new.area_feddan || 0),
+              lastUpdatedBy: payload.new.last_updated_by
+            };
+            if (!state.labor) state.labor = [];
+            const lIdx = state.labor.findIndex(w => w.id === liveLabor.id);
+            if (lIdx >= 0) {
+              state.labor[lIdx] = { ...state.labor[lIdx], ...liveLabor };
+            } else {
+              state.labor.push(liveLabor);
+            }
+            autoUpdateLaborWages();
+            saveData();
+            updateActiveViews();
+          }
         } else if (table === 'inventory_transactions') {
           const isGroc = (payload.new && (payload.new.category === 'بقالة' || payload.new.item_id === 'inv-grocery-camp' || (payload.new.id && String(payload.new.id).startsWith('groc-')))) ||
                          (payload.old && (payload.old.category === 'بقالة' || payload.old.item_id === 'inv-grocery-camp' || (payload.old.id && String(payload.old.id).startsWith('groc-'))));
@@ -14665,12 +14741,16 @@ function openDisburseWageModal(preselectedWorkerId = null) {
         <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">نوع الصرف:</label>
-            <select id="disburse-type" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
-              <option value="راتب شهري">دفعة راتب شهرية</option>
-              <option value="سلفة مؤقتة">سلفة تحت الحساب</option>
-              <option value="تصفية نهائية">تصفية ومخالصة نهائية</option>
-              <option value="حافز ومكافأة">حافز ومكافأة إضافية</option>
+            <select id="disburse-type" onchange="onDisburseTypeChange()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="راتب شهري">دفعة راتب شهرية (تخصم من مستحقات الراتب)</option>
+              <option value="سلفة مؤقتة">سلفة تحت الحساب (تخصم من مستحقات الراتب)</option>
+              <option value="تصفية نهائية">تصفية ومخالصة نهائية (تخصم من مستحقات الراتب)</option>
+              <option value="حافز ومكافأة">حافز ومكافأة تشجيعية (تخصم من الخزينة فقط ولا تخصم من الراتب)</option>
             </select>
+            <div id="disburse-type-hint" class="hidden mt-1.5 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-[11px] font-bold flex items-center gap-1.5">
+              <span>🎁</span>
+              <span>حافز ومكافأة: سيُصرف من الخزينة مباشرة (يخصم من الرصيد النقدي)، ولن يُخصم إطلاقاً من الراتب الشهري المستحق للعامل.</span>
+            </div>
           </div>
           <div>
             <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">طريقة الدفع:</label>
@@ -14860,15 +14940,23 @@ async function handleSaveDisburseWage(event) {
     const recordExpense = document.getElementById('disburse-record-expense') ? document.getElementById('disburse-record-expense').checked : true;
     const currentUserName = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : "عبدالقادر (الوكيل)";
 
-    // 1. تحديث المدفوع للعامل محلياً
-    worker.totalPaid = (parseFloat(worker.totalPaid) || 0) + amount;
+    const isBonus = disburseType === 'حافز ومكافأة' || disburseType.includes('حافز') || disburseType.includes('مكافأة');
+
+    // 1. تحديث حساب العامل محلياً
+    if (!isBonus) {
+      // الرواتب والسلف: تخصم من مستحقات الراتب
+      worker.totalPaid = (parseFloat(worker.totalPaid) || 0) + amount;
+    } else {
+      // الحوافز والمكافآت: لا تخصم من الراتب الشهري، بل تُصرف كحافز إضافي من الخزينة
+      worker.incentivesPaid = (parseFloat(worker.incentivesPaid) || 0) + amount;
+    }
     autoUpdateLaborWages();
 
     // 2. تحديد حالة متوافقة تماماً مع شروط قاعدة بيانات سوبابيس (labor_status_check: 'pending', 'partial', 'paid')
     const rawNet = (parseFloat(worker.totalDue) || 0) - (parseFloat(worker.totalPaid) || 0);
     const safeCloudStatus = rawNet <= 0 ? 'paid' : (parseFloat(worker.totalPaid) > 0 ? 'partial' : 'pending');
 
-    // 3. مزامنة جدول العمالة في سوبابيس أولاً وانتظار اكتمالها لمنع أي تضارب سحابي
+    // 3. مزامنة جدول العمالة في سوبابيس
     if (window.AgroAPI && window.AgroAPI.client) {
       try {
         await window.AgroAPI.client.from('labor').update({
@@ -14882,9 +14970,9 @@ async function handleSaveDisburseWage(event) {
       }
     }
 
-    // 4. تسجيل المصروف رسمياً في حسابات المزرعة وسوبابيس إن تم تحديد الخيار
+    // 4. تسجيل المصروف رسمياً في حسابات المزرعة وسوبابيس (يخصم من الخزينة تلقائياً)
     let expRecord = null;
-    if (recordExpense) {
+    if (recordExpense || isBonus) {
       if (!state.expenses) state.expenses = [];
       expRecord = {
         id: 'exp-wages-' + Date.now(),
@@ -14893,8 +14981,12 @@ async function handleSaveDisburseWage(event) {
         amount: amount,
         plot: worker.plot || 'كامل المشروع',
         crop: 'مشترك',
-        op: 'صرف ' + disburseType + ' للعامل (' + worker.name + ') - ' + method,
-        notes: notes || ('صرف أجر لعامل (' + worker.name + ' - ' + worker.role + ')'),
+        op: isBonus 
+          ? 'صرف حافز ومكافأة تشجيعية للعامل (' + worker.name + ') - ' + method 
+          : 'صرف ' + disburseType + ' للعامل (' + worker.name + ') - ' + method,
+        notes: notes || (isBonus 
+          ? 'حافز ومكافأة تشجيعية إضافية (تخصم من الخزينة ولا تخصم من الراتب الشهري للعامل)' 
+          : ('صرف أجر لعامل (' + worker.name + ' - ' + worker.role + ')')),
         createdBy: currentUserName,
         isUnderReview: false
       };
@@ -14911,12 +15003,17 @@ async function handleSaveDisburseWage(event) {
 
     // 5. توثيق الحركة في سجل التدقيق
     if (typeof logAudit === 'function') {
-      logAudit("صرف أجر", 'صرف ' + disburseType + ' للعامل (' + worker.name + ') بمبلغ ' + amount.toLocaleString() + ' ج.س (' + method + ')', "الرواتب والأجور");
+      logAudit("صرف أجر", isBonus 
+        ? 'صرف حافز ومكافأة تشجيعية للعامل (' + worker.name + ') بمبلغ ' + amount.toLocaleString() + ' ج.س (' + method + ') خصماً من الخزينة دون المساس بالراتب'
+        : 'صرف ' + disburseType + ' للعامل (' + worker.name + ') بمبلغ ' + amount.toLocaleString() + ' ج.س (' + method + ')', "الرواتب والأجور");
     }
 
     // 6. حفظ البيانات محلياً وتحديث الواجهات
     const newRemTreasury = Math.round(calculateMetrics().remainingTreasuryBalance || 0);
-    saveData('✓ تم صرف مبلغ (' + amount.toLocaleString() + ' ج.س) للعامل ' + worker.name + ' بنجاح! الرصيد المتبقي بالخزينة: ' + newRemTreasury.toLocaleString() + ' ج.س');
+    const msg = isBonus 
+      ? '✓ تم صرف حافز ومكافأة للعامل (' + worker.name + ') بمبلغ (' + amount.toLocaleString() + ' ج.س) خصماً من الخزينة دون المساس براتبه الشهري! رصيد الخزينة: ' + newRemTreasury.toLocaleString() + ' ج.س'
+      : '✓ تم صرف مبلغ (' + amount.toLocaleString() + ' ج.س) للعامل ' + worker.name + ' بنجاح! الرصيد المتبقي بالخزينة: ' + newRemTreasury.toLocaleString() + ' ج.س';
+    saveData(msg);
     closeModal();
 
     // 7. إشعار في مركز الإشعارات
@@ -15140,6 +15237,9 @@ function renderLaborSection() {
             <button onclick="openWorkerSettlementVoucherModal('${w.id}')" class="px-2 py-1 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 rounded-lg text-emerald-700 dark:text-emerald-300 font-bold transition flex items-center gap-1 text-[10px]" title="طباعة سند مخالصة وتصفية نهائية">
               <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
               <span>سند مخالصة</span>
+            </button>
+            <button onclick="openWorkerSalaryHistoryModal('${w.id}')" class="p-1.5 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 rounded-lg text-indigo-700 dark:text-indigo-300 transition" title="عرض سجل وكشف دفعات وحوافز العامل">
+              <i data-lucide="receipt" class="w-4 h-4"></i>
             </button>
             <button onclick="openAddGroceryTxModal('${w.id}')" class="p-1.5 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 rounded-lg text-amber-700 dark:text-amber-400 transition" title="تسجيل مشتريات وسحب بقالة جديد">
               <i data-lucide="shopping-cart" class="w-4 h-4"></i>
@@ -23561,6 +23661,267 @@ function addHarvestContractToExpenses() {
   closeModal();
 }
 
+function onDisburseTypeChange() {
+  const typeSelect = document.getElementById('disburse-type');
+  const hintEl = document.getElementById('disburse-type-hint');
+  const isBonus = typeSelect && (typeSelect.value === 'حافز ومكافأة' || typeSelect.value.includes('حافز') || typeSelect.value.includes('مكافأة'));
+  
+  if (hintEl) {
+    if (isBonus) {
+      hintEl.classList.remove('hidden');
+    } else {
+      hintEl.classList.add('hidden');
+    }
+  }
+
+  const notesInput = document.getElementById('disburse-notes');
+  if (notesInput) {
+    if (isBonus) {
+      notesInput.placeholder = "مثال: حافز ومكافأة تشجيعية نظير إنجاز وسرعة العمل (يخصم من الخزينة فقط)";
+    } else {
+      notesInput.placeholder = "مثال: صرف أجر للعامل - تسليم مباشر باليد";
+    }
+  }
+
+  if (typeof onDisburseWorkerSelectChange === 'function') {
+    onDisburseWorkerSelectChange();
+  }
+}
+
+function openLaborWageDisbursementLedgerModal() {
+  const wageExpenses = (state.expenses || []).filter(e => 
+    e.category === 'رواتب وأجور' || 
+    (e.op && (e.op.includes('راتب') || e.op.includes('سلفة') || e.op.includes('حافز') || e.op.includes('أجر')))
+  );
+
+  const totalDisbursed = wageExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  const bonusExpenses = wageExpenses.filter(e => 
+    (e.op && (e.op.includes('حافز') || e.op.includes('مكافأة'))) || 
+    (e.notes && (e.notes.includes('حافز') || e.notes.includes('مكافأة')))
+  );
+  const totalBonuses = bonusExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  const totalSalaries = totalDisbursed - totalBonuses;
+
+  const html = `
+    <div class="p-6 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 flex items-center justify-center text-xl font-black shadow-sm">
+            📋
+          </span>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">سجل صرف الرواتب والحوافز والمكافآت</h3>
+            <p class="text-xs text-slate-500">حركات الصرف الموثقة لجميع العمال والمشرفين وموقف الخزينة</p>
+          </div>
+        </div>
+        <button onclick="closeModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-xs">
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl border border-emerald-200 dark:border-emerald-800">
+          <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">إجمالي الرواتب والسلف المسددة:</span>
+          <p class="text-lg font-black text-emerald-900 dark:text-emerald-100 font-mono">${totalSalaries.toLocaleString()} ج.س</p>
+          <span class="text-[9px] text-emerald-700 font-semibold block mt-0.5">تخصم من مستحقات العامل الشهرية</span>
+        </div>
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/50 rounded-xl border border-amber-200 dark:border-amber-800">
+          <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300">إجمالي الحوافز والمكافآت:</span>
+          <p class="text-lg font-black text-amber-900 dark:text-amber-100 font-mono">${totalBonuses.toLocaleString()} ج.س</p>
+          <span class="text-[9px] text-amber-700 font-semibold block mt-0.5">تخصم من الخزينة فقط (لا تخصم من الراتب)</span>
+        </div>
+        <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+          <span class="text-[11px] font-bold text-slate-500">إجمالي المنصرف الكلي للعمالة:</span>
+          <p class="text-lg font-black text-slate-800 dark:text-slate-200 font-mono">${totalDisbursed.toLocaleString()} ج.س</p>
+          <span class="text-[9px] text-slate-400 font-semibold block mt-0.5">${wageExpenses.length} حركة صرف مسجلة</span>
+        </div>
+      </div>
+
+      <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden mb-4">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 font-bold border-b border-slate-200 dark:border-slate-700">
+            <tr>
+              <th class="py-2.5 px-3">التاريخ</th>
+              <th class="py-2.5 px-3">البيان والحركة</th>
+              <th class="py-2.5 px-3">النوع والتصنيف</th>
+              <th class="py-2.5 px-3">المبلغ (ج.س)</th>
+              <th class="py-2.5 px-3">الأثر المحاسبي</th>
+              <th class="py-2.5 px-3">المسؤول</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            ${wageExpenses.length > 0 ? wageExpenses.map(e => {
+              const isBonus = (e.op && (e.op.includes('حافز') || e.op.includes('مكافأة'))) || (e.notes && (e.notes.includes('حافز') || e.notes.includes('مكافأة')));
+              return `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                  <td class="py-2.5 px-3 font-mono font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">${e.date}</td>
+                  <td class="py-2.5 px-3 font-bold text-slate-900 dark:text-white">${e.op || e.notes}</td>
+                  <td class="py-2.5 px-3 whitespace-nowrap">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isBonus ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-teal-100 text-teal-800 border border-teal-300'}">
+                      ${isBonus ? '🎁 حافز ومكافأة' : '💵 راتب / سلفة'}
+                    </span>
+                  </td>
+                  <td class="py-2.5 px-3 font-mono font-black whitespace-nowrap ${isBonus ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'}">
+                    ${(parseFloat(e.amount) || 0).toLocaleString()} ج.س
+                  </td>
+                  <td class="py-2.5 px-3 text-[10px] whitespace-nowrap">
+                    ${isBonus 
+                      ? '<span class="text-amber-700 font-bold">خصم من الخزينة فقط</span>' 
+                      : '<span class="text-emerald-700 font-bold">خصم من الراتب والخزينة</span>'}
+                  </td>
+                  <td class="py-2.5 px-3 text-slate-500 text-[10px] font-semibold whitespace-nowrap">${e.createdBy || 'الإدارة'}</td>
+                </tr>
+              `;
+            }).join('') : `
+              <tr>
+                <td colspan="6" class="text-center py-6 text-slate-400">لا توجد حركات صرف مسجلة حتى الآن</td>
+              </tr>
+            `}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  openModal(html);
+  safeCreateIcons();
+}
+
+function openWorkerSalaryHistoryModal(workerId) {
+  const w = (state.labor || []).find(x => x.id === workerId);
+  if (!w) return;
+
+  const workerExpenses = (state.expenses || []).filter(e => 
+    (e.category === 'رواتب وأجور' || (e.op && e.op.includes('راتب'))) &&
+    ((e.op && e.op.includes(w.name)) || (e.notes && e.notes.includes(w.name)))
+  );
+
+  const totalDisbursed = workerExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  const bonusExpenses = workerExpenses.filter(e => 
+    (e.op && (e.op.includes('حافز') || e.op.includes('مكافأة'))) || 
+    (e.notes && (e.notes.includes('حافز') || e.notes.includes('مكافأة')))
+  );
+  const totalBonuses = bonusExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  const totalSalaryPayments = totalDisbursed - totalBonuses;
+
+  const months = parseFloat(w.monthsWorked) || 1;
+  const salary = parseFloat(w.monthlySalary) || 0;
+  const grossSalary = Math.round(months * salary) + (parseFloat(w.overtime) || 0);
+  const groceryDed = parseFloat(w.groceryTotal) || 0;
+  const otherDed = parseFloat(w.deductionsAmount) || 0;
+  const totalDed = groceryDed + otherDed;
+  const netDue = grossSalary - totalDed;
+  const rawBalance = netDue - (parseFloat(w.totalPaid) || 0);
+
+  const html = `
+    <div class="p-6 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 flex items-center justify-center text-xl font-black shadow-sm">
+            👤
+          </span>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">سجل وكشف حساب العامل: ${w.name}</h3>
+            <p class="text-xs text-slate-500">${w.role} • تفاصيل الرواتب والسلف والحوافز والمستحقات</p>
+          </div>
+        </div>
+        <button onclick="closeModal()"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+      </div>
+
+      <!-- بطاقات الموقف المالي -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4 text-xs">
+        <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+          <span class="text-slate-500 font-bold block text-[10px]">الراتب الشهري المتفق عليه:</span>
+          <span class="font-mono font-black text-slate-900 dark:text-white text-sm">${salary.toLocaleString()} ج.س</span>
+          <span class="text-[9px] text-slate-400 block mt-0.5">${months} شهر (${w.daysWorked || Math.round(months * 30)} يوم)</span>
+        </div>
+        <div class="p-3 bg-teal-50 dark:bg-teal-950/50 rounded-xl border border-teal-200 dark:border-teal-800">
+          <span class="text-teal-800 dark:text-teal-300 font-bold block text-[10px]">صافي المستحق للراتب:</span>
+          <span class="font-mono font-black text-teal-900 dark:text-teal-100 text-sm">${netDue.toLocaleString()} ج.س</span>
+          <span class="text-[9px] text-teal-700 block mt-0.5">بعد خصم البقالة (${groceryDed.toLocaleString()})</span>
+        </div>
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl border border-emerald-200 dark:border-emerald-800">
+          <span class="text-emerald-800 dark:text-emerald-300 font-bold block text-[10px]">إجمالي الراتب المسدد:</span>
+          <span class="font-mono font-black text-emerald-900 dark:text-emerald-100 text-sm">${(parseFloat(w.totalPaid) || 0).toLocaleString()} ج.س</span>
+          <span class="text-[9px] text-emerald-700 block mt-0.5">مخصوم من المستحق</span>
+        </div>
+        <div class="p-3 ${rawBalance < 0 ? 'bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'} rounded-xl border">
+          <span class="${rawBalance < 0 ? 'text-rose-700 dark:text-rose-300' : 'text-slate-500'} font-bold block text-[10px]">${rawBalance < 0 ? 'رصيد مدين للمشروع:' : 'المتبقي المستحق صرفه:'}</span>
+          <span class="font-mono font-black ${rawBalance < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600'} text-sm">${rawBalance < 0 ? '-' + Math.abs(rawBalance).toLocaleString() : rawBalance.toLocaleString()} ج.س</span>
+          <span class="text-[9px] ${rawBalance < 0 ? 'text-rose-500' : 'text-slate-400'} block mt-0.5">${rawBalance === 0 ? 'خالص بالكامل ✓' : (rawBalance < 0 ? 'تجاوز المستحقات' : 'بانتظار الصرف')}</span>
+        </div>
+      </div>
+
+      ${totalBonuses > 0 ? `
+        <div class="mb-4 p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-base">🎁</span>
+            <div>
+              <span class="font-black text-amber-900 dark:text-amber-200">حوافز ومكافآت تشجيعية مستلمة:</span>
+              <span class="text-slate-500 block text-[10px]">تم صرفها كحافز من الخزينة مباشرة ولم تخصم من راتبه الشهري</span>
+            </div>
+          </div>
+          <span class="font-mono font-black text-amber-800 dark:text-amber-300 text-sm">+${totalBonuses.toLocaleString()} ج.س</span>
+        </div>
+      ` : ''}
+
+      <!-- جدول الحركات المالية المصروفة للعامل -->
+      <h4 class="font-black text-slate-800 dark:text-slate-200 text-xs mb-2">سجل الدفعات والحركات المصروفة للعامل:</h4>
+      <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden mb-4">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 font-bold border-b border-slate-200 dark:border-slate-700">
+            <tr>
+              <th class="py-2.5 px-3">التاريخ</th>
+              <th class="py-2.5 px-3">البيان</th>
+              <th class="py-2.5 px-3">النوع</th>
+              <th class="py-2.5 px-3">المبلغ (ج.س)</th>
+              <th class="py-2.5 px-3">الأثر على الراتب</th>
+              <th class="py-2.5 px-3">المسؤول</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            ${workerExpenses.length > 0 ? workerExpenses.map(e => {
+              const isBonus = (e.op && (e.op.includes('حافز') || e.op.includes('مكافأة'))) || (e.notes && (e.notes.includes('حافز') || e.notes.includes('مكافأة')));
+              return `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                  <td class="py-2.5 px-3 font-mono font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">${e.date}</td>
+                  <td class="py-2.5 px-3 font-bold text-slate-900 dark:text-white">${e.op || e.notes}</td>
+                  <td class="py-2.5 px-3 whitespace-nowrap">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isBonus ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-teal-100 text-teal-800 border border-teal-300'}">
+                      ${isBonus ? '🎁 حافز ومكافأة' : '💵 راتب / سلفة'}
+                    </span>
+                  </td>
+                  <td class="py-2.5 px-3 font-mono font-black whitespace-nowrap ${isBonus ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'}">
+                    ${(parseFloat(e.amount) || 0).toLocaleString()} ج.س
+                  </td>
+                  <td class="py-2.5 px-3 text-[10px] whitespace-nowrap">
+                    ${isBonus 
+                      ? '<span class="text-amber-700 font-bold">لا يخصم من الراتب (من الخزينة)</span>' 
+                      : '<span class="text-emerald-700 font-bold">مخصوم من المستحق</span>'}
+                  </td>
+                  <td class="py-2.5 px-3 text-slate-500 text-[10px] font-semibold whitespace-nowrap">${e.createdBy || 'الإدارة'}</td>
+                </tr>
+              `;
+            }).join('') : `
+              <tr>
+                <td colspan="6" class="text-center py-6 text-slate-400">لا توجد حركات صرف مسجلة لهذا العامل بعد</td>
+              </tr>
+            `}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+        <button onclick="openDisburseWageModal('${w.id}')" class="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+          <span>💵 صرف دفعة أو حافز للعامل</span>
+        </button>
+        <button onclick="openWorkerSettlementVoucherModal('${w.id}')" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+          <span>📄 سند مخالصة نهائي</span>
+        </button>
+      </div>
+    </div>
+  `;
+  openModal(html);
+  safeCreateIcons();
+}
+
 function openWorkerSettlementVoucherModal(workerId) {
   const w = state.labor.find(x => x.id === workerId);
   if (!w) return;
@@ -24211,8 +24572,9 @@ async function initCloudSyncOnStartup() {
             const maxPaid = Math.max(parseFloat(loc.totalPaid) || 0, parseFloat(cl.totalPaid) || 0);
             const maxDeductions = Math.max(parseFloat(loc.deductionsAmount) || 0, parseFloat(cl.deductionsAmount) || 0);
             laborMap.set(cl.id, {
-              ...cl,
               ...loc,
+              ...cl,
+              endDate: (cl.endDate && cl.endDate.trim() !== '') ? cl.endDate : (loc.endDate || ''),
               totalPaid: maxPaid,
               deductionsAmount: maxDeductions
             });
@@ -24315,8 +24677,9 @@ async function handleFetchFromSupabase() {
         const maxPaid = Math.max(parseFloat(loc.totalPaid) || 0, parseFloat(cl.totalPaid) || 0);
         const maxDeductions = Math.max(parseFloat(loc.deductionsAmount) || 0, parseFloat(cl.deductionsAmount) || 0);
         laborMap.set(cl.id, {
-          ...cl,
           ...loc,
+          ...cl,
+          endDate: (cl.endDate && cl.endDate.trim() !== '') ? cl.endDate : (loc.endDate || ''),
           totalPaid: maxPaid,
           deductionsAmount: maxDeductions
         });
