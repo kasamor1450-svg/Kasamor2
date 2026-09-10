@@ -6586,7 +6586,35 @@ const DEFAULT_DATA = {
     }
   ],
   "rainfallLogs": [
-{
+    {
+      "id": "rain-1788970430539",
+      "date": "2026-09-09",
+      "dayName": "الأربعاء",
+      "startTime": "13:30",
+      "endTime": "14:45",
+      "durationMinutes": 75,
+      "intensity": "قوية",
+      "amountMm": 0,
+      "location": "كسمور الشرقي - عامة",
+      "fieldImpact": "روت الارض تماما وملأت الحفير",
+      "loggedBy": "مصطفى الجعلي",
+      "notes": "هطول أمطار قوية من 13:30 إلى 14:45"
+    },
+    {
+      "id": "rain-1788970260663",
+      "date": "2026-09-06",
+      "dayName": "الأحد",
+      "startTime": "21:45",
+      "endTime": "22:15",
+      "durationMinutes": 30,
+      "intensity": "وسط",
+      "amountMm": 0,
+      "location": "كسمور الشرقي - عامة",
+      "fieldImpact": "",
+      "loggedBy": "مصطفى الجعلي",
+      "notes": "هطول أمطار وسط من 21:45 إلى 22:15"
+    },
+    {
       "id": "rain-user-20260814",
       "date": "2026-08-14",
       "dayName": "الجمعة",
@@ -6651,11 +6679,11 @@ const DEFAULT_DATA = {
       "fullName": "محمد مصطفى حسن",
       "shares": 2,
       "totalShares": 13,
-      "paidCapital": 77210462,
+      "paidCapital": 78760462,
       "nonRefundableCapital": 10710462,
-      "refundableCapital": 66500000,
+      "refundableCapital": 68050000,
       "role": "شريك مؤسس",
-      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) [غير مسترد: 10710462] [مسترد: 66500000]"
+      "notes": "نسبة ربح ثابتة 2 من 13 (15.38%) [غير مسترد: 10710462] [مسترد: 68050000]"
     },
     {
       "id": "prt-2",
@@ -6755,6 +6783,19 @@ const DEFAULT_DATA = {
     }
   ],
   "capitalInjections": [
+    {
+      "id": "inj-1788969070424",
+      "partnerId": "prt-1",
+      "partnerName": "عمرو",
+      "date": "2026-09-09",
+      "amount": 1550000,
+      "method": "تحويل بنكك",
+      "paymentMethod": "تحويل بنكك",
+      "loggedBy": "مصطفى الجعلي",
+      "purpose": "استكمال حصة رأس المال",
+      "capitalType": "refundable",
+      "notes": "[نوع: مسترد]"
+    },
     {
       "id": "inj-1788086905527",
       "partnerId": "prt-1",
@@ -7104,6 +7145,62 @@ const DEFAULT_DATA = {
     }
   ],
   "expenses": [
+  {
+    "id": "exp-wages-1789021577504",
+    "date": "2026-09-10",
+    "category": "رواتب وأجور",
+    "amount": 10000,
+    "plot": "النوبة / الويكة",
+    "crop": "مشترك",
+    "op": "صرف حافز ومكافأة للعامل (ابستة) - نقداً كاش",
+    "isUnderReview": false,
+    "createdBy": "مصطفى الجعلي",
+    "modifiedBy": null,
+    "notes": "رصيد حافز مطره",
+    "receiptPhotoUrl": null
+  },
+  {
+    "id": "exp-wages-1789021428510",
+    "date": "2026-09-10",
+    "category": "رواتب وأجور",
+    "amount": 100000,
+    "plot": "النوبة / الويكة",
+    "crop": "مشترك",
+    "op": "صرف سلفة مؤقتة للعامل (ابستة) - نقداً كاش",
+    "isUnderReview": false,
+    "createdBy": "مصطفى الجعلي",
+    "modifiedBy": null,
+    "notes": "مصاريف تسليم يس اخوهو",
+    "receiptPhotoUrl": null
+  },
+  {
+    "id": "exp-wages-1789021152952",
+    "date": "2026-09-10",
+    "category": "رواتب وأجور",
+    "amount": 600000,
+    "plot": "كامل المشروع",
+    "crop": "مشترك",
+    "op": "صرف سلفة مؤقتة للعامل (عبدالقادر) - نقداً كاش",
+    "isUnderReview": false,
+    "createdBy": "مصطفى الجعلي",
+    "modifiedBy": null,
+    "notes": "تسليم مباشر باليد (إجراء عمليه)",
+    "receiptPhotoUrl": null
+  },
+  {
+    "id": "exp-wages-1788971045834",
+    "date": "2026-09-09",
+    "category": "رواتب وأجور",
+    "amount": 590000,
+    "plot": "ال500 / الرقيقة",
+    "crop": "مشترك",
+    "op": "صرف راتب شهري للعامل (محمد الجعيلي) - تحويل بنكك",
+    "isUnderReview": false,
+    "createdBy": "محمد مصطفى",
+    "modifiedBy": null,
+    "notes": "صرف أجر لعامل (محمد الجعيلي - سائق تركتور ثانٍ)",
+    "receiptPhotoUrl": null
+  },
   {
     "id": "exp-1788697886172",
     "date": "2026-09-06",
@@ -11161,20 +11258,19 @@ function loadData() {
         partners: (() => {
       let pList = Array.isArray(loaded.partners) ? loaded.partners : def.partners;
       const curSum = Math.round(pList.reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0));
-      if (curSum !== 136118003) {
-        console.log("⚡ ترقية وتصحيح فوري لبيانات الشركاء ورأس المال إلى المعتمد 136,118,003");
+      if (curSum < 136118003) {
+        console.log("⚡ ترقية وتصحيح فوري لبيانات الشركاء ورأس المال إلى المعتمد");
         return JSON.parse(JSON.stringify(def.partners));
       }
       return pList;
     })(),
     capitalInjections: (() => {
-      let cList = Array.isArray(loaded.capitalInjections) ? loaded.capitalInjections : def.capitalInjections;
-      const curSum = Math.round(cList.reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0));
-      if (curSum !== 136118003) {
-        console.log("⚡ ترقية فورية لتوريدات رأس المال من 118.5م القديمة إلى المعتمد");
-        return JSON.parse(JSON.stringify(def.capitalInjections));
-      }
-      return cList;
+      const existing = Array.isArray(loaded.capitalInjections) ? loaded.capitalInjections : [];
+      const defItems = Array.isArray(def.capitalInjections) ? def.capitalInjections : [];
+      const map = new Map();
+      defItems.forEach(c => map.set(c.id, c));
+      existing.forEach(c => map.set(c.id, c));
+      return Array.from(map.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     })(),
     harvestIntakes: Array.isArray(loaded.harvestIntakes) ? loaded.harvestIntakes : (def.harvestIntakes || []),
     cropSales: Array.isArray(loaded.cropSales) ? loaded.cropSales : (def.cropSales || []),
@@ -11231,13 +11327,12 @@ function loadData() {
       return lList;
     })(),
     expenses: (() => {
-      let eList = Array.isArray(loaded.expenses) ? loaded.expenses : def.expenses;
-      const curSum = Math.round(eList.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0));
-      if (curSum < 136855000) {
-        console.log("⚡ ترقية فورية لمصروفات المشروع إلى 136,855,000 ج.س المعتمدة");
-        return JSON.parse(JSON.stringify(def.expenses));
-      }
-      return eList;
+      const existing = Array.isArray(loaded.expenses) ? loaded.expenses : [];
+      const defItems = Array.isArray(def.expenses) ? def.expenses : [];
+      const map = new Map();
+      defItems.forEach(e => map.set(e.id, e));
+      existing.forEach(e => map.set(e.id, e));
+      return Array.from(map.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     })(),
     rainfallLogs: (() => {
       const existing = Array.isArray(loaded.rainfallLogs) ? loaded.rainfallLogs : [];
@@ -24529,19 +24624,38 @@ async function initCloudSyncOnStartup() {
 
         // دمج سجلات الأمطار والطقس بذكاء بين السحابة والمحلي دون فقدان أي قيد
         const localRain = state.rainfallLogs || [];
-        const cloudRain = cloudState.rainfallLogs || [];
+        const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02');
         const rainMap = new Map();
         cloudRain.forEach(r => rainMap.set(r.id, r));
         const pendingLocalRain = [];
         localRain.forEach(r => {
-          if (!rainMap.has(r.id)) {
+          if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && !rainMap.has(r.id)) {
             rainMap.set(r.id, r);
             pendingLocalRain.push(r);
           }
         });
         const mergedRainfall = Array.from(rainMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-        // دمج وسائط ألبوم المشروع السحابية ليراها الجميع
+        // دمج قيود ضخ رأس المال بذكاء
+        const localCap = state.capitalInjections || [];
+        const cloudCap = cloudState.capitalInjections || [];
+        const capMap = new Map();
+        cloudCap.forEach(c => capMap.set(c.id, c));
+        localCap.forEach(c => {
+          if (!capMap.has(c.id)) capMap.set(c.id, c);
+        });
+        const mergedCapitalInjections = Array.from(capMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+        // دمج المصروفات المالية وسجلات الرواتب بذكاء
+        const localExp = state.expenses || [];
+        const cloudExp = cloudState.expenses || [];
+        const expMap = new Map();
+        cloudExp.forEach(e => expMap.set(e.id, e));
+        localExp.forEach(e => {
+          if (!expMap.has(e.id)) expMap.set(e.id, e);
+        });
+        const mergedExpenses = Array.from(expMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
         const localMediaItems = [];
         try {
           const ldb = await MustagroMediaStore.getAllMedia();
@@ -24585,6 +24699,8 @@ async function initCloudSyncOnStartup() {
         state = {
           ...state,
           ...cloudState,
+          expenses: mergedExpenses,
+          capitalInjections: mergedCapitalInjections,
           labor: mergedLabor,
           groceryTransactions: mergedGrocery,
           rainfallLogs: mergedRainfall,
@@ -24593,6 +24709,7 @@ async function initCloudSyncOnStartup() {
           forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
         };
         autoUpdateLaborWages();
+        recalculatePartnerCapital();
         saveData();
         updateActiveViews();
         safeCreateIcons();
@@ -24647,13 +24764,33 @@ async function handleFetchFromSupabase() {
     const mergedGrocery = Array.from(grocMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     const localRain = state.rainfallLogs || [];
-    const cloudRain = cloudState.rainfallLogs || [];
+    const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02');
     const rainMap = new Map();
     cloudRain.forEach(r => rainMap.set(r.id, r));
     localRain.forEach(r => {
-      if (!rainMap.has(r.id)) rainMap.set(r.id, r);
+      if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && !rainMap.has(r.id)) {
+        rainMap.set(r.id, r);
+      }
     });
     const mergedRainfall = Array.from(rainMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    const localCap = state.capitalInjections || [];
+    const cloudCap = cloudState.capitalInjections || [];
+    const capMap = new Map();
+    cloudCap.forEach(c => capMap.set(c.id, c));
+    localCap.forEach(c => {
+      if (!capMap.has(c.id)) capMap.set(c.id, c);
+    });
+    const mergedCapitalInjections = Array.from(capMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    const localExp = state.expenses || [];
+    const cloudExp = cloudState.expenses || [];
+    const expMap = new Map();
+    cloudExp.forEach(e => expMap.set(e.id, e));
+    localExp.forEach(e => {
+      if (!expMap.has(e.id)) expMap.set(e.id, e);
+    });
+    const mergedExpenses = Array.from(expMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     const localMed = state.mediaGallery || [];
     const cloudMed = cloudState.mediaGallery || [];
@@ -24690,6 +24827,8 @@ async function handleFetchFromSupabase() {
     state = {
       ...state,
       ...cloudState,
+      expenses: mergedExpenses,
+      capitalInjections: mergedCapitalInjections,
       labor: mergedLabor,
       groceryTransactions: mergedGrocery,
       rainfallLogs: mergedRainfall,
@@ -24698,6 +24837,7 @@ async function handleFetchFromSupabase() {
       forecastSettings: state.forecastSettings || DEFAULT_DATA.forecastSettings
     };
     autoUpdateLaborWages();
+    recalculatePartnerCapital();
     saveData();
     updateActiveViews();
     safeCreateIcons();
