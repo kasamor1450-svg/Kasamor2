@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v36.0-abdulkader-work-period-fix
-const CACHE_NAME = 'mustagro-v36.0-abdulkader-work-period-fix';
+// Cache Version: mustagro-v37.0-clean-ui-swipe-engine
+const CACHE_NAME = 'mustagro-v37.0-clean-ui-swipe-engine';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

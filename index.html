@@ -836,24 +836,35 @@ html[dir="ltr"] .font-mono {
   </div>
 
 
-  <header class="no-print sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors shadow-sm">
+  <header class="no-print sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800/90 transition-colors shadow-xs">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-13 sm:h-14">
+      <div class="flex items-center justify-between h-14">
         
-        <!-- شعار واسم المزرعة مع زر التعديل المباشر -->
-        <div class="flex items-center gap-2 sm:gap-3">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-700 to-emerald-500 flex items-center justify-center text-white shadow-sm shadow-emerald-500/20 font-black text-base">
-            🌱
+        <!-- شعار واسم المشروع المعتمد وقسم الإدارة -->
+        <div class="flex items-center gap-2.5">
+          <img src="assets/images/company_logo_sm.png" alt="شعار شركة مصطفى الزراعية" class="w-9 h-9 object-contain rounded-xl shadow-xs cursor-pointer hover:scale-105 transition" onclick="switchSection('section-dashboard')">
+          <div class="leading-tight text-right">
+            <div class="flex items-center gap-1.5">
+              <span id="header-farm-name" class="font-black text-xs sm:text-sm text-slate-900 dark:text-white">شركة مصطفى الزراعية</span>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 hidden sm:inline-block">كسمور الشرقي</span>
+            </div>
+            <p id="header-farm-details" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">1,450 فدان • الموسم 2026</p>
           </div>
-          <div>
-            <!-- عناصر التحكم العلوية المنظمة والمريحة للعين (Clean Minimal Controls) -->
-        <div class="flex items-center gap-2">
+        </div>
+
+        <!-- عناصر التحكم العلوية المنظمة والمريحة للعين (Clean Minimal Controls) -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
           
+          <!-- زر سحب ومزامنة البيانات الفوري السريع -->
+          <button id="btn-header-sync" onclick="handleFetchFromSupabase()" class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 rounded-xl text-xs font-bold transition border border-emerald-300/80 dark:border-emerald-800/80 shadow-xs active:scale-95 cursor-pointer" title="سحب وتحديث أحدث بيانات من السحابة (Pull from Cloud)">
+            <span class="text-xs">🔄</span>
+            <span class="hidden sm:inline font-black">سحب البيانات</span>
+          </button>
+
           <!-- 1. زر ومركز الإشعارات الذكي (Mustagro Notification Center) -->
           <div class="relative inline-block" id="notification-center-wrapper">
-            <button id="btn-notifications-bell" onclick="toggleNotificationsPanel()" class="relative p-2 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-700 dark:text-slate-200 rounded-xl transition border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-sm active:scale-95" title="مركز الإشعارات والتنبيهات">
+            <button id="btn-notifications-bell" onclick="toggleNotificationsPanel()" class="relative p-2 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-700 dark:text-slate-200 rounded-xl transition border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-xs active:scale-95" title="مركز الإشعارات والتنبيهات">
               <span class="text-base">🔔</span>
-              <!-- شارة عدد الإشعارات غير المقروءة -->
               <span id="notifications-unread-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[19px] h-[19px] px-1 bg-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md animate-pulse border-2 border-white dark:border-slate-900">
                 0
               </span>
@@ -861,13 +872,9 @@ html[dir="ltr"] .font-mono {
 
             <!-- القائمة المنسدلة لمركز الإشعارات -->
             <div id="notifications-dropdown-panel" class="hidden fixed sm:absolute left-2 sm:left-0 right-2 sm:right-auto top-14 sm:top-12 z-50 w-auto sm:w-96 max-w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 sm:p-4 text-right transition-all">
-              
-              <!-- رأس مركز الإشعارات -->
               <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
                 <div class="flex items-center gap-2">
-                  <span class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-sm font-black shadow-sm">
-                    🔔
-                  </span>
+                  <span class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-sm font-black shadow-xs">🔔</span>
                   <div>
                     <h3 class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
                       <span>مركز إشعارات التطبيق</span>
@@ -878,28 +885,19 @@ html[dir="ltr"] .font-mono {
                 </div>
                 <button onclick="toggleNotificationsPanel()" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 flex items-center justify-center font-bold text-sm">&times;</button>
               </div>
-
-              <!-- أزرار الإجراءات السريعة -->
               <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800/60 text-[11px]">
                 <button onclick="markAllNotificationsAsRead()" class="text-emerald-700 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1">
                   <span>✓</span>
                   <span>تحديد الكل كمقروء</span>
                 </button>
-
                 <div class="flex items-center gap-2">
                   <button id="btn-request-push-perm" onclick="openBackgroundNotificationHelpModal()" class="text-sky-600 dark:text-sky-400 font-bold hover:underline flex items-center gap-1" title="تفعيل إشعارات الهاتف">
                     <span>📲 إشعارات الهاتف</span>
                   </button>
-                  <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-rose-600 font-medium transition" title="مسح السجل">
-                    🗑️
-                  </button>
+                  <button onclick="clearAllNotifications()" class="text-slate-400 hover:text-rose-600 font-medium transition" title="مسح السجل">🗑️</button>
                 </div>
               </div>
-
-              <!-- قائمة الإشعارات القابلة للتمرير -->
               <div id="notifications-items-list" class="my-2 max-h-80 overflow-y-auto space-y-2 pr-1 divide-y divide-slate-100 dark:divide-slate-800/40"></div>
-
-              <!-- أسفل مركز الإشعارات -->
               <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
                 <p class="text-[10px] text-slate-400 flex items-center justify-center gap-1">
                   <span>⚡ مزامنة إشعارات سحابية لحظية مع السحابة</span>
@@ -908,17 +906,15 @@ html[dir="ltr"] .font-mono {
             </div>
           </div>
 
-          <!-- 2. مؤشر وحالة الربط السحابي المشترك (Clean Cloud Status Pill) -->
-          <button id="cloud-sync-badge-btn" onclick="openSupabaseCloudModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition border border-slate-200 dark:border-slate-700 shadow-sm active:scale-95" title="حالة الاتصال السحابي المشترك">
+          <!-- 2. مؤشر وحالة الربط السحابي المشترك -->
+          <button id="cloud-sync-badge-btn" onclick="openSupabaseCloudModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition border border-slate-200 dark:border-slate-700 shadow-xs active:scale-95 cursor-pointer" title="حالة الاتصال السحابي المشترك">
             <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span id="cloud-status-text" class="hidden sm:inline font-bold">السحابة</span>
           </button>
 
-          <!-- 3. زر أدوات الإدارة والإعدادات (Management Tools & Profile Menu) -->
-          <button onclick="openUserProfileMenuModal()" class="inline-flex items-center gap-2 py-1 px-2.5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/60 dark:to-teal-950/60 hover:from-emerald-100 hover:to-teal-100 text-emerald-950 dark:text-emerald-200 rounded-xl transition border border-emerald-200/80 dark:border-emerald-800/80 text-xs font-black shadow-sm active:scale-95" title="قائمة الحساب وأدوات الإدارة">
-            <div id="current-user-avatar" class="w-6 h-6 rounded-lg bg-emerald-700 text-white font-black text-[10px] flex items-center justify-center shadow-sm">
-              م
-            </div>
+          <!-- 3. زر أدوات الإدارة والإعدادات -->
+          <button onclick="openUserProfileMenuModal()" class="inline-flex items-center gap-2 py-1 px-2.5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/60 dark:to-teal-950/60 hover:from-emerald-100 hover:to-teal-100 text-emerald-950 dark:text-emerald-200 rounded-xl transition border border-emerald-200/80 dark:border-emerald-800/80 text-xs font-black shadow-xs active:scale-95 cursor-pointer" title="قائمة الحساب وأدوات الإدارة">
+            <div id="current-user-avatar" class="w-6 h-6 rounded-lg bg-emerald-700 text-white font-black text-[10px] flex items-center justify-center shadow-xs">م</div>
             <div class="hidden md:block text-right leading-tight">
               <span id="current-user-display" class="block font-black text-xs text-slate-900 dark:text-white">محمد مصطفى</span>
               <span id="current-user-role" class="block text-[9px] text-emerald-700 dark:text-emerald-400 font-bold">المدير العام • الأدوات ▾</span>
@@ -926,25 +922,24 @@ html[dir="ltr"] .font-mono {
             <span class="md:hidden text-xs">⚙️</span>
           </button>
 
-          <!-- 4. تبديل الوضع الليلي (Dark Mode Toggle) -->
-          <!-- 4.1 زر تبديل لغة التطبيق (Language Switcher: Arabic / English) -->
-          <button id="lang-toggle-btn" onclick="toggleAppLanguage()" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-700 dark:text-slate-200 rounded-xl transition border border-slate-200 dark:border-slate-700 active:scale-95 flex items-center gap-1.5 text-xs font-bold shadow-sm" title="Change Language / تغيير لغة التطبيق">
+          <!-- 4. تبديل لغة التطبيق -->
+          <button id="lang-toggle-btn" onclick="toggleAppLanguage()" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-700 dark:text-slate-200 rounded-xl transition border border-slate-200 dark:border-slate-700 active:scale-95 flex items-center gap-1.5 text-xs font-bold shadow-xs cursor-pointer" title="Change Language / تغيير لغة التطبيق">
             <span id="lang-toggle-flag">🇬🇧</span>
             <span id="lang-toggle-text">English</span>
           </button>
 
-          <button id="theme-toggle" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-slate-600 dark:text-slate-300 transition border border-slate-200 dark:border-slate-700 active:scale-95" title="تبديل الوضع">
+          <!-- 5. تبديل الوضع الليلي -->
+          <button id="theme-toggle" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-slate-600 dark:text-slate-300 transition border border-slate-200 dark:border-slate-700 active:scale-95 cursor-pointer" title="تبديل الوضع الليلي">
             <i data-lucide="moon" class="w-4 h-4"></i>
           </button>
 
-          <!-- 5. زر القائمة الكاملة للهواتف -->
-          <button onclick="toggleMobileMenuDrawer()" class="md:hidden p-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded-xl transition active:scale-95 shadow-sm" title="فتح قائمة الأقسام">
+          <!-- 6. زر القائمة الكاملة للهواتف -->
+          <button onclick="toggleMobileMenuDrawer()" class="md:hidden p-2 bg-emerald-700 text-white hover:bg-emerald-800 rounded-xl transition active:scale-95 shadow-xs cursor-pointer" title="فتح قائمة الأقسام">
             <i data-lucide="menu" class="w-4 h-4"></i>
           </button>
         </div>
 
       </div>
-
       <nav class="flex items-center gap-1.5 overflow-x-auto py-2 border-t border-slate-100 dark:border-slate-800/80 no-scrollbar text-xs font-bold">
         <!-- 1. الرئيسية -->
         <button data-target="section-dashboard" class="nav-tab-btn px-3.5 py-1.5 rounded-xl bg-emerald-700 text-white shadow-sm transition flex items-center gap-1.5 whitespace-nowrap active:scale-95">
@@ -1208,53 +1203,42 @@ html[dir="ltr"] .font-mono {
 
       </div>
 
-      <!-- المخطط البصري للمزرعة -->
-      <div class="glass-card rounded-2xl p-5 border border-slate-200 dark:border-slate-800">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <i data-lucide="map" class="w-5 h-5 text-emerald-600"></i>
-            <h3 class="text-sm font-black text-slate-900 dark:text-white">المخطط التوزيعي الجغرافي للمقطوعيات (1,450 فدان)</h3>
-          </div>
-          <div class="flex items-center gap-3 text-[11px]">
-            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> تم الحراثة والزراعة</span>
-            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> تجهيز / كسرة أولى</span>
-            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span> مخطط زراعة لاحقاً</span>
-          </div>
-        </div>
-
-        <div id="farm-visual-map" class="grid grid-cols-1 md:grid-cols-5 gap-3 pt-2"></div>
-      </div>
-
-      <!-- الرسوم البيانية التحليلية -->
-            <!-- بطاقة رصد الأمطار الحية في لوحة القيادة -->
-      <div id="dashboard-rainfall-summary-card" class="glass-card rounded-2xl p-4 sm:p-5 border border-sky-200/80 dark:border-sky-900/60 bg-gradient-to-r from-sky-50/70 via-blue-50/40 to-slate-50/60 dark:from-sky-950/40 dark:via-slate-900/50 dark:to-slate-900/60 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <span class="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 flex items-center justify-center text-2xl shadow-sm">🌧️</span>
+      <!-- مركز التحليلات والمتابعة الميدانية المبوب (Executive Tabbed Analytics Hub) -->
+      <div class="glass-card rounded-2xl p-4 sm:p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-sm space-y-4">
+        
+        <!-- ترويسة وتبويبات مركز التحليلات المريحة للعين -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-200/70 dark:border-slate-800/70">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-sm font-black shadow-xs">📊</span>
             <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">رصد أمطار خريف 2026 (مزارع كسمور الشرقي)</h3>
-                <span id="dash-rainfall-badge" class="px-2.5 py-0.5 rounded-full bg-sky-500 text-white font-mono text-[10px] font-black shadow-sm">73 ملم تراكمي</span>
-              </div>
-              <p id="dash-rainfall-latest" class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                آخر مطرة مسجلة: <strong class="text-sky-700 dark:text-sky-400 font-black">28 ملم (أمطار وسط)</strong> • نمرة 500 • ري عميق وجداول ممتلئة
-              </p>
+              <h3 class="font-black text-sm text-slate-900 dark:text-white">مركز التحليلات والرسوم البيانية</h3>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">انقر على التبويب لمعاينة البيانات الميدانية والمالية بتنظيم وراحة بصرية تامة</p>
             </div>
           </div>
-          <div class="flex items-center gap-2 self-end sm:self-center">
-            <button type="button" onclick="openAddRainfallModal()" class="px-3.5 py-2 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white rounded-xl text-xs font-black shadow-sm transition active:scale-95 flex items-center gap-1.5">
-              <span>➕</span>
-              <span>تسجيل مطرة جديدة</span>
+
+          <!-- أزرار التبويبات الأنيقة -->
+          <div class="flex items-center gap-1 overflow-x-auto no-scrollbar bg-slate-100 dark:bg-slate-800/90 p-1 rounded-xl text-xs font-bold">
+            <button type="button" onclick="switchAnalyticsTab('expenses')" id="btn-analytics-tab-expenses" class="analytics-tab-btn px-3 py-1.5 rounded-lg bg-emerald-700 text-white shadow-xs transition flex items-center gap-1 whitespace-nowrap active:scale-95 cursor-pointer">
+              <span>💰 المصروفات والمحاصيل</span>
             </button>
-            <button type="button" onclick="switchSection('section-rainfall')" class="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800 rounded-xl text-xs font-black shadow-sm transition flex items-center gap-1">
-              <span>عرض السجل الكامل</span>
-              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <button type="button" onclick="switchAnalyticsTab('rainfall')" id="btn-analytics-tab-rainfall" class="analytics-tab-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-emerald-600 transition flex items-center gap-1 whitespace-nowrap active:scale-95 cursor-pointer">
+              <span>🌧️ رصد الأمطار</span>
+            </button>
+            <button type="button" onclick="switchAnalyticsTab('map')" id="btn-analytics-tab-map" class="analytics-tab-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-emerald-600 transition flex items-center gap-1 whitespace-nowrap active:scale-95 cursor-pointer">
+              <span>🗺️ خريطة المقطوعيات</span>
+            </button>
+            <button type="button" onclick="switchAnalyticsTab('timeline')" id="btn-analytics-tab-timeline" class="analytics-tab-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-emerald-600 transition flex items-center gap-1 whitespace-nowrap active:scale-95 cursor-pointer">
+              <span>📈 المدرج والخط الزمني</span>
+            </button>
+            <button type="button" onclick="switchAnalyticsTab('caps')" id="btn-analytics-tab-caps" class="analytics-tab-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-emerald-600 transition flex items-center gap-1 whitespace-nowrap active:scale-95 cursor-pointer">
+              <span>🎯 خطة الميزانية</span>
             </button>
           </div>
         </div>
-      </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- 1. عرض المصروفات والمحاصيل (افتراضي) -->
+        <div id="analytics-view-expenses" class="analytics-view space-y-4">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
         <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
           <div class="flex items-center justify-between mb-4">
@@ -1281,8 +1265,67 @@ html[dir="ltr"] .font-mono {
         </div>
 
       </div>
+        </div>
 
-      <!-- المدرج التكراري التحليلي (Project Histogram Section) -->
+        <!-- 2. عرض الأمطار -->
+        <div id="analytics-view-rainfall" class="analytics-view hidden space-y-4">
+          <!-- بطاقة رصد الأمطار الحية في لوحة القيادة -->
+      <div id="dashboard-rainfall-summary-card" class="glass-card rounded-2xl p-4 sm:p-5 border border-sky-200/80 dark:border-sky-900/60 bg-gradient-to-r from-sky-50/70 via-blue-50/40 to-slate-50/60 dark:from-sky-950/40 dark:via-slate-900/50 dark:to-slate-900/60 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 flex items-center justify-center text-2xl shadow-sm">🌧️</span>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">رصد أمطار خريف 2026 (مزارع كسمور الشرقي)</h3>
+                <span id="dash-rainfall-badge" class="px-2.5 py-0.5 rounded-full bg-sky-500 text-white font-mono text-[10px] font-black shadow-sm">73 ملم تراكمي</span>
+              </div>
+              <p id="dash-rainfall-latest" class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                آخر مطرة مسجلة: <strong class="text-sky-700 dark:text-sky-400 font-black">28 ملم (أمطار وسط)</strong> • نمرة 500 • ري عميق وجداول ممتلئة
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-center">
+            <button type="button" onclick="openAddRainfallModal()" class="px-3.5 py-2 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white rounded-xl text-xs font-black shadow-sm transition active:scale-95 flex items-center gap-1.5">
+              <span>➕</span>
+              <span>تسجيل مطرة جديدة</span>
+            </button>
+            <button type="button" onclick="switchSection('section-rainfall')" class="px-3.5 py-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800 rounded-xl text-xs font-black shadow-sm transition flex items-center gap-1">
+              <span>عرض السجل الكامل</span>
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+        </div>
+
+        <!-- 3. عرض خريطة المزرعة وبطاقات المقطوعيات -->
+        <div id="analytics-view-map" class="analytics-view hidden space-y-4">
+          <!-- المخطط البصري للمزرعة -->
+      <div class="glass-card rounded-2xl p-5 border border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="map" class="w-5 h-5 text-emerald-600"></i>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">المخطط التوزيعي الجغرافي للمقطوعيات (1,450 فدان)</h3>
+          </div>
+          <div class="flex items-center gap-3 text-[11px]">
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> تم الحراثة والزراعة</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> تجهيز / كسرة أولى</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span> مخطط زراعة لاحقاً</span>
+          </div>
+        </div>
+
+        <div id="farm-visual-map" class="grid grid-cols-1 md:grid-cols-5 gap-3 pt-2"></div>
+      </div>
+          <!-- شبكة بطاقات المقطوعيات الخمس -->
+      <div>
+        <h3 class="text-sm font-black text-slate-900 dark:text-white mb-3">تفاصيل المقطوعيات والعمليات الميدانية:</h3>
+        <div id="plots-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </div>
+        </div>
+
+        <!-- 4. عرض المدرج التكراري والخط الزمني -->
+        <div id="analytics-view-timeline" class="analytics-view hidden space-y-4">
+          <!-- المدرج التكراري التحليلي (Project Histogram Section) -->
       <div class="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div class="flex items-center gap-2.5">
@@ -1315,8 +1358,7 @@ html[dir="ltr"] .font-mono {
           <canvas id="projectHistogramChart"></canvas>
         </div>
       </div>
-
-      <!-- الخط الزمني لأنشطة المشروع اليومية (Daily Activities Timeline) -->
+          <!-- الخط الزمني لأنشطة المشروع اليومية (Daily Activities Timeline) -->
       <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div class="flex items-center gap-2.5">
@@ -1340,8 +1382,11 @@ html[dir="ltr"] .font-mono {
         </div>
         <div id="daily-activities-timeline-container" class="space-y-4"></div>
       </div>
+        </div>
 
-      <!-- بطاقات متابعة خطة رأس المال والميزانية التقديرية (إجمالي 300,000,000 ج.س) -->
+        <!-- 5. عرض خطة الميزانية والسقوف التقديرية -->
+        <div id="analytics-view-caps" class="analytics-view hidden space-y-4">
+          <!-- بطاقات متابعة خطة رأس المال والميزانية التقديرية (إجمالي 300,000,000 ج.س) -->
       <div class="glass-card rounded-2xl p-5 border border-slate-200 dark:border-slate-800">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div class="flex items-center gap-2">
@@ -1357,11 +1402,8 @@ html[dir="ltr"] .font-mono {
         </div>
         <div id="budget-caps-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
       </div>
+        </div>
 
-      <!-- شبكة بطاقات المقطوعيات الخمس -->
-      <div>
-        <h3 class="text-sm font-black text-slate-900 dark:text-white mb-3">تفاصيل المقطوعيات والعمليات الميدانية:</h3>
-        <div id="plots-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
       </div>
 
     </section>
@@ -24887,6 +24929,206 @@ if (typeof window !== 'undefined') {
 }
 
 
+
+
+// =========================================================================
+// محرك الإيماءات اللمسي المطور والسحب للتحديث (Mustagro Smart Gesture Engine)
+// =========================================================================
+(function initTouchGestureEngine() {
+  const primarySections = [
+    "section-dashboard",
+    "section-expenses",
+    "section-rainfall",
+    "section-labor",
+    "section-sales",
+    "section-partners",
+    "section-fuel",
+    "section-harvest",
+    "section-inventory"
+  ];
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchEndX = 0;
+  let touchEndY = 0;
+  let isPullingDown = false;
+  let pullDistance = 0;
+  const PULL_THRESHOLD = 70;
+
+  let pullIndicator = document.getElementById("pull-to-refresh-indicator");
+  if (!pullIndicator) {
+    pullIndicator = document.createElement("div");
+    pullIndicator.id = "pull-to-refresh-indicator";
+    pullIndicator.className = "no-print fixed top-0 left-0 right-0 z-50 flex items-center justify-center transition-all pointer-events-none";
+    pullIndicator.style.transform = "translateY(-120%)";
+    pullIndicator.innerHTML = `
+      <div id="pull-indicator-card" class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-emerald-400 dark:border-emerald-600 flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+        <span id="pull-indicator-icon" class="text-sm transition-transform duration-200">↓</span>
+        <span id="pull-indicator-text">اسحب لأسفل لمزامنة السحابة</span>
+      </div>
+    `;
+    document.body.prepend(pullIndicator);
+  }
+
+  function isInsideScrollable(el) {
+    let current = el;
+    while (current && current !== document.body) {
+      if (
+        current.classList && (
+          current.classList.contains("overflow-x-auto") ||
+          current.classList.contains("no-swipe") ||
+          current.classList.contains("chart-container") ||
+          current.tagName === "TABLE" ||
+          current.tagName === "INPUT" ||
+          current.tagName === "SELECT" ||
+          current.tagName === "TEXTAREA" ||
+          current.id === "plots-interactive-map" ||
+          current.id === "farm-visual-map"
+        )
+      ) {
+        return true;
+      }
+      current = current.parentElement;
+    }
+    return false;
+  }
+
+  document.addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchEndX = touchStartX;
+    touchEndY = touchStartY;
+    isPullingDown = false;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", (e) => {
+    if (e.touches.length !== 1) return;
+    touchEndX = e.touches[0].clientX;
+    touchEndY = e.touches[0].clientY;
+
+    const diffY = touchEndY - touchStartY;
+    const diffX = touchEndX - touchStartX;
+
+    if (window.scrollY <= 2 && diffY > 15 && Math.abs(diffY) > Math.abs(diffX) * 1.3) {
+      isPullingDown = true;
+      pullDistance = Math.min(diffY * 0.45, PULL_THRESHOLD + 20);
+      pullIndicator.style.transform = `translateY(${pullDistance}px)`;
+      const icon = document.getElementById("pull-indicator-icon");
+      const text = document.getElementById("pull-indicator-text");
+      if (pullDistance >= PULL_THRESHOLD) {
+        if (icon) icon.style.transform = "rotate(180deg)";
+        if (text) text.innerText = "أفلت للتحديث والمزامنة الآن";
+      } else {
+        if (icon) icon.style.transform = "rotate(0deg)";
+        if (text) text.innerText = "اسحب لأسفل لمزامنة السحابة";
+      }
+    }
+  }, { passive: true });
+
+  document.addEventListener("touchend", (e) => {
+    if (isPullingDown) {
+      if (pullDistance >= PULL_THRESHOLD) {
+        const icon = document.getElementById("pull-indicator-icon");
+        const text = document.getElementById("pull-indicator-text");
+        if (icon) {
+          icon.innerText = "⏳";
+          icon.className = "text-sm animate-spin";
+        }
+        if (text) text.innerText = "جاري سحب أحدث نسخة من السحابة...";
+        pullIndicator.style.transform = "translateY(60px)";
+
+        if (typeof handleFetchFromSupabase === "function") {
+          handleFetchFromSupabase().finally(() => {
+            setTimeout(() => {
+              pullIndicator.style.transform = "translateY(-120%)";
+              if (icon) {
+                icon.innerText = "↓";
+                icon.className = "text-sm";
+              }
+            }, 800);
+          });
+        } else {
+          setTimeout(() => {
+            pullIndicator.style.transform = "translateY(-120%)";
+          }, 600);
+        }
+      } else {
+        pullIndicator.style.transform = "translateY(-120%)";
+      }
+      isPullingDown = false;
+      return;
+    }
+
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+    const targetEl = e.target;
+
+    if (Math.abs(diffX) > 65 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+      if (isInsideScrollable(targetEl)) {
+        return;
+      }
+
+      const activeSection = document.querySelector(".app-section:not(.hidden)");
+      if (!activeSection) return;
+      const currentId = activeSection.id;
+      const currentIndex = primarySections.indexOf(currentId);
+      if (currentIndex === -1) return;
+
+      if (diffX < 0) {
+        if (currentIndex < primarySections.length - 1) {
+          const nextSec = primarySections[currentIndex + 1];
+          switchSection(nextSec);
+        }
+      } else {
+        if (currentIndex > 0) {
+          const prevSec = primarySections[currentIndex - 1];
+          switchSection(prevSec);
+        }
+      }
+    }
+  }, { passive: true });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".overflow-x-auto").forEach(slider => {
+      slider.style.webkitOverflowScrolling = "touch";
+      slider.style.touchAction = "pan-x pan-y";
+    });
+  });
+})();
+
+window.switchAnalyticsTab = function(tabKey) {
+  const views = ["expenses", "rainfall", "map", "timeline", "caps"];
+  views.forEach(v => {
+    const el = document.getElementById(`analytics-view-${v}`);
+    const btn = document.getElementById(`btn-analytics-tab-${v}`);
+    if (el) {
+      if (v === tabKey) {
+        el.classList.remove("hidden");
+      } else {
+        el.classList.add("hidden");
+      }
+    }
+    if (btn) {
+      if (v === tabKey) {
+        btn.classList.add("bg-emerald-700", "text-white", "shadow-xs");
+        btn.classList.remove("text-slate-600", "dark:text-slate-300", "hover:bg-slate-200");
+      } else {
+        btn.classList.remove("bg-emerald-700", "text-white", "shadow-xs");
+        btn.classList.add("text-slate-600", "dark:text-slate-300", "hover:bg-slate-200");
+      }
+    }
+  });
+
+  setTimeout(() => {
+    if (tabKey === "expenses") {
+      if (window.expensesCategoryChart && typeof window.expensesCategoryChart.resize === "function") window.expensesCategoryChart.resize();
+      if (window.cropsComparisonChart && typeof window.cropsComparisonChart.resize === "function") window.cropsComparisonChart.resize();
+    } else if (tabKey === "timeline") {
+      if (window.projectHistogramChart && typeof window.projectHistogramChart.resize === "function") window.projectHistogramChart.resize();
+    }
+  }, 50);
+};
 </script>
 </body>
 </html>
