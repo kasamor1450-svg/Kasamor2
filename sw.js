@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v31.0-wage-disbursement-fixed
-const CACHE_NAME = 'mustagro-v31.0-wage-disbursement-fixed';
+// Cache Version: mustagro-v32.0-treasury-grocery-rain-fixes
+const CACHE_NAME = 'mustagro-v32.0-treasury-grocery-rain-fixes';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

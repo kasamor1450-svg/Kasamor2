@@ -6582,7 +6582,7 @@ const DEFAULT_DATA = {
     }
   ],
   "rainfallLogs": [
-    {
+{
       "id": "rain-user-20260814",
       "date": "2026-08-14",
       "dayName": "الجمعة",
@@ -6610,20 +6610,7 @@ const DEFAULT_DATA = {
       "loggedBy": "حسن مصطفى",
       "notes": "رذاذ متقطع"
     },
-    {
-      "id": "rain-2",
-      "date": "2026-08-02",
-      "dayName": "الأحد",
-      "startTime": "16:00",
-      "endTime": "18:30",
-      "durationMinutes": 150,
-      "intensity": "وسط",
-      "amountMm": 28,
-      "location": "كسمور الشرقي - عامة",
-      "fieldImpact": "مطرة متوسطة ملائمة لنمو بادرات الذرة والتسالي",
-      "loggedBy": "محمد مصطفى",
-      "notes": "أمطار رطبة جيدة للمحصول"
-    },
+
     {
       "id": "rain-user-20260731",
       "date": "2026-07-31",
@@ -6651,20 +6638,6 @@ const DEFAULT_DATA = {
       "fieldImpact": "مطرة قوية خريفية روت كامل أراضي المشروع وسيلت الجداول",
       "loggedBy": "محمد مصطفى",
       "notes": "هطول أمطار قوية من 6:00 مساء إلى 7:45 مساء عمت كامل المشروع"
-    },
-    {
-      "id": "rain-1",
-      "date": "2026-07-15",
-      "dayName": "الأربعاء",
-      "startTime": "03:30",
-      "endTime": "06:15",
-      "durationMinutes": 165,
-      "intensity": "قوية",
-      "amountMm": 45,
-      "location": "كسمور الشرقي - نمرة 500",
-      "fieldImpact": "مطرة خريفية غزيرة سيلت الجداول، روت الأرض تماماً وجهزتها للكسرة",
-      "loggedBy": "عبدالقادر (الوكيل)",
-      "notes": "سيل في خور كسمور وري عميق"
     }
   ],
   "partners": [
@@ -11235,7 +11208,9 @@ function loadData() {
       const map = new Map();
       defItems.forEach(r => map.set(r.id, r));
       existing.forEach(r => map.set(r.id, r));
-      return Array.from(map.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      return Array.from(map.values())
+        .filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02')
+        .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     })(),
     capitalPlan: loaded.capitalPlan || def.capitalPlan,
     budgetCaps: Array.isArray(loaded.budgetCaps) ? loaded.budgetCaps : def.budgetCaps,
@@ -11796,7 +11771,7 @@ function initNotificationsSystem() {
   if (window.AgroAPI && typeof window.AgroAPI.onDataChange === 'function') {
     window.AgroAPI.onDataChange((payload) => {
       console.log('⚡ Realtime notification payload:', payload);
-      if (payload && payload.eventType === 'INSERT' && payload.new) {
+      if (payload && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE' || payload.eventType === 'DELETE')) {
         const table = payload.table;
         let title = 'إدخال جديد في السحابة';
         let details = 'تم تسجيل بيانات جديدة';
@@ -12504,7 +12479,7 @@ function calculateMetrics() {
 
   // حسابات الخزينة الموحدة والرصيد المتبقي الفعلي
   const calcCap = (state.partners || []).reduce((sum, p) => sum + (parseFloat(p.paidCapital) || 0), 0);
-  const totalPaidCapital = (calcCap > 0 && Math.round(calcCap) === 136118003) ? calcCap : 136118003;
+  const totalPaidCapital = Math.max(136118003, calcCap);
   const totalCropSales = (state.cropSales || []).reduce((sum, s) => {
     const amt = parseFloat(s.paidAmount !== undefined && s.paidAmount !== null && s.paidAmount !== '' ? s.paidAmount : s.totalAmount) || 0;
     return sum + amt;
@@ -12512,7 +12487,7 @@ function calculateMetrics() {
   const totalProfitsDistributed = (state.profitDistributions || []).reduce((sum, d) => sum + (parseFloat(d.totalAmount) || 0), 0);
   const totalInflows = totalPaidCapital + totalCropSales;
   const totalOutflows = totalExpenses + totalProfitsDistributed;
-  const remainingTreasuryBalance = Math.max(0, totalInflows - totalOutflows);
+  const remainingTreasuryBalance = totalInflows - totalOutflows;
 
   return {
     totalArea,
@@ -12581,10 +12556,16 @@ function renderHeaderKPIs() {
   // Dynamic calculation of Remaining Treasury Balance KPI
   const elRemTreasury = document.getElementById('kpi-remaining-treasury-balance');
   if (elRemTreasury) {
-    elRemTreasury.innerText = `${formatCapitalMoney(m.remainingTreasuryBalance)} ج.س`;
+    if (m.remainingTreasuryBalance < 0) {
+      elRemTreasury.className = "text-2xl sm:text-4xl font-black text-rose-600 dark:text-rose-400 font-mono tracking-tight mt-1";
+      elRemTreasury.innerHTML = `-${Math.abs(Math.round(m.remainingTreasuryBalance)).toLocaleString()} <span class="text-xs sm:text-sm font-bold text-rose-500">(عجز بالخزينة ⚠️)</span>`;
+    } else {
+      elRemTreasury.className = "text-2xl sm:text-4xl font-black text-emerald-700 dark:text-emerald-300 font-mono tracking-tight mt-1";
+      elRemTreasury.innerText = `${Math.round(m.remainingTreasuryBalance).toLocaleString()} ج.س`;
+    }
     const elRemSub = document.getElementById('kpi-remaining-treasury-sub');
     if (elRemSub) {
-      elRemSub.innerText = `الوارد: ${formatCapitalMoney(m.totalInflows)} • المنصرف والأرباح: ${formatCapitalMoney(m.totalOutflows)}`;
+      elRemSub.innerText = `الوارد: ${formatCapitalMoney(m.totalInflows)} • المنصرف: ${formatCapitalMoney(m.totalOutflows)}`;
     }
   }
   
@@ -15123,7 +15104,13 @@ function renderLaborSection() {
             <button onclick="openWorkerGroceryStatementModal('${w.id}')" class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-300 rounded-lg text-xs font-black transition flex items-center gap-1" title="عرض فواتير ومسحوبات البقالة التفصيلية">
               <span>🛒 ${(w.groceryTotal).toLocaleString()} ج.س</span>
             </button>
+            ${(w.deductionsAmount && w.deductionsAmount > 0) ? `<div class="text-[10px] text-slate-500 font-semibold mt-0.5">+ استقطاعات: ${(w.deductionsAmount).toLocaleString()} ج.س</div>` : ''}
             <div class="text-[9px] text-amber-700 dark:text-amber-400 font-semibold mt-0.5">يخصم من المستحقات</div>
+          ` : (w.deductionsAmount && w.deductionsAmount > 0) ? `
+            <div class="px-2.5 py-1 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-300 rounded-lg text-xs font-black inline-block">
+              <span>✂️ ${(w.deductionsAmount).toLocaleString()} ج.س</span>
+            </div>
+            <div class="text-[9px] text-amber-700 dark:text-amber-400 font-semibold mt-0.5">استقطاعات ومسحوبات</div>
           ` : `
             <span class="text-slate-400 font-normal text-[11px]">- لا يوجد -</span>
           `}
@@ -15537,14 +15524,15 @@ function saveGroceryTx(e, txId, isEdit) {
     }).catch(err => console.warn('Grocery cloud upsert error:', err));
   }
 
-  // مزامنة خصميات البقالة مع السحابة فوراً في جدول labor
+  // مزامنة خصميات العامل مع السحابة فوراً في جدول labor
   if (window.AgroAPI && window.AgroAPI.client) {
     const updatedWorker = (state.labor || []).find(w => w.id === workerId);
     if (updatedWorker) {
+      const safeStatus = (updatedWorker.status === 'overdrawn') ? 'partial' : (updatedWorker.status || 'pending');
       window.AgroAPI.client.from('labor').update({
-        deductions_amount: updatedWorker.totalDeductions || (updatedWorker.deductionsAmount + (updatedWorker.groceryTotal || 0)),
+        deductions_amount: updatedWorker.deductionsAmount || 0,
         total_due: updatedWorker.totalDue || 0,
-        status: updatedWorker.status || 'pending'
+        status: safeStatus
       }).eq('id', workerId).then(({ error }) => {
         if (error) console.warn('Supabase labor deduction sync warning:', error);
         else console.log('✓ تم تثبيت خصم البقالة في السحابة للعامل:', updatedWorker.name);
@@ -21362,6 +21350,8 @@ function renderRainfallSection() {
   if (!state.rainfallLogs) {
     state.rainfallLogs = (DEFAULT_DATA && DEFAULT_DATA.rainfallLogs) ? JSON.parse(JSON.stringify(DEFAULT_DATA.rainfallLogs)) : [];
   }
+  // تنقية دائمة للمطرتين المحذوفتين
+  state.rainfallLogs = (state.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02');
 
   const logs = state.rainfallLogs || [];
   
@@ -24219,10 +24209,12 @@ async function initCloudSyncOnStartup() {
           } else {
             const loc = laborMap.get(cl.id);
             const maxPaid = Math.max(parseFloat(loc.totalPaid) || 0, parseFloat(cl.totalPaid) || 0);
+            const maxDeductions = Math.max(parseFloat(loc.deductionsAmount) || 0, parseFloat(cl.deductionsAmount) || 0);
             laborMap.set(cl.id, {
               ...cl,
               ...loc,
-              totalPaid: maxPaid
+              totalPaid: maxPaid,
+              deductionsAmount: maxDeductions
             });
           }
         });
@@ -24321,10 +24313,12 @@ async function handleFetchFromSupabase() {
       } else {
         const loc = laborMap.get(cl.id);
         const maxPaid = Math.max(parseFloat(loc.totalPaid) || 0, parseFloat(cl.totalPaid) || 0);
+        const maxDeductions = Math.max(parseFloat(loc.deductionsAmount) || 0, parseFloat(cl.deductionsAmount) || 0);
         laborMap.set(cl.id, {
           ...cl,
           ...loc,
-          totalPaid: maxPaid
+          totalPaid: maxPaid,
+          deductionsAmount: maxDeductions
         });
       }
     });
