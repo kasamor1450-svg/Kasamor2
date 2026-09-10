@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v37.0-clean-ui-swipe-engine
-const CACHE_NAME = 'mustagro-v37.0-clean-ui-swipe-engine';
+// Cache Version: mustagro-v38.0-rainfall-persistence-fix
+const CACHE_NAME = 'mustagro-v38.0-rainfall-persistence-fix';
 
 const PRECACHE_ASSETS = [
   './manifest.json',

@@ -6657,6 +6657,20 @@ const DEFAULT_DATA = {
       "notes": "هطول أمطار وسط من 9:45 مساء إلى 10:15 مساء"
     },
     {
+      "id": "rain-1789036359913",
+      "date": "2026-08-21",
+      "dayName": "الجمعة",
+      "startTime": "23:00",
+      "endTime": "00:00",
+      "durationMinutes": 60,
+      "intensity": "وسط",
+      "amountMm": 25,
+      "location": "كسمور الشرقي - عامة",
+      "fieldImpact": "روى الأرض ورطب التربة",
+      "loggedBy": "محمد مصطفى",
+      "notes": "هطول أمطار وسط من 11:00 مساء إلى 12:00 منتصف الليل"
+    },
+    {
       "id": "rain-user-20260814",
       "date": "2026-08-14",
       "dayName": "الجمعة",
@@ -6693,12 +6707,11 @@ const DEFAULT_DATA = {
       "durationMinutes": 105,
       "intensity": "قوية",
       "amountMm": 42,
-      "location": "كامل المشروع - كسمور الشرقي",
+      "location": "كسمور الشرقي - عامة",
       "fieldImpact": "مطرة قوية خريفية روت كامل أراضي المشروع وسيلت الجداول",
       "loggedBy": "محمد مصطفى",
       "notes": "هطول أمطار قوية من 6:00 مساء إلى 7:45 مساء عمت كامل المشروع"
-    }
-  ],
+    }],
   "partners": [
     {
       "id": "prt-1",
@@ -11349,7 +11362,7 @@ function loadData() {
       defItems.forEach(r => map.set(r.id, r));
       existing.forEach(r => map.set(r.id, r));
       return Array.from(map.values())
-        .filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21')
+        .filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' )
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     })(),
     capitalPlan: loaded.capitalPlan || def.capitalPlan,
@@ -11984,53 +11997,105 @@ function initNotificationsSystem() {
             updateActiveViews();
           }
         } else if (table === 'inventory_transactions') {
-          const isGroc = (payload.new && (payload.new.category === 'بقالة' || payload.new.item_id === 'inv-grocery-camp' || (payload.new.id && String(payload.new.id).startsWith('groc-')))) ||
-                         (payload.old && (payload.old.category === 'بقالة' || payload.old.item_id === 'inv-grocery-camp' || (payload.old.id && String(payload.old.id).startsWith('groc-'))));
-          if (isGroc) {
-            title = '🛒 مسحوبات بقالة جديدة في السحابة';
-            const wName = (payload.new && (payload.new.receiver || 'عامل')) || (payload.old && payload.old.receiver) || 'عامل';
-            const cost = payload.new ? Number(payload.new.total_cost || payload.new.unit_price || 0) : 0;
-            const itemDesc = (payload.new && payload.new.item_name) || '';
-            details = `تم تسجيل سحب بقالة للعامل (${wName}) بمبلغ ${cost.toLocaleString()} ج.س${itemDesc ? ' (' + itemDesc + ')' : ''}`;
-            target = 'section-grocery';
-            icon = '🛒';
+          const isRain = (payload.new && (payload.new.category === 'أمطار' || payload.new.item_id === 'inv-weather-rainfall' || (payload.new.id && String(payload.new.id).startsWith('rain-')))) ||
+                         (payload.old && (payload.old.category === 'أمطار' || payload.old.item_id === 'inv-weather-rainfall' || (payload.old.id && String(payload.old.id).startsWith('rain-'))));
 
-            // دمج فوري وتلقائي لقيد البقالة في الذاكرة المحلية وتحديث المستحقات دون الحاجة للتحديث اليدوي
-            if (payload.new && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
-              const liveGrocTx = {
-                id: payload.new.id,
-                date: payload.new.date,
-                workerId: payload.new.crop || payload.new.sale_id || '',
-                workerName: payload.new.receiver || '',
-                amount: Number(payload.new.total_cost || payload.new.unit_price || 0),
-                items: payload.new.item_name || 'مسحوبات بقالة',
-                notes: payload.new.notes || '',
-                loggedBy: payload.new.logged_by || 'المشرف'
-              };
-              if (!state.groceryTransactions) state.groceryTransactions = [];
-              const gIdx = state.groceryTransactions.findIndex(t => t.id === liveGrocTx.id);
-              if (gIdx >= 0) {
-                state.groceryTransactions[gIdx] = liveGrocTx;
-              } else {
-                state.groceryTransactions.unshift(liveGrocTx);
+          if (isRain) {
+            title = '🌧️ تحديث سجل الأمطار في السحابة';
+            icon = '🌧️';
+            target = 'section-rainfall';
+            let extra = null;
+            try {
+              if (payload.new && payload.new.notes && payload.new.notes.trim().startsWith('{')) {
+                extra = JSON.parse(payload.new.notes);
               }
-              autoUpdateLaborWages();
+            } catch(e) {}
+
+            if (payload.new && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
+              const liveRain = {
+                id: payload.new.id,
+                date: payload.new.date || (extra && extra.date) || '',
+                dayName: (extra && extra.dayName) || payload.new.crop || '',
+                startTime: (extra && extra.startTime) || '00:00',
+                endTime: (extra && extra.endTime) || '00:00',
+                durationMinutes: (extra && extra.durationMinutes) !== undefined ? Number(extra.durationMinutes) : (Number(payload.new.unit_price) || 0),
+                intensity: (extra && extra.intensity) || payload.new.item_name || 'وسط',
+                amountMm: (extra && extra.amountMm) !== undefined ? Number(extra.amountMm) : (Number(payload.new.quantity) || 0),
+                location: (extra && extra.location) || payload.new.plot || '',
+                fieldImpact: (extra && extra.fieldImpact) || payload.new.receiver || '',
+                loggedBy: (extra && extra.loggedBy) || payload.new.logged_by || 'المشرف',
+                notes: (extra && extra.notes) || payload.new.notes || ''
+              };
+              details = `تم تسجيل/تحديث هطول أمطار (${liveRain.intensity}) في ${liveRain.location} (${liveRain.amountMm} ملم)`;
+              if (!state.rainfallLogs) state.rainfallLogs = [];
+              const rIdx = state.rainfallLogs.findIndex(r => r.id === liveRain.id);
+              if (rIdx >= 0) {
+                state.rainfallLogs[rIdx] = liveRain;
+              } else {
+                state.rainfallLogs.unshift(liveRain);
+              }
               saveData();
-              updateActiveViews();
+              renderRainfallSection();
+              renderDashboardRainfallCard();
             } else if (payload.eventType === 'DELETE' && payload.old) {
               const delId = payload.old.id;
-              if (delId && state.groceryTransactions) {
-                state.groceryTransactions = state.groceryTransactions.filter(t => t.id !== delId);
-                autoUpdateLaborWages();
+              details = 'تم حذف سجل هطول أمطار من السحابة';
+              if (delId && state.rainfallLogs) {
+                state.rainfallLogs = state.rainfallLogs.filter(r => r.id !== delId);
                 saveData();
-                updateActiveViews();
+                renderRainfallSection();
+                renderDashboardRainfallCard();
               }
             }
           } else {
-            title = '📦 حركة مخزن ومستودع جديدة';
-            details = `تسجيل حركة في المخزن (${payload.new?.item_name || ''})`;
-            target = 'section-inventory';
-            icon = '📦';
+            const isGroc = (payload.new && (payload.new.category === 'بقالة' || payload.new.item_id === 'inv-grocery-camp' || (payload.new.id && String(payload.new.id).startsWith('groc-')))) ||
+                           (payload.old && (payload.old.category === 'بقالة' || payload.old.item_id === 'inv-grocery-camp' || (payload.old.id && String(payload.old.id).startsWith('groc-'))));
+            if (isGroc) {
+              title = '🛒 مسحوبات بقالة جديدة في السحابة';
+              const wName = (payload.new && (payload.new.receiver || 'عامل')) || (payload.old && payload.old.receiver) || 'عامل';
+              const cost = payload.new ? Number(payload.new.total_cost || payload.new.unit_price || 0) : 0;
+              const itemDesc = (payload.new && payload.new.item_name) || '';
+              details = `تم تسجيل سحب بقالة للعامل (${wName}) بمبلغ ${cost.toLocaleString()} ج.س${itemDesc ? ' (' + itemDesc + ')' : ''}`;
+              target = 'section-grocery';
+              icon = '🛒';
+
+              // دمج فوري وتلقائي لقيد البقالة في الذاكرة المحلية وتحديث المستحقات دون الحاجة للتحديث اليدوي
+              if (payload.new && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
+                const liveGrocTx = {
+                  id: payload.new.id,
+                  date: payload.new.date,
+                  workerId: payload.new.crop || payload.new.sale_id || '',
+                  workerName: payload.new.receiver || '',
+                  amount: Number(payload.new.total_cost || payload.new.unit_price || 0),
+                  items: payload.new.item_name || 'مسحوبات بقالة',
+                  notes: payload.new.notes || '',
+                  loggedBy: payload.new.logged_by || 'المشرف'
+                };
+                if (!state.groceryTransactions) state.groceryTransactions = [];
+                const gIdx = state.groceryTransactions.findIndex(t => t.id === liveGrocTx.id);
+                if (gIdx >= 0) {
+                  state.groceryTransactions[gIdx] = liveGrocTx;
+                } else {
+                  state.groceryTransactions.unshift(liveGrocTx);
+                }
+                autoUpdateLaborWages();
+                saveData();
+                updateActiveViews();
+              } else if (payload.eventType === 'DELETE' && payload.old) {
+                const delId = payload.old.id;
+                if (delId && state.groceryTransactions) {
+                  state.groceryTransactions = state.groceryTransactions.filter(t => t.id !== delId);
+                  autoUpdateLaborWages();
+                  saveData();
+                  updateActiveViews();
+                }
+              }
+            } else {
+              title = '📦 حركة مخزن ومستودع جديدة';
+              details = `تسجيل حركة في المخزن (${payload.new?.item_name || ''})`;
+              target = 'section-inventory';
+              icon = '📦';
+            }
           }
         }
 
@@ -21570,7 +21635,7 @@ function renderRainfallSection() {
     state.rainfallLogs = (DEFAULT_DATA && DEFAULT_DATA.rainfallLogs) ? JSON.parse(JSON.stringify(DEFAULT_DATA.rainfallLogs)) : [];
   }
   // تنقية دائمة للمطرتين المحذوفتين
-  state.rainfallLogs = (state.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21');
+  state.rainfallLogs = (state.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' );
 
   const logs = state.rainfallLogs || [];
   
@@ -24648,12 +24713,12 @@ async function initCloudSyncOnStartup() {
 
         // دمج سجلات الأمطار والطقس بذكاء بين السحابة والمحلي دون فقدان أي قيد
         const localRain = state.rainfallLogs || [];
-        const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21');
+        const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' );
         const rainMap = new Map();
         cloudRain.forEach(r => rainMap.set(r.id, r));
         const pendingLocalRain = [];
         localRain.forEach(r => {
-          if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21' && !rainMap.has(r.id)) {
+          if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3'  && !rainMap.has(r.id)) {
             rainMap.set(r.id, r);
             pendingLocalRain.push(r);
           }
@@ -24788,11 +24853,11 @@ async function handleFetchFromSupabase() {
     const mergedGrocery = Array.from(grocMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     const localRain = state.rainfallLogs || [];
-    const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21');
+    const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' );
     const rainMap = new Map();
     cloudRain.forEach(r => rainMap.set(r.id, r));
     localRain.forEach(r => {
-      if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21' && !rainMap.has(r.id)) {
+      if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3'  && !rainMap.has(r.id)) {
         rainMap.set(r.id, r);
       }
     });
