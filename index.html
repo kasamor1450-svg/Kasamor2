@@ -6594,11 +6594,11 @@ const DEFAULT_DATA = {
       "endTime": "14:45",
       "durationMinutes": 75,
       "intensity": "قوية",
-      "amountMm": 0,
-      "location": "كسمور الشرقي - عامة",
-      "fieldImpact": "روت الارض تماما وملأت الحفير",
+      "amountMm": 45,
+      "location": "كامل أراضي المشروع - كسمور الشرقي",
+      "fieldImpact": "روت الأرض تماماً وملأت الحفير وجداول النمر",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "هطول أمطار قوية من 13:30 إلى 14:45"
+      "notes": "هطول أمطار قوية خريفية من 1:30 ظهراً إلى 2:45 عصراً عمت كافة النمر"
     },
     {
       "id": "rain-1788970260663",
@@ -6608,11 +6608,11 @@ const DEFAULT_DATA = {
       "endTime": "22:15",
       "durationMinutes": 30,
       "intensity": "وسط",
-      "amountMm": 0,
+      "amountMm": 22,
       "location": "كسمور الشرقي - عامة",
-      "fieldImpact": "",
+      "fieldImpact": "روى الأرض وملائم جداً للنمو",
       "loggedBy": "مصطفى الجعلي",
-      "notes": "هطول أمطار وسط من 21:45 إلى 22:15"
+      "notes": "هطول أمطار وسط من 9:45 مساء إلى 10:15 مساء"
     },
     {
       "id": "rain-user-20260814",
@@ -6628,21 +6628,6 @@ const DEFAULT_DATA = {
       "loggedBy": "محمد مصطفى",
       "notes": "أمطار قوية متواصلة لمدة ساعتين (8-10 مساء) سيل في خور كسمور"
     },
-    {
-      "id": "rain-3",
-      "date": "2026-08-18",
-      "dayName": "الثلاثاء",
-      "startTime": "21:15",
-      "endTime": "22:45",
-      "durationMinutes": 90,
-      "intensity": "خفيفة",
-      "amountMm": 12,
-      "location": "نمرة 250 ذرة والكمبو",
-      "fieldImpact": "رشاش رطب الجو ورشح التربة الخفيفة",
-      "loggedBy": "حسن مصطفى",
-      "notes": "رذاذ متقطع"
-    },
-
     {
       "id": "rain-user-20260731",
       "date": "2026-07-31",
@@ -7014,9 +6999,9 @@ const DEFAULT_DATA = {
       "monthsWorked": 1.8,
       "deductionsAmount": 0,
       "overtime": 0,
-      "totalDue": 1210000,
+      "totalDue": 2000000,
       "totalPaid": 2000000,
-      "task": "إشراف عام على العمليات والوقود والمخزون",
+      "task": "إشراف عام على العمليات والوقود والمخزون وسلفة عملية جراحية",
       "plot": "كامل المشروع",
       "crop": "مشترك",
       "areaFeddan": 1450,
@@ -7063,7 +7048,7 @@ const DEFAULT_DATA = {
       "overtime": 0,
       "totalDue": 1240000,
       "totalPaid": 1240000,
-      "task": "حراثة وزراعة ال500 والرقيقة",
+      "task": "حراثة وزراعة ال500 والرقيقة - مخالصة نهائية",
       "plot": "ال500 / الرقيقة",
       "crop": "ذرة",
       "areaFeddan": 579,
@@ -7071,8 +7056,8 @@ const DEFAULT_DATA = {
       "lastUpdatedBy": "محمد مصطفى",
       "daysWorked": 52,
       "workerType": "temporary",
-      "groceryTotal": 60000,
-      "totalDeductions": 60000
+      "groceryTotal": 0,
+      "totalDeductions": 0
     },
     {
       "id": "lab-4",
@@ -7109,7 +7094,7 @@ const DEFAULT_DATA = {
       "overtime": 0,
       "totalDue": 950000,
       "totalPaid": 950000,
-      "task": "بناء الرواكيب والكرانك والسراير",
+      "task": "بناء الرواكيب والكرانك والسراير - مسدد بالكامل",
       "plot": "كمبو المزرعة",
       "crop": "مشترك",
       "areaFeddan": 0,
@@ -7123,24 +7108,24 @@ const DEFAULT_DATA = {
     {
       "id": "lab-1788077268220",
       "name": "زيات حبشي",
-      "role": "زيات",
+      "role": "مساعد سائق وزيات",
       "startDate": "2026-07-31",
       "endDate": "2026-08-31",
-      "monthsWorked": 1,
       "monthlySalary": 400000,
+      "monthsWorked": 1,
       "deductionsAmount": 303000,
       "overtime": 0,
       "totalDue": 97000,
       "totalPaid": 97000,
-      "status": "paid",
-      "task": "عمليات موسمية",
-      "plot": "مشترك",
+      "task": "مساعدة صيانة ومتابعة - مسدد بالكامل",
+      "plot": "الورشة",
       "crop": "مشترك",
       "areaFeddan": 0,
-      "lastUpdatedBy": "محمد مصطفى",
+      "status": "paid",
+      "lastUpdatedBy": "مصطفى الجعلي",
       "daysWorked": 31,
       "workerType": "temporary",
-      "groceryTotal": 0,
+      "groceryTotal": 303000,
       "totalDeductions": 303000
     }
   ],
@@ -11280,48 +11265,32 @@ function loadData() {
     labor: (() => {
       let lList = Array.isArray(loaded.labor) ? loaded.labor : def.labor;
       lList.forEach(w => {
-        if (w.id === 'lab-1788077268220' || w.name === 'زيات حبشي') {
-          w.startDate = '2026-07-31';
+        if (w.id === 'lab-1' || (w.name && w.name.includes('عبدالقادر'))) {
+          w.totalDue = 2000000;
+          w.totalPaid = 2000000;
+          w.status = 'paid';
+          w.netBalance = 0;
+        }
+        if (w.id === 'lab-3' || (w.name && w.name.includes('الجعيلي'))) {
+          w.endDate = '2026-09-04';
+          w.totalDue = 1240000;
+          w.totalPaid = 1240000;
+          w.status = 'paid';
+          w.netBalance = 0;
+        }
+        if (w.id === 'lab-5' || (w.name && w.name.includes('كمبو'))) {
+          w.endDate = '2026-08-13';
+          w.totalDue = 950000;
+          w.totalPaid = 950000;
+          w.status = 'paid';
+          w.netBalance = 0;
+        }
+        if (w.id === 'lab-1788077268220' || (w.name && w.name.includes('زيات'))) {
           w.endDate = '2026-08-31';
-          w.daysWorked = 31;
-          w.monthsWorked = 1;
-          w.monthlySalary = 400000;
-          w.deductionsAmount = 303000;
-          w.totalDeductions = 303000;
           w.totalDue = 97000;
           w.totalPaid = 97000;
           w.status = 'paid';
-        }
-        if (w.id === 'lab-3' || w.name === 'محمد الجعيلي') {
-          if (!w.endDate || w.endDate.trim() === '' || w.totalPaid < 1240000) {
-            w.endDate = '2026-09-04';
-            w.daysWorked = 52;
-            w.monthsWorked = 1.7;
-            w.totalPaid = 1240000;
-            w.totalDue = 1240000;
-            w.status = 'paid';
-          }
-        }
-        if (w.id === 'lab-1' || w.name === 'عبدالقادر') {
-          if (w.totalPaid < 2000000) {
-            w.totalPaid = 2000000;
-            w.totalDue = 1210000;
-            w.status = 'paid';
-          }
-        }
-        if (w.id === 'lab-2' || w.name === 'ابستة') {
-          if (w.totalPaid < 750000) {
-            w.totalPaid = 750000;
-            w.deductionsAmount = 24000;
-          }
-        }
-        if (w.id === 'lab-5' || w.name.includes('كمبو')) {
-          w.endDate = '2026-08-13';
-          w.daysWorked = 31;
-          w.monthsWorked = 1;
-          w.totalPaid = 950000;
-          w.totalDue = 950000;
-          w.status = 'paid';
+          w.netBalance = 0;
         }
       });
       return lList;
@@ -11341,7 +11310,7 @@ function loadData() {
       defItems.forEach(r => map.set(r.id, r));
       existing.forEach(r => map.set(r.id, r));
       return Array.from(map.values())
-        .filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02')
+        .filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21')
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     })(),
     capitalPlan: loaded.capitalPlan || def.capitalPlan,
@@ -12159,10 +12128,10 @@ function autoUpdateLaborWages() {
 
   state.labor.forEach(w => {
     if (!w.workerType) {
-      w.workerType = (w.id === 'lab-5') ? 'temporary' : 'permanent';
+      w.workerType = (w.id === 'lab-5' || w.id === 'lab-3' || w.id === 'lab-1788077268220') ? 'temporary' : 'permanent';
     }
 
-    // احتساب إجمالي مسحوبات البقالة الآجلة للعامل بدقة وموثوقية عالية
+    // احتساب إجمالي مسحوبات البقالة الآجلة للعامل
     const cleanStr = (s) => (s || '').toString().trim().toLowerCase();
     const workerGroc = groceryTxList.filter(t => {
       if (t.workerId && cleanStr(t.workerId) === cleanStr(w.id)) return true;
@@ -12187,12 +12156,69 @@ function autoUpdateLaborWages() {
       }
     }
 
-    // إذا كان الموظف لديه تاريخ مباشرة وراتب شهري
+    // حالات خاصة مؤكدة للعمال المسددين بالكامل والمخالصين:
+    // 1. عبدالقادر (lab-1): تم صرف 2 مليون (تشمل سلفة العملية الجراحية)، مستحقاته مسددة بالكامل ورصيده 0 وليس مديناً
+    if (w.id === 'lab-1' || (w.name && w.name.includes('عبدالقادر'))) {
+      w.totalPaid = 2000000;
+      w.totalDue = 2000000;
+      w.netBalance = 0;
+      w.status = 'paid';
+      w.daysWorked = 53;
+      w.monthsWorked = 1.8;
+      w.grossEarnings = 2000000;
+      w.totalDeductions = 0;
+      return;
+    }
+
+    // 2. محمد الجعيلي (lab-3): انتهى عقده بتاريخ 04/09/2026 وتمت مخالصته نهائياً بمبلغ 1,240,000 ج.س
+    if (w.id === 'lab-3' || (w.name && w.name.includes('الجعيلي'))) {
+      w.endDate = '2026-09-04';
+      w.totalPaid = 1240000;
+      w.totalDue = 1240000;
+      w.netBalance = 0;
+      w.status = 'paid';
+      w.daysWorked = 52;
+      w.monthsWorked = 1.7;
+      w.grossEarnings = 1240000;
+      w.totalDeductions = 0;
+      w.isContractEnded = true;
+      return;
+    }
+
+    // 3. عمال الكمبو (lab-5): مسدد بالكامل 950,000 ج.س
+    if (w.id === 'lab-5' || (w.name && w.name.includes('كمبو'))) {
+      w.endDate = '2026-08-13';
+      w.totalPaid = 950000;
+      w.totalDue = 950000;
+      w.netBalance = 0;
+      w.status = 'paid';
+      w.daysWorked = 31;
+      w.monthsWorked = 1;
+      w.grossEarnings = 950000;
+      w.totalDeductions = 0;
+      w.isContractEnded = true;
+      return;
+    }
+
+    // 4. الزيات (lab-1788077268220): مسدد بالكامل 97,000 ج.س
+    if (w.id === 'lab-1788077268220' || (w.name && w.name.includes('زيات'))) {
+      w.endDate = '2026-08-31';
+      w.totalPaid = 97000;
+      w.totalDue = 97000;
+      w.netBalance = 0;
+      w.status = 'paid';
+      w.daysWorked = 31;
+      w.monthsWorked = 1;
+      w.grossEarnings = 400000;
+      w.totalDeductions = 303000;
+      w.isContractEnded = true;
+      return;
+    }
+
+    // احتساب أجور باقي العمال المستمرين (مثل ابستة وتشالي)
     if (w.startDate && w.monthlySalary > 0) {
       let calcEndDate;
       let hasEnded = false;
-      
-      // قاعدة حاسمة: عند تسجيل تاريخ الانتهاء، يتوقف الاحتساب حصراً عند هذا التاريخ ولا يستمر لليوم
       if (w.endDate && w.endDate.trim() !== '') {
         calcEndDate = w.endDate;
         hasEnded = true;
@@ -12219,22 +12245,20 @@ function autoUpdateLaborWages() {
     w.grossEarnings = Math.round(months * salary) + overtime;
     // إجمالي الاستقطاعات والمسحوبات الآجلة
     w.totalDeductions = generalDeductions + groceryDeductions;
-    // صافي المستحق المحاسبي الدقيق: يظهر بالسالب إذا تجاوزت الاستقطاعات والمسحوبات الأجر المكتسب
+    // صافي المستحق المحاسبي
     w.totalDue = w.grossEarnings - w.totalDeductions;
     
     const paid = parseFloat(w.totalPaid) || 0;
-    // صافي الرصيد المتبقي للعامل (أو الدين عليه بالسالب إذا سحب أو صُرف له أكثر من مستحقاته)
     w.netBalance = w.totalDue - paid;
     
-    // تحديد الحالة المحاسبية للعامل مع دعم الرصيد السالب
     if (w.netBalance < 0) {
-      w.status = 'overdrawn'; // رصيد سالب - تجاوز المستحقات ومدين للمشروع
+      w.status = 'overdrawn';
     } else if (w.netBalance === 0) {
-      w.status = 'paid'; // خالص بالكامل
+      w.status = 'paid';
     } else if (paid > 0) {
-      w.status = 'partial'; // مدفوع جزئياً
+      w.status = 'partial';
     } else {
-      w.status = 'pending'; // مستحق بانتظار الصرف
+      w.status = 'pending';
     }
   });
 }
@@ -21546,7 +21570,7 @@ function renderRainfallSection() {
     state.rainfallLogs = (DEFAULT_DATA && DEFAULT_DATA.rainfallLogs) ? JSON.parse(JSON.stringify(DEFAULT_DATA.rainfallLogs)) : [];
   }
   // تنقية دائمة للمطرتين المحذوفتين
-  state.rainfallLogs = (state.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02');
+  state.rainfallLogs = (state.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21');
 
   const logs = state.rainfallLogs || [];
   
@@ -24624,12 +24648,12 @@ async function initCloudSyncOnStartup() {
 
         // دمج سجلات الأمطار والطقس بذكاء بين السحابة والمحلي دون فقدان أي قيد
         const localRain = state.rainfallLogs || [];
-        const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02');
+        const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21');
         const rainMap = new Map();
         cloudRain.forEach(r => rainMap.set(r.id, r));
         const pendingLocalRain = [];
         localRain.forEach(r => {
-          if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && !rainMap.has(r.id)) {
+          if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21' && !rainMap.has(r.id)) {
             rainMap.set(r.id, r);
             pendingLocalRain.push(r);
           }
@@ -24764,11 +24788,11 @@ async function handleFetchFromSupabase() {
     const mergedGrocery = Array.from(grocMap.values()).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     const localRain = state.rainfallLogs || [];
-    const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02');
+    const cloudRain = (cloudState.rainfallLogs || []).filter(r => r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21');
     const rainMap = new Map();
     cloudRain.forEach(r => rainMap.set(r.id, r));
     localRain.forEach(r => {
-      if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && !rainMap.has(r.id)) {
+      if (r.id !== 'rain-1' && r.id !== 'rain-2' && r.id !== 'rain-3' && r.date !== '2026-07-15' && r.date !== '2026-08-02' && r.date !== '2026-08-18' && r.date !== '2026-08-21' && !rainMap.has(r.id)) {
         rainMap.set(r.id, r);
       }
     });

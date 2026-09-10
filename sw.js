@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v34.0-complete-records-sync
-const CACHE_NAME = 'mustagro-v34.0-complete-records-sync';
+// Cache Version: mustagro-v35.0-final-payroll-rainfall-fix
+const CACHE_NAME = 'mustagro-v35.0-final-payroll-rainfall-fix';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
