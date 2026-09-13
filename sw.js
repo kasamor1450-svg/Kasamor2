@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v39.0-compact-expenses-sync-darkmode
-const CACHE_NAME = 'mustagro-v39.0-compact-expenses-sync-darkmode';
+// Cache Version: mustagro-v39.1-sync-desktop-cloud-rest-fallback
+const CACHE_NAME = 'mustagro-v39.1-sync-desktop-cloud-rest-fallback';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
