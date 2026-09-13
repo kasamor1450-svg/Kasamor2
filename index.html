@@ -616,7 +616,7 @@ table tbody tr:hover {
   body.role-is-viewer button[onclick*="toggleMobileQuickActions"] {
     display: none !important;
   }
-  body.role-is-viewer input:not([type="search"]):not([type="file"]):not(#modal-overlay input),
+  body.role-is-viewer input:not([type="search"]):not([type="file"]):not([type="range"]):not(#section-forecasts input):not(#modal-overlay input),
   body.role-is-viewer select:not(#currency-filter):not(#expenses-month-filter):not(#modal-overlay select) {
     pointer-events: none !important;
     opacity: 0.85 !important;
@@ -682,6 +682,94 @@ html[dir="ltr"] #more-sections-dropdown button {
 html[dir="ltr"] .font-mono {
   direction: ltr !important;
   text-align: left !important;
+}
+
+
+/* ========================================================
+   تحسينات التباين الفائق والوضوح الناصع في الوضع الليلي (Dark Mode High Contrast)
+   ======================================================== */
+html.dark, .dark-mode {
+  color-scheme: dark;
+}
+
+html.dark body, .dark-mode body {
+  color: #f8fafc !important;
+}
+
+/* رفع تباين كافة النصوص الثانوية والرمادية في الوضع الليلي */
+html.dark .text-slate-500, .dark-mode .text-slate-500,
+html.dark .text-slate-600, .dark-mode .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-400, .dark-mode .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-700, .dark-mode .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+html.dark .text-slate-800, .dark-mode .text-slate-800,
+html.dark .text-slate-900, .dark-mode .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+/* ألوان المحاصيل والأقسام الناصعة والواضحة جداً في الوضع الليلي */
+html.dark .text-amber-700, .dark-mode .text-amber-700,
+html.dark .text-amber-800, .dark-mode .text-amber-800,
+html.dark .text-amber-900, .dark-mode .text-amber-900 {
+  color: #fde047 !important; /* ذهبي ناصع مشرق للذرة */
+}
+
+html.dark .text-emerald-700, .dark-mode .text-emerald-700,
+html.dark .text-emerald-800, .dark-mode .text-emerald-800,
+html.dark .text-emerald-900, .dark-mode .text-emerald-900 {
+  color: #6ee7b7 !important; /* زمردي فاتح ناصع للتسالي */
+}
+
+html.dark .text-purple-700, .dark-mode .text-purple-700,
+html.dark .text-purple-800, .dark-mode .text-purple-800,
+html.dark .text-purple-900, .dark-mode .text-purple-900,
+html.dark .text-purple-950, .dark-mode .text-purple-950 {
+  color: #d8b4fe !important; /* ليلكي ناصع للاحتياطي والبيت */
+}
+
+html.dark .text-sky-700, .dark-mode .text-sky-700,
+html.dark .text-sky-800, .dark-mode .text-sky-800,
+html.dark .text-sky-900, .dark-mode .text-sky-900 {
+  color: #7dd3fc !important; /* سماوي مشرق للأمطار والوقود */
+}
+
+/* وضوح الجداول في الوضع الليلي */
+html.dark table th, .dark-mode table th {
+  color: #f1f5f9 !important;
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+html.dark table td, .dark-mode table td {
+  color: #f8fafc !important;
+  border-color: #1e293b !important;
+}
+
+/* وضوح الحقول والمدخلات والقوائم المنسدلة في الوضع الليلي */
+html.dark input:not([type="range"]), .dark-mode input:not([type="range"]),
+html.dark select, .dark-mode select,
+html.dark textarea, .dark-mode textarea {
+  color: #f8fafc !important;
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder, .dark-mode input::placeholder,
+html.dark textarea::placeholder, .dark-mode textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.dark .bg-slate-50, .dark-mode .bg-slate-50,
+html.dark .bg-slate-100, .dark-mode .bg-slate-100 {
+  background-color: #1e293b !important;
 }
 
 </style>
@@ -1489,15 +1577,14 @@ html[dir="ltr"] .font-mono {
         <div class="overflow-x-auto">
           <table class="w-full text-right border-collapse">
             <thead>
-              <tr class="bg-slate-50 dark:bg-slate-800/80 text-[11px] font-bold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
-                <th class="py-3 px-4">التاريخ</th>
-                <th class="py-3 px-4">البند والتصنيف</th>
-                <th class="py-3 px-4">المبلغ</th>
-                <th class="py-3 px-4">المقطوعية</th>
-                <th class="py-3 px-4">المحصول</th>
-                <th class="py-3 px-4">البيان ومدخل القيد</th>
-                <th class="py-3 px-4">حالة التدقيق</th>
-                <th class="py-3 px-4 text-left">إجراءات</th>
+              <tr class="bg-slate-100/90 dark:bg-slate-800/90 text-[11px] font-black text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 whitespace-nowrap">
+                <th class="py-2 px-2.5">التاريخ</th>
+                <th class="py-2 px-2.5">البند</th>
+                <th class="py-2 px-2.5">المبلغ</th>
+                <th class="py-2 px-2.5">المحصول / النمرة</th>
+                <th class="py-2 px-2.5">البيان</th>
+                <th class="py-2 px-2.5">الحالة</th>
+                <th class="py-2 px-2.5 text-center">إجراءات</th>
               </tr>
             </thead>
             <tbody id="expenses-table-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
@@ -11391,7 +11478,24 @@ function saveData(notifyMessage = null) {
     autoUpdateLaborWages();
     recalculatePartnerCapital();
     
-    const stateStr = JSON.stringify(state);
+    // تجريد الوسائط الثقيلة من مصفوفة state قبل حفظها في LocalStorage لتفادي تجاوز السعة (5MB) نهائياً
+    const sanitizedState = { ...state };
+    if (sanitizedState.mediaGallery && Array.isArray(sanitizedState.mediaGallery)) {
+      sanitizedState.mediaGallery = sanitizedState.mediaGallery.map(m => ({
+        id: m.id,
+        type: m.type,
+        title: m.title,
+        tag: m.tag,
+        desc: m.desc,
+        thumbnail: (m.thumbnail && m.thumbnail.length < 50000) ? m.thumbnail : null,
+        duration: m.duration,
+        fileSizeFormatted: m.fileSizeFormatted,
+        date: m.date,
+        createdAt: m.createdAt,
+        loggedBy: m.loggedBy
+      }));
+    }
+    const stateStr = JSON.stringify(sanitizedState);
     
     // 1. الحفظ في المفتاح الدائم الرئيسي
     localStorage.setItem(STORAGE_KEY, stateStr);
@@ -12000,6 +12104,9 @@ function initNotificationsSystem() {
           const isRain = (payload.new && (payload.new.category === 'أمطار' || payload.new.item_id === 'inv-weather-rainfall' || (payload.new.id && String(payload.new.id).startsWith('rain-')))) ||
                          (payload.old && (payload.old.category === 'أمطار' || payload.old.item_id === 'inv-weather-rainfall' || (payload.old.id && String(payload.old.id).startsWith('rain-'))));
 
+          const isMedia = (payload.new && (payload.new.category === 'وسائط' || payload.new.item_id === 'inv-media-gallery' || (payload.new.id && String(payload.new.id).startsWith('media-')))) ||
+                          (payload.old && (payload.old.category === 'وسائط' || payload.old.item_id === 'inv-media-gallery' || (payload.old.id && String(payload.old.id).startsWith('media-'))));
+
           if (isRain) {
             title = '🌧️ تحديث سجل الأمطار في السحابة';
             icon = '🌧️';
@@ -12047,6 +12154,61 @@ function initNotificationsSystem() {
                 renderDashboardRainfallCard();
               }
             }
+          } else if (isMedia) {
+            title = '📸 تحديث ألبوم الصور والفيديوهات في السحابة';
+            icon = '📸';
+            target = 'section-dashboard';
+            let extra = null;
+            try {
+              if (payload.new && payload.new.notes && payload.new.notes.trim().startsWith('{')) {
+                extra = JSON.parse(payload.new.notes);
+              }
+            } catch(e) {}
+
+            if (payload.new && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
+              const liveMedia = {
+                id: payload.new.id,
+                type: (extra && extra.type) || payload.new.unit || 'image',
+                title: (extra && extra.title) || payload.new.item_name || 'مشهد من كسمور',
+                tag: (extra && extra.tag) || payload.new.plot || 'توثيق ميداني',
+                desc: (extra && extra.desc) || payload.new.crop || '',
+                thumbnail: (extra && extra.thumbnail) || (extra && extra.dataUrl) || '',
+                dataUrl: (extra && extra.dataUrl) || (extra && extra.thumbnail) || '',
+                duration: (extra && extra.duration) || Number(payload.new.unit_price) || 0,
+                fileSizeFormatted: (extra && extra.fileSizeFormatted) || payload.new.receiver || '',
+                date: (extra && extra.date) || payload.new.date || '',
+                createdAt: (extra && extra.createdAt) || Date.now(),
+                loggedBy: (extra && extra.loggedBy) || payload.new.logged_by || 'المشرف'
+              };
+              details = `تمت إضافة/تحديث ${liveMedia.type === 'video' ? 'فيديو' : 'صورة'}: "${liveMedia.title}"`;
+              if (!state.mediaGallery) state.mediaGallery = [];
+              const mIdx = state.mediaGallery.findIndex(m => m.id === liveMedia.id);
+              if (mIdx >= 0) {
+                state.mediaGallery[mIdx] = liveMedia;
+              } else {
+                state.mediaGallery.unshift(liveMedia);
+              }
+              if (typeof MustagroMediaStore !== 'undefined' && typeof MustagroMediaStore.saveMedia === 'function') {
+                MustagroMediaStore.saveMedia(liveMedia).catch(() => {});
+              }
+              saveData();
+              if (typeof openGedarefGalleryModal === 'function' && document.getElementById('upload-media-title')) {
+                openGedarefGalleryModal(typeof currentGalleryFilter !== 'undefined' ? currentGalleryFilter : 'all');
+              }
+            } else if (payload.eventType === 'DELETE' && payload.old) {
+              const delId = payload.old.id;
+              details = 'تم حذف عنصر من ألبوم المشروع في السحابة';
+              if (delId && state.mediaGallery) {
+                state.mediaGallery = state.mediaGallery.filter(m => m.id !== delId);
+                if (typeof MustagroMediaStore !== 'undefined' && typeof MustagroMediaStore.deleteMedia === 'function') {
+                  MustagroMediaStore.deleteMedia(delId).catch(() => {});
+                }
+                saveData();
+                if (typeof openGedarefGalleryModal === 'function' && document.getElementById('upload-media-title')) {
+                  openGedarefGalleryModal(typeof currentGalleryFilter !== 'undefined' ? currentGalleryFilter : 'all');
+                }
+              }
+            }
           } else {
             const isGroc = (payload.new && (payload.new.category === 'بقالة' || payload.new.item_id === 'inv-grocery-camp' || (payload.new.id && String(payload.new.id).startsWith('groc-')))) ||
                            (payload.old && (payload.old.category === 'بقالة' || payload.old.item_id === 'inv-grocery-camp' || (payload.old.id && String(payload.old.id).startsWith('groc-'))));
@@ -12059,7 +12221,6 @@ function initNotificationsSystem() {
               target = 'section-grocery';
               icon = '🛒';
 
-              // دمج فوري وتلقائي لقيد البقالة في الذاكرة المحلية وتحديث المستحقات دون الحاجة للتحديث اليدوي
               if (payload.new && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
                 const liveGrocTx = {
                   id: payload.new.id,
@@ -12578,6 +12739,11 @@ function switchSection(targetId) {
 
   // التمرير السلس لأعلى الصفحة
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (targetId === 'section-forecasts') {
+    if (typeof syncSimulatorInputs === 'function') syncSimulatorInputs();
+    if (typeof renderForecastsSection === 'function') renderForecastsSection();
+  }
 
   safeCreateIcons();
 }
@@ -13718,21 +13884,21 @@ function renderExpensesTable(expensesList) {
   const reviewNotice = document.getElementById('review-alert-banner');
   if (!tableBody) return;
 
-  const reviewCount = state.expenses.filter(e => e.isUnderReview).length;
+  const reviewCount = (state.expenses || []).filter(e => e.isUnderReview).length;
   if (reviewNotice) {
     if (reviewCount > 0) {
       reviewNotice.classList.remove('hidden');
       reviewNotice.innerHTML = `
-        <div class="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-amber-900 dark:text-amber-200">
-          <div class="flex items-center gap-3">
-            <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-600"></i>
+        <div class="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900/60 rounded-2xl text-amber-900 dark:text-amber-200">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>
             <div>
-              <p class="font-bold text-sm">تنبيه تدقيق: يوجد (${reviewCount}) قيود مصروفات مبدئية مسجلة وتحتاج إلى مراجعة وتأكيد من الإدارة المالية.</p>
-              <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5">يمكن للمدير المالي (مصطفى الجعلي) أو المدير الإداري (حسن مصطفى) تعديل المبالغ أو اعتمادها فوراً.</p>
+              <p class="font-bold text-xs sm:text-sm">تنبيه تدقيق: يوجد (${reviewCount}) قيود مبدئية مسجلة تحتاج لمراجعة وتأكيد من الإدارة المالية.</p>
+              <p class="text-[11px] text-amber-700 dark:text-amber-300 mt-0.5">يمكن للمدير المالي (مصطفى الجعلي) أو الإداري (حسن مصطفى) تعديل المبالغ أو اعتمادها فوراً.</p>
             </div>
           </div>
-          <button onclick="markAllExpensesApproved()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-3.5 rounded-xl shadow-sm transition">
-            اعتماد وتأكيد الكل
+          <button onclick="markAllExpensesApproved()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold py-1 px-3 rounded-xl shadow-sm transition whitespace-nowrap flex-shrink-0">
+            اعتماد الكل
           </button>
         </div>
       `;
@@ -13741,63 +13907,80 @@ function renderExpensesTable(expensesList) {
     }
   }
 
+  if (!expensesList || expensesList.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="py-8 text-center text-slate-400 dark:text-slate-500 font-medium text-xs">
+          لا توجد قيود مصروفات مطابقة للبحث أو الفلتر
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
   tableBody.innerHTML = expensesList.map(exp => {
-    let cropBadge = '';
+    let cropPlotBadge = '';
+    const plotTxt = exp.plot ? ` (${String(exp.plot).startsWith('ن') ? exp.plot : 'ن' + exp.plot})` : '';
     if (exp.crop === 'ذرة') {
-      cropBadge = '<span class="font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md">🌽 ذرة</span>';
+      cropPlotBadge = `<span class="font-bold text-amber-800 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/70 px-2 py-0.5 rounded text-[11px] whitespace-nowrap inline-block">🌽 ذرة${plotTxt}</span>`;
     } else if (exp.crop === 'تسالي') {
-      cropBadge = '<span class="font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">🌱 تسالي</span>';
+      cropPlotBadge = `<span class="font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/70 px-2 py-0.5 rounded text-[11px] whitespace-nowrap inline-block">🌱 تسالي${plotTxt}</span>`;
     } else if (exp.crop === 'البيت') {
-      cropBadge = '<span class="font-black text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2.5 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">🏠 البيت</span>';
+      cropPlotBadge = `<span class="font-bold text-purple-800 dark:text-purple-300 bg-purple-100/80 dark:bg-purple-950/70 px-2 py-0.5 rounded text-[11px] whitespace-nowrap inline-block">🏠 البيت${plotTxt}</span>`;
     } else {
-      cropBadge = '<span class="font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">🌾 مشترك</span>';
+      cropPlotBadge = `<span class="font-medium text-slate-700 dark:text-slate-300 bg-slate-200/80 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px] whitespace-nowrap inline-block">🌾 مشترك${plotTxt}</span>`;
     }
 
+    const rawNote = (exp.notes || exp.op || '-').trim();
+    const creator = exp.createdBy || 'مصطفى الجعلي';
+    const tooltipText = `${rawNote} - بواسطة: ${creator}${exp.modifiedBy ? ' | تعديل: ' + exp.modifiedBy : ''}`;
+
     return `
-      <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition text-xs">
-        <td class="py-3.5 px-4 font-mono font-medium text-slate-700 dark:text-slate-300">${exp.date}</td>
-        <td class="py-3.5 px-4">
-          <span class="font-bold text-slate-900 dark:text-white px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
-            ${exp.category}
+      <tr class="border-b border-slate-100 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition text-xs whitespace-nowrap">
+        <td class="py-2 px-2.5 font-mono font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap text-xs">${exp.date || '-'}</td>
+        <td class="py-2 px-2.5 whitespace-nowrap">
+          <span class="font-bold text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px]">
+            ${exp.category || '-'}
           </span>
         </td>
-        <td class="py-3.5 px-4 font-black text-sm text-slate-900 dark:text-white font-mono">
-          ${parseFloat(exp.amount).toLocaleString()} <span class="text-[11px] font-normal text-slate-500">ج.س</span>
+        <td class="py-2 px-2.5 font-black text-xs text-slate-900 dark:text-emerald-400 font-mono whitespace-nowrap">
+          ${parseFloat(exp.amount || 0).toLocaleString()} <span class="text-[10px] font-normal text-slate-500 dark:text-slate-400">ج.س</span>
         </td>
-        <td class="py-3.5 px-4 text-slate-600 dark:text-slate-300">${exp.plot || '-'}</td>
-        <td class="py-3.5 px-4">
-          ${cropBadge}
+        <td class="py-2 px-2.5 whitespace-nowrap">
+          ${cropPlotBadge}
         </td>
-        <td class="py-3.5 px-4 text-slate-500 max-w-xs">
-          <div class="font-semibold text-slate-800 dark:text-slate-200">${exp.notes || exp.op || '-'}</div>
-          <div class="text-[10px] text-slate-400 mt-0.5">
-            بواسطة: <strong class="text-slate-600 dark:text-slate-400">${exp.createdBy || 'مصطفى الجعلي'}</strong>
-            ${exp.modifiedBy ? ` • آخر تعديل: <span class="text-amber-600 font-semibold">${exp.modifiedBy}</span>` : ''}
+        <td class="py-2 px-2.5 whitespace-nowrap">
+          <div class="max-w-[220px] sm:max-w-xs md:max-w-md truncate text-slate-800 dark:text-slate-200 font-medium text-xs" title="${tooltipText}">
+            ${rawNote} <span class="text-slate-400 dark:text-slate-500 text-[10px] font-normal">(${creator})</span>
           </div>
         </td>
-        <td class="py-3.5 px-4">
+        <td class="py-2 px-2.5 whitespace-nowrap">
           ${exp.isUnderReview 
-            ? '<span class="badge-review text-[11px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">⚠️ للمراجعة</span>' 
-            : '<span class="badge-completed text-[11px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">✓ معتمد</span>'}
+            ? '<span class="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-900/50">⚠️ مراجعة</span>' 
+            : '<span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/50">✓ معتمد</span>'}
         </td>
-        <td class="py-3.5 px-4 text-left">
-          <div class="flex items-center justify-end gap-1.5">
+        <td class="py-2 px-2.5 text-center whitespace-nowrap">
+          <div class="inline-flex items-center justify-center gap-1">
             ${exp.receiptPhotoUrl ? `
-              <button onclick="viewExpenseReceiptModal('${exp.id}')" class="p-1.5 bg-sky-100 dark:bg-sky-950/70 hover:bg-sky-200 text-sky-700 dark:text-sky-300 rounded-lg transition" title="عرض الفاتورة أو المرفق">
+              <button onclick="viewExpenseReceiptModal('${exp.id}')" class="p-1 text-sky-600 hover:text-sky-700 hover:bg-sky-50 dark:text-sky-400 dark:hover:bg-sky-950/60 rounded transition" title="عرض الفاتورة / المرفق">
                 ${exp.receiptType === 'video' ? '🎥' : '📎'}
               </button>
             ` : ''}
-            <button onclick="openEditExpenseModal('${exp.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg text-slate-600 dark:text-slate-300 transition" title="تعديل وتدقيق">
-              <i data-lucide="edit" class="w-4 h-4"></i>
+            <button onclick="openEditExpenseModal('${exp.id}')" class="p-1 text-slate-600 hover:text-emerald-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 rounded transition" title="تعديل">
+              <i data-lucide="edit" class="w-3.5 h-3.5"></i>
             </button>
-            <button onclick="deleteExpense('${exp.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-600 dark:text-slate-300 transition" title="حذف">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <button onclick="deleteExpense('${exp.id}')" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded transition" title="حذف">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             </button>
           </div>
         </td>
       </tr>
     `;
   }).join('');
+
+  if (window.lucide && lucide.createIcons) {
+    try { lucide.createIcons(); } catch(e) {}
+  }
 }
 
 function renderBudgetCaps() {
@@ -17956,6 +18139,48 @@ async function handleDirectSavePartner(e, partnerId) {
   showToast(`✓ تم حفظ وتثبيت رأس مال الشريك (${name}) في السحابة بنجاح!`, 'success');
 }
 
+function syncSimulatorInputs() {
+  if (!state.forecastSettings || !state.forecastSettings.sorghum || !state.forecastSettings.tasali) {
+    state.forecastSettings = (typeof DEFAULT_DATA !== 'undefined' && DEFAULT_DATA.forecastSettings) 
+      ? JSON.parse(JSON.stringify(DEFAULT_DATA.forecastSettings)) 
+      : {
+          nextSeasonAllocation: 500000000,
+          zakatRatePercent: 10,
+          sorghum: { name: 'ذرة ارفع قدمك محسن', area: 959, expectedYieldFeddan: 3.5, yieldUnit: 'جوال (100 كجم)', expectedPricePerUnit: 300000, harvestCostPerFeddan: 14000, transportCostPerFeddan: 4500, packingCostPerFeddan: 3000 },
+          tasali: { name: 'تسالي نقاوة أولى', area: 490, expectedYieldFeddan: 1.5, yieldUnit: 'جوال (50 كجم)', expectedPricePerUnit: 600000, harvestCostPerFeddan: 16000, transportCostPerFeddan: 5000, packingCostPerFeddan: 3500 }
+        };
+  }
+
+  const f = state.forecastSettings;
+  const s = f.sorghum || { name: 'ذرة ارفع قدمك محسن', area: 959, expectedYieldFeddan: 3.5, expectedPricePerUnit: 300000 };
+  const t = f.tasali || { name: 'تسالي نقاوة أولى', area: 490, expectedYieldFeddan: 1.5, expectedPricePerUnit: 600000 };
+  const nextAlloc = (f.nextSeasonAllocation !== undefined) ? Number(f.nextSeasonAllocation) : 500000000;
+
+  const inpSY = document.getElementById('sim-sorghum-yield');
+  const inpSP = document.getElementById('sim-sorghum-price');
+  const inpTY = document.getElementById('sim-tasali-yield');
+  const inpTP = document.getElementById('sim-tasali-price');
+  const inpNS = document.getElementById('sim-next-season');
+
+  if (inpSY && s.expectedYieldFeddan !== undefined) inpSY.value = s.expectedYieldFeddan;
+  if (inpSP && s.expectedPricePerUnit !== undefined) inpSP.value = s.expectedPricePerUnit;
+  if (inpTY && t.expectedYieldFeddan !== undefined) inpTY.value = t.expectedYieldFeddan;
+  if (inpTP && t.expectedPricePerUnit !== undefined) inpTP.value = t.expectedPricePerUnit;
+  if (inpNS && nextAlloc !== undefined) inpNS.value = nextAlloc;
+
+  const elSYV = document.getElementById('sim-sorghum-yield-val');
+  const elSPV = document.getElementById('sim-sorghum-price-val');
+  const elTYV = document.getElementById('sim-tasali-yield-val');
+  const elTPV = document.getElementById('sim-tasali-price-val');
+  const elNSV = document.getElementById('sim-next-season-val');
+
+  if (elSYV) elSYV.innerText = `${s.expectedYieldFeddan || 3.5} جوال/فدان`;
+  if (elSPV) elSPV.innerText = `${(s.expectedPricePerUnit || 300000).toLocaleString()} جنيه`;
+  if (elTYV) elTYV.innerText = `${t.expectedYieldFeddan || 1.5} جوال/فدان`;
+  if (elTPV) elTPV.innerText = `${(t.expectedPricePerUnit || 600000).toLocaleString()} جنيه`;
+  if (elNSV) elNSV.innerText = `${Math.round(nextAlloc).toLocaleString()} ج.س`;
+}
+
 function updateSimulation() {
   const sorghumYield = parseFloat(document.getElementById('sim-sorghum-yield')?.value) || 3.5;
   const sorghumPrice = parseFloat(document.getElementById('sim-sorghum-price')?.value) || 300000;
@@ -17975,42 +18200,62 @@ function updateSimulation() {
   if (elTPV) elTPV.innerText = `${tasaliPrice.toLocaleString()} جنيه`;
   if (elNSV) elNSV.innerText = `${Math.round(nextSeasonAlloc).toLocaleString()} ج.س`;
 
+  if (!state.forecastSettings) {
+    state.forecastSettings = (typeof DEFAULT_DATA !== 'undefined' && DEFAULT_DATA.forecastSettings) 
+      ? JSON.parse(JSON.stringify(DEFAULT_DATA.forecastSettings)) 
+      : {};
+  }
+  if (!state.forecastSettings.sorghum) {
+    state.forecastSettings.sorghum = { name: 'ذرة ارفع قدمك محسن', area: 959, expectedYieldFeddan: 3.5, yieldUnit: 'جوال (100 كجم)', expectedPricePerUnit: 300000, harvestCostPerFeddan: 14000, transportCostPerFeddan: 4500, packingCostPerFeddan: 3000 };
+  }
+  if (!state.forecastSettings.tasali) {
+    state.forecastSettings.tasali = { name: 'تسالي نقاوة أولى', area: 490, expectedYieldFeddan: 1.5, yieldUnit: 'جوال (50 كجم)', expectedPricePerUnit: 600000, harvestCostPerFeddan: 16000, transportCostPerFeddan: 5000, packingCostPerFeddan: 3500 };
+  }
+
   state.forecastSettings.sorghum.expectedYieldFeddan = sorghumYield;
   state.forecastSettings.sorghum.expectedPricePerUnit = sorghumPrice;
   state.forecastSettings.tasali.expectedYieldFeddan = tasaliYield;
   state.forecastSettings.tasali.expectedPricePerUnit = tasaliPrice;
   state.forecastSettings.nextSeasonAllocation = nextSeasonAlloc;
 
-  saveData();
   renderForecastsSection();
+
+  if (window._simSaveTimer) clearTimeout(window._simSaveTimer);
+  window._simSaveTimer = setTimeout(() => {
+    if (typeof saveData === 'function') saveData();
+  }, 400);
 }
 
 function renderForecastsSection() {
+  if (!state.forecastSettings || !state.forecastSettings.sorghum || !state.forecastSettings.tasali) {
+    syncSimulatorInputs();
+  }
+
   const m = calculateMetrics();
   const f = state.forecastSettings;
-  const nextSeasonAlloc = (f.nextSeasonAllocation !== undefined) ? parseFloat(f.nextSeasonAllocation) : 500000000;
+  const nextSeasonAlloc = (f && f.nextSeasonAllocation !== undefined) ? parseFloat(f.nextSeasonAllocation) : 500000000;
 
   // 1. حسابات محصول الذرة وزكاة الزروع 10% (العُشر)
-  const s = f.sorghum;
+  const s = (f && f.sorghum) || { name: 'ذرة ارفع قدمك محسن', area: 959, expectedYieldFeddan: 3.5, yieldUnit: 'جوال (100 كجم)', expectedPricePerUnit: 300000, harvestCostPerFeddan: 14000, transportCostPerFeddan: 4500, packingCostPerFeddan: 3000 };
   const sorghumTotalProduction = +(s.area * s.expectedYieldFeddan).toFixed(1);
-  const sorghumZakatBags = +(sorghumTotalProduction * 0.10).toFixed(1); // 10% زكاة زروع
-  const sorghumNetSellableBags = +(sorghumTotalProduction - sorghumZakatBags).toFixed(1); // 90% صافي الإنتاج القابل للتسويق
+  const sorghumZakatBags = +(sorghumTotalProduction * 0.10).toFixed(1);
+  const sorghumNetSellableBags = +(sorghumTotalProduction - sorghumZakatBags).toFixed(1);
   const sorghumGrossProductionValue = sorghumTotalProduction * s.expectedPricePerUnit;
   const sorghumZakatValue = sorghumZakatBags * s.expectedPricePerUnit;
-  const sorghumGrossRevenue = sorghumNetSellableBags * s.expectedPricePerUnit; // إيرادات البيع بعد إخراج الزكاة
+  const sorghumGrossRevenue = sorghumNetSellableBags * s.expectedPricePerUnit;
   const sorghumPostHarvestCosts = s.area * (s.harvestCostPerFeddan + s.transportCostPerFeddan + s.packingCostPerFeddan);
   const sorghumTotalCosts = m.sorghumExpenses + sorghumPostHarvestCosts;
   const sorghumNetProfit = sorghumGrossRevenue - sorghumTotalCosts;
   const sorghumProfitPerFeddan = s.area > 0 ? (sorghumNetProfit / s.area) : 0;
 
   // 2. حسابات محصول التسالي وزكاة الزروع 10% (العُشر)
-  const t = f.tasali;
+  const t = (f && f.tasali) || { name: 'تسالي نقاوة أولى', area: 490, expectedYieldFeddan: 1.5, yieldUnit: 'جوال (50 كجم)', expectedPricePerUnit: 600000, harvestCostPerFeddan: 16000, transportCostPerFeddan: 5000, packingCostPerFeddan: 3500 };
   const tasaliTotalProduction = +(t.area * t.expectedYieldFeddan).toFixed(1);
-  const tasaliZakatBags = +(tasaliTotalProduction * 0.10).toFixed(1); // 10% زكاة زروع
-  const tasaliNetSellableBags = +(tasaliTotalProduction - tasaliZakatBags).toFixed(1); // 90% صافي الإنتاج القابل للتسويق
+  const tasaliZakatBags = +(tasaliTotalProduction * 0.10).toFixed(1);
+  const tasaliNetSellableBags = +(tasaliTotalProduction - tasaliZakatBags).toFixed(1);
   const tasaliGrossProductionValue = tasaliTotalProduction * t.expectedPricePerUnit;
   const tasaliZakatValue = tasaliZakatBags * t.expectedPricePerUnit;
-  const tasaliGrossRevenue = tasaliNetSellableBags * t.expectedPricePerUnit; // إيرادات البيع بعد إخراج الزكاة
+  const tasaliGrossRevenue = tasaliNetSellableBags * t.expectedPricePerUnit;
   const tasaliPostHarvestCosts = t.area * (t.harvestCostPerFeddan + t.transportCostPerFeddan + t.packingCostPerFeddan);
   const tasaliTotalCosts = m.tasaliExpenses + tasaliPostHarvestCosts;
   const tasaliNetProfit = tasaliGrossRevenue - tasaliTotalCosts;
@@ -18019,13 +18264,13 @@ function renderForecastsSection() {
   // 3. المجموع الكلي للمشروع وتخصيص الموسم القادم 500 مليون
   const totalZakatValue = sorghumZakatValue + tasaliZakatValue;
   const totalGrossProductionValue = sorghumGrossProductionValue + tasaliGrossProductionValue;
-  const projectGrossRevenue = sorghumGrossRevenue + tasaliGrossRevenue; // الإيرادات الإجمالية بعد الزكاة
+  const projectGrossRevenue = sorghumGrossRevenue + tasaliGrossRevenue;
   const projectTotalCosts = sorghumTotalCosts + tasaliTotalCosts;
-  const projectGrossSurplus = projectGrossRevenue - projectTotalCosts; // الفائض الإجمالي للموسم بعد الزكاة والتكاليف
+  const projectGrossSurplus = projectGrossRevenue - projectTotalCosts;
   
   // حجز وتخصيص الـ 500 مليون للموسم القادم (2027) كتمويل ذاتي
   const nextSeasonReserve = Math.min(nextSeasonAlloc, Math.max(0, projectGrossSurplus));
-  const distributableCashProfit = Math.max(0, projectGrossSurplus - nextSeasonAlloc); // صافي الأرباح النقدية المتبقية للتوزيع الفوري
+  const distributableCashProfit = Math.max(0, projectGrossSurplus - nextSeasonAlloc);
   const projectAvgProfitPerFeddan = m.totalArea > 0 ? (distributableCashProfit / m.totalArea) : 0;
 
   const container = document.getElementById('forecast-results-container');
@@ -18041,26 +18286,17 @@ function renderForecastsSection() {
           <span class="text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950 px-3 py-1 rounded-full">${s.area} فدان</span>
         </div>
         <div class="space-y-2 text-xs">
-          <div class="flex justify-between"><span>الإنتاج الكلي المتوقع:</span><strong class="text-slate-800 dark:text-slate-200 font-bold font-mono">${sorghumTotalProduction.toLocaleString()} جوال</strong></div>
-          
-          <!-- خصم الزكاة 10% -->
-          <div class="flex justify-between bg-amber-50/80 dark:bg-amber-950/60 p-2 rounded-xl border border-amber-200 dark:border-amber-800/60 font-bold text-amber-900 dark:text-amber-200">
-            <span>✨ خصم الزكاة 10% (العُشر):</span>
-            <span class="font-mono text-xs">-${sorghumZakatBags.toLocaleString()} جوال (${Math.round(sorghumZakatValue).toLocaleString()} ج.س)</span>
+          <div class="flex justify-between"><span>الإنتاج الكلي المتوقع:</span><strong class="text-slate-800 dark:text-slate-200">${sorghumTotalProduction.toLocaleString()} ${s.yieldUnit}</strong></div>
+          <div class="flex justify-between text-amber-700 dark:text-amber-400 font-bold"><span>زكاة الزروع (10% العُشر):</span><strong>${sorghumZakatBags.toLocaleString()} جوال (${sorghumZakatValue.toLocaleString()} ج.س)</strong></div>
+          <div class="flex justify-between"><span>صافي الإنتاج المسوق (90%):</span><strong class="text-slate-800 dark:text-slate-200">${sorghumNetSellableBags.toLocaleString()} جوال</strong></div>
+          <div class="flex justify-between"><span>سعر الجوال بالسوق:</span><strong>${s.expectedPricePerUnit.toLocaleString()} ج.س</strong></div>
+          <div class="flex justify-between"><span>إجمالي الإيرادات بعد الزكاة:</span><strong class="text-emerald-600 font-bold">${sorghumGrossRevenue.toLocaleString()} ج.س</strong></div>
+          <div class="flex justify-between text-rose-600"><span>التكاليف (تشغيل + حصاد):</span><strong>${sorghumTotalCosts.toLocaleString()} ج.س</strong></div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between font-black text-sm">
+            <span>صافي فائض الذرة:</span>
+            <span class="${sorghumNetProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600'} font-mono">${sorghumNetProfit.toLocaleString()} ج.س</span>
           </div>
-
-          <div class="flex justify-between"><span>الإنتاج الصافي القابل للبيع (90%):</span><strong class="text-slate-900 dark:text-white font-mono">${sorghumNetSellableBags.toLocaleString()} جوال</strong></div>
-          <div class="flex justify-between"><span>سعر الجوال المقدر:</span><strong class="text-slate-700 dark:text-slate-300 font-mono">${s.expectedPricePerUnit.toLocaleString()} ج.س</strong></div>
-          <div class="flex justify-between"><span>الإيرادات بعد الزكاة:</span><strong class="text-emerald-600 font-bold font-mono text-sm">${Math.round(sorghumGrossRevenue).toLocaleString()} ج.س</strong></div>
-          <div class="flex justify-between"><span>التكاليف التشغيلية والحصاد:</span><span class="font-mono">${Math.round(sorghumTotalCosts).toLocaleString()} ج.س</span></div>
-          <div class="flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2 text-sm font-bold">
-            <span>صافي فائض المحصول:</span>
-            <span class="${sorghumNetProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-mono font-black">${Math.round(sorghumNetProfit).toLocaleString()} ج.س</span>
-          </div>
-          <div class="flex justify-between bg-amber-50 dark:bg-amber-950/50 p-2.5 rounded-xl mt-2 font-bold">
-            <span>صافي ربح الفدان:</span>
-            <span class="text-amber-700 dark:text-amber-400 font-mono font-bold">${Math.round(sorghumProfitPerFeddan).toLocaleString()} ج.س/فدان</span>
-          </div>
+          <div class="text-[11px] text-slate-400 text-left font-mono">ربح الفدان: ${Math.round(sorghumProfitPerFeddan).toLocaleString()} ج.س</div>
         </div>
       </div>
 
@@ -18072,145 +18308,99 @@ function renderForecastsSection() {
           <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-3 py-1 rounded-full">${t.area} فدان</span>
         </div>
         <div class="space-y-2 text-xs">
-          <div class="flex justify-between"><span>الإنتاج الكلي المتوقع:</span><strong class="text-slate-800 dark:text-slate-200 font-bold font-mono">${tasaliTotalProduction.toLocaleString()} جوال</strong></div>
-          
-          <!-- خصم الزكاة 10% -->
-          <div class="flex justify-between bg-emerald-50/80 dark:bg-emerald-950/60 p-2 rounded-xl border border-emerald-200 dark:border-emerald-800/60 font-bold text-emerald-900 dark:text-emerald-200">
-            <span>✨ خصم الزكاة 10% (العُشر):</span>
-            <span class="font-mono text-xs">-${tasaliZakatBags.toLocaleString()} جوال (${Math.round(tasaliZakatValue).toLocaleString()} ج.س)</span>
+          <div class="flex justify-between"><span>الإنتاج الكلي المتوقع:</span><strong class="text-slate-800 dark:text-slate-200">${tasaliTotalProduction.toLocaleString()} ${t.yieldUnit}</strong></div>
+          <div class="flex justify-between text-emerald-700 dark:text-emerald-400 font-bold"><span>زكاة الزروع (10% العُشر):</span><strong>${tasaliZakatBags.toLocaleString()} جوال (${tasaliZakatValue.toLocaleString()} ج.س)</strong></div>
+          <div class="flex justify-between"><span>صافي الإنتاج المسوق (90%):</span><strong class="text-slate-800 dark:text-slate-200">${tasaliNetSellableBags.toLocaleString()} جوال</strong></div>
+          <div class="flex justify-between"><span>سعر الجوال بالسوق:</span><strong>${t.expectedPricePerUnit.toLocaleString()} ج.س</strong></div>
+          <div class="flex justify-between"><span>إجمالي الإيرادات بعد الزكاة:</span><strong class="text-emerald-600 font-bold">${tasaliGrossRevenue.toLocaleString()} ج.س</strong></div>
+          <div class="flex justify-between text-rose-600"><span>التكاليف (تشغيل + حصاد):</span><strong>${tasaliTotalCosts.toLocaleString()} ج.س</strong></div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between font-black text-sm">
+            <span>صافي فائض التسالي:</span>
+            <span class="${tasaliNetProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600'} font-mono">${tasaliNetProfit.toLocaleString()} ج.س</span>
           </div>
-
-          <div class="flex justify-between"><span>الإنتاج الصافي القابل للبيع (90%):</span><strong class="text-slate-900 dark:text-white font-mono">${tasaliNetSellableBags.toLocaleString()} جوال</strong></div>
-          <div class="flex justify-between"><span>سعر الجوال المقدر:</span><strong class="text-slate-700 dark:text-slate-300 font-mono">${t.expectedPricePerUnit.toLocaleString()} ج.س</strong></div>
-          <div class="flex justify-between"><span>الإيرادات بعد الزكاة:</span><strong class="text-emerald-600 font-bold font-mono text-sm">${Math.round(tasaliGrossRevenue).toLocaleString()} ج.س</strong></div>
-          <div class="flex justify-between"><span>التكاليف التشغيلية والحصاد:</span><span class="font-mono">${Math.round(tasaliTotalCosts).toLocaleString()} ج.س</span></div>
-          <div class="flex justify-between border-t border-slate-200 dark:border-slate-800 pt-2 text-sm font-bold">
-            <span>صافي فائض المحصول:</span>
-            <span class="${tasaliNetProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-mono font-black">${Math.round(tasaliNetProfit).toLocaleString()} ج.س</span>
-          </div>
-          <div class="flex justify-between bg-emerald-50 dark:bg-emerald-950/50 p-2.5 rounded-xl mt-2 font-bold">
-            <span>صافي ربح الفدان:</span>
-            <span class="text-emerald-700 dark:text-emerald-400 font-mono font-bold">${Math.round(tasaliProfitPerFeddan).toLocaleString()} ج.س/فدان</span>
-          </div>
+          <div class="text-[11px] text-slate-400 text-left font-mono">ربح الفدان: ${Math.round(tasaliProfitPerFeddan).toLocaleString()} ج.س</div>
         </div>
       </div>
 
-      <!-- كرت المجموع الكلي وتخصيص 500 مليون -->
-      <div class="glass-card p-6 rounded-2xl border-2 border-emerald-600 bg-gradient-to-br from-emerald-900 to-slate-900 text-white flex flex-col justify-between shadow-xl">
-        <div>
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-lg font-black">🌟 المجموع الكلي للمشروع</h3>
-            <span class="text-xs bg-emerald-500/30 text-emerald-300 font-bold px-3 py-1 rounded-full">${m.totalArea} فدان</span>
-          </div>
-          <div class="space-y-2 text-xs text-slate-200">
-            <div class="flex justify-between"><span>قيمة الإنتاج الإجمالية (100%):</span><span class="font-mono">${Math.round(totalGrossProductionValue).toLocaleString()} ج.س</span></div>
-            <div class="flex justify-between bg-emerald-950/80 p-1.5 rounded-xl border border-emerald-500/40 text-emerald-300 font-bold">
-              <span>✨ إجمالي زكاة الزروع (10%):</span>
-              <strong class="font-mono">-${Math.round(totalZakatValue).toLocaleString()} ج.س</strong>
-            </div>
-            <div class="flex justify-between"><span>الإيرادات بعد إخراج الزكاة:</span><strong class="text-emerald-300 font-mono font-bold">${Math.round(projectGrossRevenue).toLocaleString()} ج.س</strong></div>
-            <div class="flex justify-between"><span>إجمالي التكاليف الكلية:</span><strong class="font-mono text-rose-300 font-bold">-${Math.round(projectTotalCosts).toLocaleString()} ج.س</strong></div>
-            <div class="flex justify-between border-t border-emerald-800/80 pt-1 font-bold text-slate-300">
-              <span>الفائض المالي الكلي للموسم:</span>
-              <span class="font-mono text-white">${Math.round(projectGrossSurplus).toLocaleString()} ج.س</span>
-            </div>
-
-            <!-- بند تخصيص 500 مليون للموسم القادم -->
-            <div class="flex justify-between bg-purple-950/90 p-2 rounded-xl border border-purple-500/50 text-purple-200 font-bold">
-              <span>🌱 تخصيص للموسم القادم 2027:</span>
-              <strong class="font-mono text-sm text-purple-300">-${Math.round(nextSeasonReserve).toLocaleString()} ج.س</strong>
-            </div>
-
-            <div class="flex justify-between border-t border-emerald-600/80 pt-2 text-base font-black text-white">
-              <span>الأرباح النقدية الموزعة الآن:</span>
-              <span class="text-emerald-400 font-mono font-black text-lg">${Math.round(distributableCashProfit).toLocaleString()} ج.س</span>
-            </div>
-          </div>
+      <!-- كرت الإجمالي والاحتياطي وتوزيعات الأرباح -->
+      <div class="glass-card p-6 rounded-2xl border-2 border-purple-400 dark:border-purple-600/80 relative overflow-hidden bg-gradient-to-br from-purple-50/50 via-white to-indigo-50/50 dark:from-purple-950/40 dark:via-slate-900 dark:to-indigo-950/40 shadow-xl">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-base font-black text-purple-950 dark:text-purple-200 flex items-center gap-1.5">
+            <span>🎯 الفائض واحتياطي 2027</span>
+          </h3>
+          <span class="text-xs font-black text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/60 px-3 py-1 rounded-full">1,450 فدان</span>
         </div>
 
-        <div class="bg-black/30 p-3 rounded-xl mt-3 border border-emerald-500/30 flex justify-between items-center">
-          <span class="text-xs font-bold text-emerald-300">متوسط الربح الموزع للفدان:</span>
-          <span class="text-base font-black text-white">${Math.round(projectAvgProfitPerFeddan).toLocaleString()} ج.س/فدان</span>
+        <div class="space-y-2 text-xs">
+          <div class="flex justify-between"><span>إجمالي قيمة الإنتاج:</span><strong>${totalGrossProductionValue.toLocaleString()} ج.س</strong></div>
+          <div class="flex justify-between text-emerald-800 dark:text-emerald-300 font-bold">
+            <span>إجمالي زكاة الزروع (10%):</span>
+            <strong>${totalZakatValue.toLocaleString()} ج.س</strong>
+          </div>
+          <div class="flex justify-between font-bold"><span>إجمالي الإيرادات بعد الزكاة:</span><strong class="text-emerald-600">${projectGrossRevenue.toLocaleString()} ج.س</strong></div>
+          <div class="flex justify-between text-rose-600"><span>إجمالي تكاليف الموسم (كلياً):</span><strong>${projectTotalCosts.toLocaleString()} ج.س</strong></div>
+          
+          <div class="p-2.5 bg-purple-100/70 dark:bg-purple-900/40 rounded-xl space-y-1 my-1 border border-purple-200 dark:border-purple-800">
+            <div class="flex justify-between text-xs font-black text-purple-900 dark:text-purple-200">
+              <span>الفائض الصافي بعد الزكاة:</span>
+              <span class="font-mono">${projectGrossSurplus.toLocaleString()} ج.س</span>
+            </div>
+            <div class="flex justify-between text-[11px] text-purple-700 dark:text-purple-300">
+              <span>🌱 احتياطي 2027 المخصص:</span>
+              <strong class="font-mono">-${nextSeasonReserve.toLocaleString()} ج.س</strong>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t-2 border-purple-200 dark:border-purple-800 flex justify-between items-center">
+            <div>
+              <span class="text-xs font-black text-slate-900 dark:text-white block">الأرباح المتبقية للتوزيع الفوري:</span>
+              <span class="text-[10px] text-slate-500">نصيب الفدان الصافي: ${Math.round(projectAvgProfitPerFeddan).toLocaleString()} ج.س</span>
+            </div>
+            <div class="text-base font-black text-purple-800 dark:text-purple-300 font-mono">${distributableCashProfit.toLocaleString()} ج.س</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- جدول توزيع أرباح وتخصيصات الشركاء (13 سهم) -->
-    <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden mt-6">
-      <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-slate-50/50 dark:bg-slate-800/40">
-        <div class="flex items-center gap-2">
-          <span class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs">👥</span>
-          <div>
-            <h4 class="text-xs font-black text-slate-900 dark:text-white">توزيع الأرباح النقدية ورأس مال الموسم القادم على الشركاء (13 سهم)</h4>
-            <p class="text-[10px] text-slate-400">توزيع دقيق: (استرداد رأس المال 100% + حجز حصة الموسم القادم 500M + استلام الأرباح النقدية الفورية)</p>
-          </div>
+    <!-- جدول توزيع الأرباح النقدية المتوقعة لكل شريك بعد حجز احتياطي الـ 500 مليون -->
+    <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm mt-6">
+      <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+        <div>
+          <h4 class="font-black text-xs text-slate-900 dark:text-white">جدول توزيع الأرباح النقدية المتوقعة للشركاء (بعد حجز تمويل 2027)</h4>
+          <p class="text-[10px] text-slate-500 mt-0.5">توزيع نسبي مباشر حسب الحصص المعتمدة (13 حصة بالتساوي: سهمين = 15.38%، سهم واحد = 7.69%)</p>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-mono font-black text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 px-3 py-1 rounded-xl border border-purple-200 dark:border-purple-900/50">
-            تمويل الموسم القادم: ${Math.round(nextSeasonReserve).toLocaleString()} ج.س
-          </span>
-          <span class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-xl border border-emerald-200 dark:border-emerald-900/50">
-            الأرباح النقدية: ${Math.round(distributableCashProfit).toLocaleString()} ج.س
-          </span>
-        </div>
+        <span class="px-2.5 py-1 rounded-xl bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 font-bold text-xs">
+          مجموع الأسهم: 13 حصة
+        </span>
       </div>
-
       <div class="overflow-x-auto">
-        <table class="w-full text-right text-xs">
-          <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 font-bold border-b border-slate-200 dark:border-slate-700">
-            <tr>
-              <th class="py-2.5 px-4">الشريك</th>
-              <th class="py-2.5 px-4">الأنصبة الثابتة</th>
-              <th class="py-2.5 px-4">نسبة الربح</th>
-              <th class="py-2.5 px-4 text-slate-700 dark:text-slate-300">رأس المال المدفوع (مسترد)</th>
-              <th class="py-2.5 px-4 text-purple-700 dark:text-purple-400">🌱 حصة تمويل الموسم القادم (500M)</th>
-              <th class="py-2.5 px-4 font-black text-emerald-700 dark:text-emerald-400">+ الأرباح النقدية الفورية</th>
-              <th class="py-2.5 px-4 font-black text-slate-900 dark:text-white bg-emerald-50/40 dark:bg-emerald-950/40">💵 ما يستلمه الشريك نقداً الآن</th>
+        <table class="w-full text-right border-collapse text-xs whitespace-nowrap">
+          <thead>
+            <tr class="bg-slate-100/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+              <th class="py-2.5 px-3">الشريك</th>
+              <th class="py-2.5 px-3">عدد الأسهم</th>
+              <th class="py-2.5 px-3">النسبة</th>
+              <th class="py-2.5 px-3">رأس المال المدفوع</th>
+              <th class="py-2.5 px-3">حصته في احتياطي 2027</th>
+              <th class="py-2.5 px-3 font-black text-purple-700 dark:text-purple-300">الربح النقدي القابل للتوزيع</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-            ${(state.partners || DEFAULT_DATA.partners || []).map(p => {
-              const totalS = 13;
-              const sharesCount = parseFloat(p.shares) || 1;
-              const ratio = sharesCount / totalS;
-              const paidCap = parseFloat(p.paidCapital) || 0;
-              
-              // حصة الشريك في تمويل الموسم القادم (محتجزة في رصيد المشروع كأصل مملوك للشريك)
-              const partnerNextSeasonShare = Math.round(nextSeasonReserve * ratio);
-              // نصيب الشريك من الأرباح النقدية الموزعة الآن
-              const partnerCashProfit = Math.round(distributableCashProfit * ratio);
-              // إجمالي ما يستلمه نقداً الآن (رأس المال المسترد + الأرباح النقدية الفورية)
-              const totalCashPayoutNow = paidCap + partnerCashProfit;
-              
-              const isDouble = sharesCount === 2;
+          <tbody>
+            ${(state.partners || []).map(p => {
+              const shares = Number(p.shares || 1);
+              const totalShares = Number(p.totalShares || 13);
+              const pct = (shares / totalShares);
+              const partnerReserveShare = Math.round(nextSeasonReserve * pct);
+              const partnerCashProfit = Math.round(distributableCashProfit * pct);
 
               return `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                  <td class="py-2.5 px-4 font-bold text-slate-900 dark:text-white">
-                    <span>${p.fullName || p.name}</span>
-                  </td>
-                  <td class="py-2.5 px-4">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isDouble ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'}">
-                      ${sharesCount} من 13
-                    </span>
-                  </td>
-                  <td class="py-2.5 px-4 font-mono font-bold text-emerald-700 dark:text-emerald-400">${(ratio * 100).toFixed(2)}%</td>
-                  
-                  <td class="py-2.5 px-4 font-mono font-bold text-slate-700 dark:text-slate-300">
-                    ${Math.round(paidCap).toLocaleString()} ج.س
-                  </td>
-
-                  <td class="py-2.5 px-4 font-mono font-bold text-purple-700 dark:text-purple-400">
-                    ${partnerNextSeasonShare.toLocaleString()} ج.س
-                  </td>
-
-                  <td class="py-2.5 px-4 font-mono font-black text-sm ${partnerCashProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600'}">
-                    +${partnerCashProfit.toLocaleString()} ج.س
-                  </td>
-
-                  <td class="py-2.5 px-4 font-mono font-black text-sm text-slate-900 dark:text-white bg-emerald-50/40 dark:bg-emerald-950/40">
-                    ${Math.round(totalCashPayoutNow).toLocaleString()} ج.س
-                  </td>
+                <tr class="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                  <td class="py-2.5 px-3 font-bold text-slate-900 dark:text-white">${p.name} <span class="text-[10px] font-normal text-slate-400">(${p.role || 'شريك'})</span></td>
+                  <td class="py-2.5 px-3 font-bold">${shares} ${shares === 2 ? 'سهمين' : 'سهم'}</td>
+                  <td class="py-2.5 px-3 font-mono">${(pct * 100).toFixed(2)}%</td>
+                  <td class="py-2.5 px-3 font-mono text-slate-600 dark:text-slate-300">${Number(p.paidCapital || 0).toLocaleString()} ج.س</td>
+                  <td class="py-2.5 px-3 font-mono text-purple-700 dark:text-purple-400">${partnerReserveShare.toLocaleString()} ج.س</td>
+                  <td class="py-2.5 px-3 font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm">${partnerCashProfit.toLocaleString()} ج.س</td>
                 </tr>
               `;
             }).join('')}
@@ -18219,6 +18409,8 @@ function renderForecastsSection() {
       </div>
     </div>
   `;
+
+  safeCreateIcons();
 }
 
 function getCategorySpentAmount(catName, categoryTotals) {
@@ -19468,17 +19660,63 @@ function previewExpenseReceipt(event) {
   const isVid = file.type.startsWith('video/');
   const label = document.getElementById('exp-receipt-label');
   const actions = document.getElementById('exp-receipt-actions');
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    currentExpenseReceipt = {
-      type: isVid ? 'video' : 'image',
-      dataUrl: e.target.result
+
+  if (isVid) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      currentExpenseReceipt = {
+        type: 'video',
+        dataUrl: e.target.result
+      };
+      if (label) label.textContent = '✓ تم إرفاق مقطع فيديو (' + (file.size / (1024*1024)).toFixed(1) + ' MB)';
+      if (actions) actions.classList.remove('hidden');
+      showToast('✓ تم تجهيز المرفق للحفظ مع المصروف');
     };
-    if (label) label.textContent = isVid ? '✓ تم إرفاق مقطع فيديو (' + (file.size / (1024*1024)).toFixed(1) + ' MB)' : '✓ تم إرفاق صورة الفاتورة';
-    if (actions) actions.classList.remove('hidden');
-    showToast('✓ تم تجهيز المرفق للحفظ مع المصروف');
-  };
-  reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 1200;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedData = canvas.toDataURL('image/jpeg', 0.72);
+        currentExpenseReceipt = {
+          type: 'image',
+          dataUrl: compressedData
+        };
+        if (label) label.textContent = '✓ تم إرفاق وضغط صورة الفاتورة بنجاح';
+        if (actions) actions.classList.remove('hidden');
+        showToast('✓ تم تجهيز وضغط صورة الفاتورة للحفظ');
+      };
+      img.onerror = function() {
+        currentExpenseReceipt = {
+          type: 'image',
+          dataUrl: e.target.result
+        };
+        if (label) label.textContent = '✓ تم إرفاق صورة الفاتورة';
+        if (actions) actions.classList.remove('hidden');
+        showToast('✓ تم تجهيز المرفق للحفظ مع المصروف');
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 function removeExpenseReceiptFromForm() {
@@ -21152,7 +21390,7 @@ function openUploadPhotoModal() {
 
           <!-- مدخلات الملفات الخفية المتوافقة تماماً مع أندرويد وجميع الأجهزة -->
           <input type="file" id="upload-media-file-input" accept="image/*,video/*" onchange="previewSelectedMedia(event)" class="hidden">
-          <input type="file" id="upload-input-photo" accept="image/*" onchange="previewSelectedMedia(event)" class="hidden">
+          <input type="file" id="upload-input-photo" accept="image/*" capture="environment" onchange="previewSelectedMedia(event)" class="hidden">
           <input type="file" id="upload-input-video" accept="video/*" onchange="previewSelectedMedia(event)" class="hidden">
         </div>
 
@@ -21504,7 +21742,18 @@ async function deleteCustomPhoto(mediaId) {
 
 // عرض الوسيط في نافذة التكبير والتشغيل (Lightbox) عبر المعرف
 async function viewMediaLightboxById(mediaId) {
-  const item = await MustagroMediaStore.getMediaById(mediaId);
+  let item = null;
+  if (typeof MustagroMediaStore !== 'undefined' && typeof MustagroMediaStore.getMediaById === 'function') {
+    try {
+      item = await MustagroMediaStore.getMediaById(mediaId);
+    } catch(e) {}
+  }
+  if (!item && state && state.mediaGallery) {
+    item = state.mediaGallery.find(m => m.id === mediaId);
+    if (item && typeof MustagroMediaStore !== 'undefined' && typeof MustagroMediaStore.saveMedia === 'function') {
+      MustagroMediaStore.saveMedia(item).catch(() => {});
+    }
+  }
   if (!item) {
     showToast('⚠️ لم يتم العثور على الوسيط المطلوب');
     return;

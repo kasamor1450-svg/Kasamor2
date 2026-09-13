@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v38.0-rainfall-persistence-fix
-const CACHE_NAME = 'mustagro-v38.0-rainfall-persistence-fix';
+// Cache Version: mustagro-v39.0-compact-expenses-sync-darkmode
+const CACHE_NAME = 'mustagro-v39.0-compact-expenses-sync-darkmode';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
