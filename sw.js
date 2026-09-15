@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
 // Cache Version: mustagro-v39.4-expenses-photos-notifications-sync
-const CACHE_NAME = 'mustagro-v40.0-complete-suite-upgrade';
+const CACHE_NAME = 'mustagro-v40.1-tchali-phone-repair-fix';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
