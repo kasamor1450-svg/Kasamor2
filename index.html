@@ -1574,8 +1574,8 @@ html.dark .bg-slate-100, .dark-mode .bg-slate-100 {
             <input type="text" id="expenses-search-input" onkeyup="filterTableRows('expenses-search-input', 'expenses-table-body')" placeholder="🔍 بحث فوري (بالبيان، البند، النمرة)..." class="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-sm">
           </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-right border-collapse">
+        <div class="overflow-x-auto overflow-y-visible overscroll-x-contain" style="-webkit-overflow-scrolling: touch; pointer-events: auto !important;">
+          <table class="w-full text-right border-collapse" style="min-width: 760px;">
             <thead>
               <tr class="bg-slate-100/90 dark:bg-slate-800/90 text-[11px] font-black text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 whitespace-nowrap">
                 <th class="py-2 px-2.5">التاريخ</th>
@@ -3184,8 +3184,8 @@ html.dark .bg-slate-100, .dark-mode .bg-slate-100 {
   </div>
 
   <!-- النافذة المنبثقة العامة (Modal Overlay) -->
-  <div id="modal-overlay" class="no-print hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div id="modal-content-container" class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transform transition-all"></div>
+  <div id="modal-overlay" class="no-print hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto overscroll-contain">
+    <div id="modal-content-container" class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-y-auto max-h-[92vh] overscroll-contain transform transition-all my-auto" style="-webkit-overflow-scrolling: touch;"></div>
   </div>
 
   <footer class="no-print border-t border-slate-200 dark:border-slate-800 py-4 text-center text-xs text-slate-400 bg-white/50 dark:bg-slate-900/50">
@@ -7274,23 +7274,25 @@ const DEFAULT_DATA = {
       "name": "تشالي الحبشي",
       "role": "زيات",
       "startDate": "2026-08-07",
+      "endDate": "",
       "monthlySalary": 400000,
-      "monthsWorked": 0.8,
+      "monthsWorked": 1,
+      "daysWorked": 31,
       "deductionsAmount": 0,
       "overtime": 0,
-      "totalDue": 320000,
-      "totalPaid": 100000,
+      "grossEarnings": 400000,
+      "totalDue": 400000,
+      "totalPaid": 250000,
+      "netBalance": 150000,
       "task": "تزييت وتشحيم الآليات ومساعدة السائقين",
       "plot": "المقر والمخزن",
       "crop": "مشترك",
       "areaFeddan": 0,
       "status": "partial",
-      "lastUpdatedBy": "محمد مصطفى",
-      "daysWorked": 25,
+      "lastUpdatedBy": "مصطفى الجعلي",
       "workerType": "permanent",
       "groceryTotal": 0,
-      "totalDeductions": 0,
-      "endDate": ""
+      "totalDeductions": 0
     },
     {
       "id": "lab-5",
@@ -11506,6 +11508,16 @@ function loadData() {
           w.status = 'paid';
           w.netBalance = 0;
         }
+        if (w.id === 'lab-4' || (w.name && w.name.includes('تشالي'))) {
+          w.totalPaid = Math.max(parseFloat(w.totalPaid) || 0, 250000);
+          if (!w.monthsWorked || w.monthsWorked === 0.8) {
+            w.monthsWorked = 1;
+            w.daysWorked = 31;
+            w.totalDue = 400000;
+            w.netBalance = 150000;
+            w.status = 'partial';
+          }
+        }
         if (w.id === 'lab-5' || (w.name && w.name.includes('كمبو'))) {
           w.endDate = '2026-08-13';
           w.totalDue = 950000;
@@ -11513,7 +11525,7 @@ function loadData() {
           w.status = 'paid';
           w.netBalance = 0;
         }
-        if (w.id === 'lab-1788077268220' || (w.name && w.name.includes('زيات'))) {
+        if (w.id === 'lab-1788077268220' || (w.name && w.name === 'زيات حبشي')) {
           w.endDate = '2026-08-31';
           w.totalDue = 97000;
           w.totalPaid = 97000;
@@ -12526,6 +12538,50 @@ function autoUpdateLaborWages() {
       return;
     }
 
+    // 2. تشالي الحبشي (lab-4): زيات المزرعة - راتب شهري 400,000 ج.س
+    // مسدد له: 100,000 (دفعة 22/08) + 150,000 (راتب شهري 11/09) = إجمالي 250,000 ج.س
+    if (w.id === 'lab-4' || (w.name && w.name.includes('تشالي'))) {
+      let tchaliPaidFromExpenses = 0;
+      if (Array.isArray(state.expenses)) {
+        tchaliPaidFromExpenses = state.expenses
+          .filter(e => {
+            const desc = ((e.description || '') + ' ' + (e.op || '') + ' ' + (e.notes || '') + ' ' + (e.recipient || '')).toLowerCase();
+            return desc.includes('تشالي');
+          })
+          .reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      }
+      w.totalPaid = Math.max(parseFloat(w.totalPaid) || 0, tchaliPaidFromExpenses, 250000);
+      
+      if (w.endDate && w.endDate.trim() !== '') {
+        const days = Math.max(1, getDaysDiff(w.startDate || '2026-08-07', w.endDate));
+        w.daysWorked = days;
+        w.monthsWorked = +(days / 30).toFixed(1);
+        w.isContractEnded = true;
+      } else {
+        w.daysWorked = 31;
+        w.monthsWorked = 1;
+        w.isContractEnded = false;
+      }
+      
+      const salary = parseFloat(w.monthlySalary) || 400000;
+      const overtime = parseFloat(w.overtime) || 0;
+      const genDeductions = parseFloat(w.deductionsAmount) || 0;
+      const grocDeductions = parseFloat(w.groceryTotal) || 0;
+      w.totalDeductions = genDeductions + grocDeductions;
+      w.grossEarnings = Math.round((parseFloat(w.monthsWorked) || 1) * salary) + overtime;
+      w.totalDue = w.grossEarnings - w.totalDeductions;
+      w.netBalance = w.totalDue - w.totalPaid;
+      
+      if (w.netBalance < 0) {
+        w.status = 'overdrawn';
+      } else if (w.netBalance === 0) {
+        w.status = 'paid';
+      } else {
+        w.status = 'partial';
+      }
+      return;
+    }
+
     // 3. عمال الكمبو (lab-5): مسدد بالكامل 950,000 ج.س
     if (w.id === 'lab-5' || (w.name && w.name.includes('كمبو'))) {
       w.endDate = '2026-08-13';
@@ -12541,8 +12597,8 @@ function autoUpdateLaborWages() {
       return;
     }
 
-    // 4. الزيات (lab-1788077268220): مسدد بالكامل 97,000 ج.س
-    if (w.id === 'lab-1788077268220' || (w.name && w.name.includes('زيات'))) {
+    // 4. الزيات (lab-1788077268220): مسدد بالكامل 97,000 ج.س (تجنب الخلط مع تشالي)
+    if (w.id === 'lab-1788077268220' || (w.name && w.name === 'زيات حبشي')) {
       w.endDate = '2026-08-31';
       w.totalPaid = 97000;
       w.totalDue = 97000;

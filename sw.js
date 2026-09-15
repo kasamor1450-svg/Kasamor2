@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v39.1-sync-desktop-cloud-rest-fallback
-const CACHE_NAME = 'mustagro-v39.1-sync-desktop-cloud-rest-fallback';
+// Cache Version: mustagro-v39.2-tchali-wages-capital-scroll-fix
+const CACHE_NAME = 'mustagro-v39.2-tchali-wages-capital-scroll-fix';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
