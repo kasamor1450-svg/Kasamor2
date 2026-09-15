@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v39.4-expenses-photos-notifications-sync
-const CACHE_NAME = 'mustagro-v40.2-merge-sales-nonref';
+// Cache Version: mustagro-v40.3-complete-suite-sar-plots
+const CACHE_NAME = 'mustagro-v40.3-complete-suite-sar-plots';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
