@@ -7276,14 +7276,14 @@ const DEFAULT_DATA = {
       "startDate": "2026-08-07",
       "endDate": "",
       "monthlySalary": 400000,
-      "monthsWorked": 1,
-      "daysWorked": 31,
+      "monthsWorked": 1.3,
+      "daysWorked": 39,
       "deductionsAmount": 0,
       "overtime": 0,
-      "grossEarnings": 400000,
-      "totalDue": 400000,
+      "grossEarnings": 520000,
+      "totalDue": 520000,
       "totalPaid": 250000,
-      "netBalance": 150000,
+      "netBalance": 270000,
       "task": "تزييت وتشحيم الآليات ومساعدة السائقين",
       "plot": "المقر والمخزن",
       "crop": "مشترك",
@@ -11510,11 +11510,11 @@ function loadData() {
         }
         if (w.id === 'lab-4' || (w.name && w.name.includes('تشالي'))) {
           w.totalPaid = Math.max(parseFloat(w.totalPaid) || 0, 250000);
-          if (!w.monthsWorked || w.monthsWorked === 0.8) {
-            w.monthsWorked = 1;
-            w.daysWorked = 31;
-            w.totalDue = 400000;
-            w.netBalance = 150000;
+          if (!w.monthsWorked || w.monthsWorked === 0.8 || w.monthsWorked === 1) {
+            w.monthsWorked = 1.3;
+            w.daysWorked = 39;
+            w.totalDue = 520000;
+            w.netBalance = 270000;
             w.status = 'partial';
           }
         }
@@ -12558,8 +12558,9 @@ function autoUpdateLaborWages() {
         w.monthsWorked = +(days / 30).toFixed(1);
         w.isContractEnded = true;
       } else {
-        w.daysWorked = 31;
-        w.monthsWorked = 1;
+        const days = Math.max(1, getDaysDiff(w.startDate || '2026-08-07', now));
+        w.daysWorked = days;
+        w.monthsWorked = Math.max(0.1, +(days / 30).toFixed(1));
         w.isContractEnded = false;
       }
       

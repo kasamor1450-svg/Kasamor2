@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v39.2-tchali-wages-capital-scroll-fix
-const CACHE_NAME = 'mustagro-v39.2-tchali-wages-capital-scroll-fix';
+// Cache Version: mustagro-v39.3-tchali-exact-ongoing-wages
+const CACHE_NAME = 'mustagro-v39.3-tchali-exact-ongoing-wages';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
