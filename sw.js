@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v40.3-complete-suite-sar-plots
-const CACHE_NAME = 'mustagro-v40.3-complete-suite-sar-plots';
+// Cache Version: mustagro-v40.4-tchali-320k
+const CACHE_NAME = 'mustagro-v40.4-tchali-320k';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
