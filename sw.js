@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v40.6-tchali-account-fix
-const CACHE_NAME = 'mustagro-v40.6-tchali-account-fix';
+// Cache Version: mustagro-v40.7-fuel-disburse-fix
+const CACHE_NAME = 'mustagro-v40.7-fuel-disburse-fix';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
