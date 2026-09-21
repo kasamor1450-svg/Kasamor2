@@ -2246,7 +2246,9 @@
       "loggedBy": "محمد مصطفى",
       "purpose": "استكمال راس مال تشغيلي",
       "notes": "",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 88667
     },
     {
       "id": "inj-1",
@@ -2258,7 +2260,9 @@
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 14281
     },
     {
       "id": "inj-2",
@@ -2270,7 +2274,9 @@
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 14281
     },
     {
       "id": "inj-3",
@@ -2282,7 +2288,9 @@
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 14281
     },
     {
       "id": "inj-4",
@@ -2294,7 +2302,9 @@
       "purpose": "رأس المال التأسيسي للموسم (2 سهم)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 14281
     },
     {
       "id": "inj-5",
@@ -2306,7 +2316,9 @@
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 7140
     },
     {
       "id": "inj-6",
@@ -2318,7 +2330,9 @@
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 7140
     },
     {
       "id": "inj-7",
@@ -2330,7 +2344,9 @@
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 7140
     },
     {
       "id": "inj-8",
@@ -2342,7 +2358,9 @@
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 7140
     },
     {
       "id": "inj-9",
@@ -2354,7 +2372,9 @@
       "purpose": "رأس المال التأسيسي للموسم (سهم واحد)",
       "loggedBy": "مصطفى الجعلي",
       "notes": "الدفعة التأسيسية الأولى لتمويل الزراعة",
-      "capitalType": "refundable"
+      "capitalType": "refundable",
+      "sarRate": 750,
+      "sarAmount": 7140
     }
   ],
   "harvestIntakes": [
