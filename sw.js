@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
-// Cache Version: mustagro-v40.7-fuel-disburse-fix
-const CACHE_NAME = 'mustagro-v40.7-fuel-disburse-fix';
+// Cache Version: mustagro-v40.8-expenses-sync-fix
+const CACHE_NAME = 'mustagro-v40.8-expenses-sync-fix';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
