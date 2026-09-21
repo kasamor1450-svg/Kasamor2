@@ -5,7 +5,8 @@
     "totalArea": 1450,
     "seasonStart": "2026-06-01",
     "seasonDurationMonths": 6,
-    "currency": "جنيه سوداني"
+    "currency": "جنيه سوداني",
+    "sarExchangeRate": 750
   },
   "users": [
     {
