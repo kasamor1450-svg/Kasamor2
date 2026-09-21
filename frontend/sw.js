@@ -1,6 +1,6 @@
 // Service Worker for Mustagro PWA
 // Cache Version: mustagro-v41.0-expenses-reconciled
-const CACHE_NAME = 'mustagro-v41.3-capital-dedup-fixed';
+const CACHE_NAME = 'mustagro-v41.4-expenses-edit-save-fixed';
 
 const PRECACHE_ASSETS = [
   './manifest.json',
