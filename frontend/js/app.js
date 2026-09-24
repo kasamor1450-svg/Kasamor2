@@ -9833,7 +9833,11 @@ function saveOperation(e, plotId) {
 }
 
 function openEditExpenseModal(expenseId = null) {
-  const exp = expenseId ? state.expenses.find(e => e.id === expenseId) : {
+  const foundExp = (expenseId && Array.isArray(state.expenses))
+    ? state.expenses.find(e => String(e.id).trim() === String(expenseId).trim())
+    : null;
+  const isEdit = !!(expenseId && foundExp);
+  const exp = foundExp || {
     id: `exp-${Date.now()}`,
     date: new Date().toISOString().split('T')[0],
     category: "وقود",
@@ -9842,11 +9846,11 @@ function openEditExpenseModal(expenseId = null) {
     crop: "مشترك",
     op: "",
     isUnderReview: false,
-    createdBy: currentUser ? currentUser.name : "مصطفى الجعلي",
+    createdBy: (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : "مصطفى الجعلي",
     notes: ""
   };
 
-  const isEdit = !!expenseId;
+  const safeNotes = ((exp.notes || exp.op || '') + '').replace(/"/g, '&quot;');
 
   const html = `
     <div class="p-6">
@@ -9854,19 +9858,23 @@ function openEditExpenseModal(expenseId = null) {
         <h3 class="text-base font-bold text-slate-900 dark:text-white">
           ${isEdit ? 'تعديل وتدقيق مصروف مالي' : 'إضافة مصروف جديد'}
         </h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <form onsubmit="saveExpense(event, '${exp.id}', ${isEdit})" class="space-y-4 text-xs">
+      <form id="edit-expense-form" onsubmit="event.preventDefault(); saveExpense(event, '${exp.id}', ${isEdit}); return false;" class="space-y-4 text-xs">
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold mb-1">تاريخ المصروف:</label>
-            <input type="date" id="exp-date" value="${exp.date}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" required>
+            <input type="date" id="exp-date" value="${exp.date || ''}" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" required>
           </div>
           <div>
             <label class="block font-bold mb-1">بند المصروف:</label>
             <select id="exp-category" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold" required>
-              ${state.budgetCaps.map(b => `<option value="${b.category}" ${exp.category === b.category ? 'selected' : ''}>${b.category}</option>`).join('')}
+              ${(() => {
+                const allCategories = ['وقود', 'إيجار آليات', 'صيانة', 'إيجار أرض', 'بذور', 'مبيدات', 'أسمدة', 'عمالة', 'رواتب وأجور', 'مصاريف إدارية', 'البيت', 'نقل', 'أخرى'];
+                const mergedList = Array.from(new Set([...allCategories, ...(state.budgetCaps || []).map(b => b.category), exp.category].filter(Boolean)));
+                return mergedList.map(cat => `<option value="${cat}" ${exp.category === cat ? 'selected' : ''}>${cat}</option>`).join('');
+              })()}
             </select>
           </div>
         </div>
@@ -9874,7 +9882,7 @@ function openEditExpenseModal(expenseId = null) {
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold mb-1">المبلغ (جنيه سوداني):</label>
-            <input type="number" id="exp-amount" value="${exp.amount}" min="0" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-black text-emerald-600 text-sm" required>
+            <input type="number" id="exp-amount" value="${exp.amount || 0}" min="0" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-black text-emerald-600 text-sm" required>
           </div>
           <div>
             <label class="block font-bold mb-1">المحصول المستفيد / مركز التكلفة:</label>
@@ -9893,7 +9901,7 @@ function openEditExpenseModal(expenseId = null) {
             <select id="exp-plot" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
               <option value="مشترك" ${exp.plot === 'مشترك' ? 'selected' : ''}>مشترك / عام</option>
               <option value="المقر والمنزل" ${exp.plot === 'المقر والمنزل' ? 'selected' : ''}>المقر والمنزل</option>
-              ${state.plots.map(p => `<option value="${p.name}" ${exp.plot === p.name ? 'selected' : ''}>${p.name}</option>`).join('')}
+              ${(state.plots || []).map(p => `<option value="${p.name}" ${exp.plot === p.name ? 'selected' : ''}>${p.name}</option>`).join('')}
             </select>
           </div>
           <div>
@@ -9907,12 +9915,30 @@ function openEditExpenseModal(expenseId = null) {
 
         <div>
           <label class="block font-bold mb-1">بيان المصروف والملاحظات:</label>
-          <input type="text" id="exp-notes" value="${exp.notes || exp.op || ''}" placeholder="رقم الفاتورة، اسم المورد، التفاصيل..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <input type="text" id="exp-notes" value="${safeNotes}" placeholder="رقم الفاتورة، اسم المورد، التفاصيل..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">مرفق الفاتورة أو الإيصال (صورة أو فيديو اختياري):</label>
+          <div class="p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="document.getElementById('exp-receipt-file-input').click()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95">
+                <span>📎</span>
+                <span>اختر صورة أو فيديو</span>
+              </button>
+              <span id="exp-receipt-label" class="text-xs text-slate-500">${exp.receiptPhotoUrl ? '✓ يوجد مرفق محفوظ' : 'لا يوجد مرفق حالياً'}</span>
+            </div>
+            <div id="exp-receipt-actions" class="${exp.receiptPhotoUrl ? '' : 'hidden'} flex items-center gap-1.5">
+              <button type="button" onclick="viewExpenseReceiptModal('${exp.id}')" class="px-2.5 py-1 bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 rounded-lg text-xs font-bold hover:bg-sky-200">عرض</button>
+              <button type="button" onclick="removeExpenseReceiptFromForm()" class="px-2 py-1 bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 rounded-lg text-xs font-bold hover:bg-rose-200">حذف</button>
+            </div>
+          </div>
+          <input type="file" id="exp-receipt-file-input" accept="image/*,video/*" onchange="previewExpenseReceipt(event)" class="hidden">
         </div>
 
         <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold">حفظ وتحديث المصروف</button>
+          <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold active:scale-95 transition">إلغاء</button>
+          <button type="button" onclick="saveExpense(event, '${exp.id}', ${isEdit})" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold active:scale-95 transition shadow-sm">حفظ وتحديث المصروف</button>
         </div>
       </form>
     </div>
@@ -9920,49 +9946,137 @@ function openEditExpenseModal(expenseId = null) {
   openModal(html);
 }
 
-function saveExpense(e, expId, isEdit) {
-  e.preventDefault();
-
-  const date = document.getElementById('exp-date').value;
-  const category = document.getElementById('exp-category').value;
-  const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
-  const crop = document.getElementById('exp-crop').value;
-  const plot = document.getElementById('exp-plot').value;
-  const isUnderReview = document.getElementById('exp-review-status').value === 'review';
-  const notes = document.getElementById('exp-notes').value;
-
-  const currentUserName = currentUser ? currentUser.name : "مصطفى الجعلي";
-
-  if (isEdit) {
-    const idx = state.expenses.findIndex(x => x.id === expId);
-    if (idx !== -1) {
-      const oldAmount = state.expenses[idx].amount;
-      state.expenses[idx] = {
-        ...state.expenses[idx],
-        date, category, amount, crop, plot, isUnderReview, notes,
-        modifiedBy: currentUserName
-      };
-      logAudit("تعديل مصروف", `تعديل قيد (${category} - ${crop}) من ${oldAmount.toLocaleString()} إلى ${amount.toLocaleString()} ج.س`, plot);
-      if (window.AgroAPI && window.AgroAPI.isConnected) {
-        window.AgroAPI.updateExpense(expId, state.expenses[idx]);
-      }
-    }
-  } else {
-    const newExp = {
-      id: expId,
-      date, category, amount, crop, plot, isUnderReview, notes, op: notes,
-      createdBy: currentUserName,
-      modifiedBy: null
-    };
-    state.expenses.unshift(newExp);
-    logAudit("إضافة مصروف", `تسجيل مصروف جديد (${category} - ${crop}) بمبلغ ${amount.toLocaleString()} ج.س`, plot);
-    if (window.AgroAPI && window.AgroAPI.isConnected) {
-      window.AgroAPI.insertExpense(newExp);
-    }
+async function saveExpense(e, expId, isEdit) {
+  if (e && typeof e.preventDefault === 'function') {
+    e.preventDefault();
   }
 
-  saveData();
+  const date = document.getElementById('exp-date')?.value || new Date().toISOString().split('T')[0];
+  const category = document.getElementById('exp-category')?.value || 'أخرى';
+  const amount = parseFloat(document.getElementById('exp-amount')?.value) || 0;
+  const crop = document.getElementById('exp-crop')?.value || 'مشترك';
+  const plot = document.getElementById('exp-plot')?.value || 'مشترك';
+  const isUnderReview = document.getElementById('exp-review-status')?.value === 'review';
+  const notes = (document.getElementById('exp-notes')?.value || '').trim();
+
+  const currentUserName = (typeof currentUser !== 'undefined' && currentUser && currentUser.name) ? currentUser.name : "مصطفى الجعلي";
+  const nowIso = new Date().toISOString();
+
+  if (!state.expenses) state.expenses = [];
+
+  const targetId = expId || `exp-${Date.now()}`;
+  const idx = state.expenses.findIndex(x => String(x.id).trim() === String(targetId).trim());
+  const isExisting = idx !== -1;
+
+  const finalReceiptUrl = currentExpenseReceipt ? currentExpenseReceipt.dataUrl : (isExisting ? (state.expenses[idx].receiptPhotoUrl || null) : null);
+  const finalReceiptType = currentExpenseReceipt ? currentExpenseReceipt.type : (isExisting ? (state.expenses[idx].receiptType || 'image') : 'image');
+  currentExpenseReceipt = null;
+
+  const updatedExp = {
+    ...(isExisting ? state.expenses[idx] : {}),
+    id: targetId,
+    date,
+    category,
+    amount,
+    crop,
+    plot,
+    isUnderReview,
+    notes,
+    op: notes,
+    receiptPhotoUrl: finalReceiptUrl,
+    receiptType: finalReceiptType,
+    modifiedBy: currentUserName,
+    modifiedAt: nowIso
+  };
+
+  if (!isExisting) {
+    updatedExp.createdBy = currentUserName;
+    updatedExp.createdAt = nowIso;
+    state.expenses.unshift(updatedExp);
+    logAudit("إضافة مصروف", `تسجيل مصروف جديد (${category} - ${crop}) بمبلغ ${amount.toLocaleString()} ج.س`, plot);
+  } else {
+    const oldAmount = state.expenses[idx].amount;
+    state.expenses[idx] = updatedExp;
+    logAudit("تعديل مصروف", `تعديل قيد (${category} - ${crop}) من ${Number(oldAmount).toLocaleString()} إلى ${amount.toLocaleString()} ج.س`, plot);
+  }
+
+  // 1. الحفظ الفوري المتعدد في LocalStorage و IndexedDB وتحديث واجهات العرض محلياً
+  saveData("✓ تم حفظ وتحديث المصروف بنجاح");
+  if (typeof renderExpensesSection === 'function') {
+    renderExpensesSection();
+  }
   closeModal();
+
+  // 2. المزامنة المباشرة والفورية مع Supabase
+  const SUPABASE_URL = "https://iuavmonqyvokldpvdqtm.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_62ldmJkE5F6DaEB1DipflQ_M1g0n57l";
+  const row = {
+    id: targetId,
+    date: updatedExp.date,
+    category: updatedExp.category,
+    amount: Number(updatedExp.amount || 0),
+    plot: updatedExp.plot || null,
+    crop: updatedExp.crop || null,
+    op: updatedExp.notes || updatedExp.op || '',
+    notes: updatedExp.notes || '',
+    is_under_review: !!updatedExp.isUnderReview,
+    modified_by: updatedExp.modifiedBy,
+    receipt_photo_url: updatedExp.receiptPhotoUrl || null
+  };
+  if (!isExisting) {
+    row.created_by = updatedExp.createdBy;
+  }
+
+  try {
+    let cloudSaved = false;
+    if (isExisting) {
+      // تعديل سجل موجود مسبقاً: PATCH المباشر يضمن الدقة وتفادي أي خطأ قيود
+      const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/expenses?id=eq.${encodeURIComponent(targetId)}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(row)
+      });
+      if (patchRes.ok) {
+        const patchData = await patchRes.json().catch(() => null);
+        if (patchData && patchData.length > 0) {
+          cloudSaved = true;
+          showToast("✓ تم تثبيت تعديل المصروف في السحابة بنجاح", "success");
+        }
+      }
+    }
+
+    if (!cloudSaved) {
+      // إدخال قيد جديد أو احتياطي في حال لم يكن السجل في السحابة
+      const postRes = await fetch(`${SUPABASE_URL}/rest/v1/expenses`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify(row)
+      });
+      if (postRes.ok) {
+        cloudSaved = true;
+        showToast("✓ تم حفظ ومزامنة المصروف في السحابة بنجاح", "success");
+      }
+    }
+
+    if (!cloudSaved && window.AgroAPI && typeof window.AgroAPI.updateExpense === 'function') {
+      await window.AgroAPI.updateExpense(targetId, updatedExp);
+    }
+  } catch(err) {
+    console.warn("Direct save error, fallback to AgroAPI:", err);
+    if (window.AgroAPI && typeof window.AgroAPI.updateExpense === 'function') {
+      window.AgroAPI.updateExpense(targetId, updatedExp).catch(() => {});
+    }
+  }
 }
 
 function deleteExpense(expId) {
